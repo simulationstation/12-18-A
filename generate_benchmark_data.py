@@ -211,7 +211,11 @@ def normalized_laplacian_lambda2(G: nx.Graph) -> float:
 # Circuit Generation Functions
 # =============================================================================
 
-def random_maximal_matching(G: nx.Graph, rng: np.random.Generator) -> List[Tuple[int, int]]:
+def random_maximal_matching(
+    G: nx.Graph,
+    rng: np.random.Generator,
+    limit_entanglement: bool = False,
+) -> List[Tuple[int, int]]:
     """
     Build a random maximal matching by shuffling edges and greedily selecting.
 
@@ -222,12 +226,26 @@ def random_maximal_matching(G: nx.Graph, rng: np.random.Generator) -> List[Tuple
     Args:
         G: The coupling graph
         rng: Random generator for shuffling
+        limit_entanglement: If True, prefer edges with small |u-v| (local edges)
+            to keep entanglement more tractable for MPS simulation.
 
     Returns:
         List of (u, v) edge tuples forming the maximal matching
     """
     edges = list(G.edges())
-    rng.shuffle(edges)
+
+    if limit_entanglement:
+        # Sort edges by |u-v| with small random jitter to break ties
+        # This biases toward local edges in qubit ordering, helping MPS
+        jitter_scale = 0.5
+        edges_with_key = [
+            (abs(u - v) + rng.uniform(0, jitter_scale), u, v)
+            for u, v in edges
+        ]
+        edges_with_key.sort(key=lambda x: x[0])
+        edges = [(u, v) for _, u, v in edges_with_key]
+    else:
+        rng.shuffle(edges)
 
     used = set()
     chosen = []
@@ -245,6 +263,7 @@ def generate_random_circuit(
     G: nx.Graph,
     depth: int,
     rng: np.random.Generator,
+    limit_entanglement: bool = False,
 ) -> QuantumCircuit:
     """
     Generate a random circuit constrained by coupling graph G.
@@ -264,6 +283,7 @@ def generate_random_circuit(
         G: The coupling graph defining allowed two-qubit interactions
         depth: Number of layers
         rng: Random generator for reproducibility
+        limit_entanglement: If True, bias matching toward local edges for MPS
 
     Returns:
         QuantumCircuit with depth layers and final measurement
@@ -295,7 +315,7 @@ def generate_random_circuit(
         # The matching ensures gates can be applied in parallel without
         # conflicts, respecting the coupling graph topology.
         # -----------------------------------------------------------------
-        matching = random_maximal_matching(G, rng)
+        matching = random_maximal_matching(G, rng, limit_entanglement)
         for (u, v) in matching:
             qc.cx(u, v)
 
@@ -428,6 +448,10 @@ def run_sweep(
     seed: int,
     outfile: str,
     global_gamma: float = 0.0,
+    sim_method: str = "auto",
+    mps_max_bond: int = 256,
+    mps_trunc: float = 1e-10,
+    limit_entanglement: bool = True,
 ):
     """
     Run the full benchmark sweep across all graph families, N values, and depths.
@@ -472,6 +496,16 @@ def run_sweep(
     current_point = 0
 
     # -----------------------------------------------------------------
+    # Determine simulation method
+    # -----------------------------------------------------------------
+    actual_method = sim_method
+    if sim_method == "auto":
+        actual_method = "matrix_product_state" if max(Ns) >= 32 else "statevector"
+    elif sim_method == "mps":
+        actual_method = "matrix_product_state"
+    # else: statevector stays as-is
+
+    # -----------------------------------------------------------------
     # Print configuration summary
     # -----------------------------------------------------------------
     print("=" * 70)
@@ -487,6 +521,12 @@ def run_sweep(
     print(f"    p2 (2-qubit depolarizing): {p2}")
     print(f"    pm (readout error): {pm}")
     print(f"  Global penalty (gamma): {global_gamma}")
+    print(f"  Simulation method: {actual_method} (requested: {sim_method})")
+    if actual_method == "matrix_product_state":
+        print(f"  MPS options:")
+        print(f"    max_bond_dimension: {mps_max_bond}")
+        print(f"    truncation_threshold: {mps_trunc}")
+        print(f"    limit_entanglement: {limit_entanglement}")
     print(f"  Random seed: {seed}")
     print(f"  Total data points: {total_points}")
     print(f"  Output file: {outfile}")
@@ -496,8 +536,26 @@ def run_sweep(
     # Build noise model once (it's the same for all circuits)
     noise_model = build_noise_model(p1, p2, pm)
 
-    # Create backend with noise model
-    backend = AerSimulator(noise_model=noise_model)
+    # -----------------------------------------------------------------
+    # Create backend with appropriate method and options
+    # -----------------------------------------------------------------
+    if actual_method == "matrix_product_state":
+        # Configure MPS backend with noise
+        backend = AerSimulator(
+            method="matrix_product_state",
+            noise_model=noise_model,
+        )
+        # Set MPS-specific options
+        backend.set_options(
+            matrix_product_state_max_bond_dimension=mps_max_bond,
+            matrix_product_state_truncation_threshold=mps_trunc,
+        )
+    else:
+        # Statevector backend with noise
+        backend = AerSimulator(
+            method="statevector",
+            noise_model=noise_model,
+        )
 
     # -----------------------------------------------------------------
     # Main sweep loop
@@ -544,7 +602,7 @@ def run_sweep(
                 success_probs = []
                 for k in range(K):
                     # Generate new random circuit for this instance
-                    qc = generate_random_circuit(G, depth, rng)
+                    qc = generate_random_circuit(G, depth, rng, limit_entanglement)
 
                     # Simulate and get success probability
                     prob = simulate_circuit(qc, backend, shots)
@@ -659,6 +717,23 @@ def main():
         help='Global penalty strength. If > 0, applies exp(-gamma * C * depth) penalty '
              'where C = N_used * lambda2(G). Default 0.0 (no penalty).'
     )
+    # MPS simulation options
+    parser.add_argument(
+        '--sim_method', type=str, choices=['auto', 'statevector', 'mps'], default='auto',
+        help='Simulation method: auto (mps if max(Ns)>=32 else statevector), statevector, or mps'
+    )
+    parser.add_argument(
+        '--mps_max_bond', type=int, default=256,
+        help='MPS max bond dimension (only used when sim_method=mps)'
+    )
+    parser.add_argument(
+        '--mps_trunc', type=float, default=1e-10,
+        help='MPS truncation threshold (only used when sim_method=mps)'
+    )
+    parser.add_argument(
+        '--limit_entanglement', type=int, choices=[0, 1], default=1,
+        help='If 1, bias matching toward local edges (small |u-v|) for MPS efficiency'
+    )
 
     args = parser.parse_args()
 
@@ -688,6 +763,10 @@ def main():
         seed=args.seed,
         outfile=args.outfile,
         global_gamma=args.global_gamma,
+        sim_method=args.sim_method,
+        mps_max_bond=args.mps_max_bond,
+        mps_trunc=args.mps_trunc,
+        limit_entanglement=bool(args.limit_entanglement),
     )
 
 
