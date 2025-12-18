@@ -374,12 +374,9 @@ def simulate_circuit(
     Returns:
         Probability of measuring the all-zeros bitstring
     """
-    # Transpile circuit for the backend
-    # optimization_level=0 to preserve circuit structure
-    qc_transpiled = transpile(qc, backend, optimization_level=0)
-
-    # Run simulation
-    job = backend.run(qc_transpiled, shots=shots)
+    # Run simulation directly without coupling map constraints
+    # AerSimulator can handle arbitrary qubit counts when run directly
+    job = backend.run(qc, shots=shots)
     result = job.result()
     counts = result.get_counts()
 
