@@ -32,6 +32,7 @@ from typing import List, Tuple
 import numpy as np
 import pandas as pd
 import networkx as nx
+from scipy.sparse.linalg import eigsh
 
 # Qiskit imports
 from qiskit import QuantumCircuit, transpile
@@ -183,6 +184,27 @@ def ensure_connected(G: nx.Graph) -> Tuple[nx.Graph, int]:
     G_sub = nx.relabel_nodes(G_sub, mapping)
 
     return G_sub, G_sub.number_of_nodes()
+
+
+def normalized_laplacian_lambda2(G: nx.Graph) -> float:
+    """
+    Compute λ2 of the normalized Laplacian L = I - D^{-1/2} A D^{-1/2}.
+
+    λ2 is the spectral gap (second-smallest eigenvalue) and measures
+    how well-connected the graph is. Higher λ2 indicates better expansion.
+
+    Args:
+        G: A connected NetworkX graph with at least 2 nodes
+
+    Returns:
+        The second-smallest eigenvalue of the normalized Laplacian
+    """
+    if G.number_of_nodes() < 2:
+        raise ValueError("Graph must have at least 2 nodes to compute lambda2")
+    L = nx.normalized_laplacian_matrix(G)  # sparse matrix
+    vals = eigsh(L, k=2, which="SM", return_eigenvectors=False, tol=1e-6, maxiter=5000)
+    vals = np.sort(vals)
+    return float(vals[1])
 
 
 # =============================================================================
@@ -405,6 +427,7 @@ def run_sweep(
     pm: float,
     seed: int,
     outfile: str,
+    global_gamma: float = 0.0,
 ):
     """
     Run the full benchmark sweep across all graph families, N values, and depths.
@@ -415,7 +438,8 @@ def run_sweep(
     3. Build appropriate noise model
     4. Generate K random circuit instances
     5. Simulate each and compute success probability
-    6. Average results and record to CSV
+    6. Optionally apply global penalty: success_prob *= exp(-global_gamma * C * depth)
+    7. Average results and record to CSV
 
     Args:
         Ns: List of N values (number of qubits) to test
@@ -427,6 +451,7 @@ def run_sweep(
         pm: Measurement error probability
         seed: Random seed for reproducibility
         outfile: Output CSV file path
+        global_gamma: Global penalty strength (0.0 = no penalty)
     """
     rng = np.random.default_rng(seed)
 
@@ -461,6 +486,7 @@ def run_sweep(
     print(f"    p1 (1-qubit depolarizing): {p1}")
     print(f"    p2 (2-qubit depolarizing): {p2}")
     print(f"    pm (readout error): {pm}")
+    print(f"  Global penalty (gamma): {global_gamma}")
     print(f"  Random seed: {seed}")
     print(f"  Total data points: {total_points}")
     print(f"  Output file: {outfile}")
@@ -502,6 +528,15 @@ def run_sweep(
             # Device label encodes family and actual N
             device_label = f"{family_name}_N{N_used}"
 
+            # Compute lambda2 and C once per (family, N_used) graph
+            lambda2 = normalized_laplacian_lambda2(G)
+            C = N_used * lambda2
+
+            # Log when global penalty is active
+            if global_gamma > 0:
+                print(f"  [global penalty] {family_name}, N_used={N_used}, "
+                      f"lambda2={lambda2:.4e}, C={C:.4e}, gamma={global_gamma}")
+
             for depth in depths:
                 current_point += 1
 
@@ -513,6 +548,12 @@ def run_sweep(
 
                     # Simulate and get success probability
                     prob = simulate_circuit(qc, backend, shots)
+
+                    # Apply global penalty if enabled: exp(-gamma * C * depth)
+                    if global_gamma > 0:
+                        penalty = math.exp(-global_gamma * C * depth)
+                        prob = prob * penalty
+
                     success_probs.append(prob)
 
                 # Average success probability across all K instances
@@ -613,6 +654,11 @@ def main():
         '--pm', type=float, default=0.0,
         help='Measurement/readout error probability (0 = no readout error)'
     )
+    parser.add_argument(
+        '--global_gamma', type=float, default=0.0,
+        help='Global penalty strength. If > 0, applies exp(-gamma * C * depth) penalty '
+             'where C = N_used * lambda2(G). Default 0.0 (no penalty).'
+    )
 
     args = parser.parse_args()
 
@@ -627,6 +673,8 @@ def main():
         parser.error("p2 must be in [0, 1]")
     if not (0 <= args.pm <= 1):
         parser.error("pm must be in [0, 1]")
+    if args.global_gamma < 0:
+        parser.error("global_gamma must be >= 0")
 
     # Run the sweep
     run_sweep(
@@ -639,6 +687,7 @@ def main():
         pm=args.pm,
         seed=args.seed,
         outfile=args.outfile,
+        global_gamma=args.global_gamma,
     )
 
 
