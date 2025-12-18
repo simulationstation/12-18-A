@@ -26,8 +26,10 @@ Output:
 
 import argparse
 import math
+import os
 import sys
-from typing import List, Tuple
+import time
+from typing import Callable, List, Optional, Tuple
 
 import numpy as np
 import pandas as pd
@@ -265,6 +267,7 @@ def generate_random_circuit(
     rng: np.random.Generator,
     limit_entanglement: bool = False,
     benchmark: str = "allzeros",
+    oneq_set: str = "default",
 ) -> QuantumCircuit:
     """
     Generate a random circuit constrained by coupling graph G.
@@ -294,7 +297,10 @@ def generate_random_circuit(
     qc = QuantumCircuit(N, N)
 
     # Available single-qubit gates (standard basis gates for most backends)
-    single_qubit_gates = ['sx', 'x', 'rz']
+    if oneq_set == "light":
+        single_qubit_gates = ['x', 'rz']
+    else:
+        single_qubit_gates = ['sx', 'x', 'rz']
 
     # Record operations for mirror mode
     # Each entry: ('1q', gate_name, qubit, theta_or_None) or ('2q', 'cx', u, v)
@@ -425,6 +431,8 @@ def simulate_circuit(
     qc: QuantumCircuit,
     backend: AerSimulator,
     shots: int,
+    shots_batch: int = 0,
+    status_cb: Optional[Callable[[int, int], None]] = None,
 ) -> float:
     """
     Simulate a circuit with noise and return the success probability.
@@ -443,17 +451,23 @@ def simulate_circuit(
     """
     # Run simulation directly without coupling map constraints
     # AerSimulator can handle arbitrary qubit counts when run directly
-    job = backend.run(qc, shots=shots)
-    result = job.result()
-    counts = result.get_counts()
-
-    # The all-zeros bitstring (Qiskit uses little-endian ordering)
     N = qc.num_qubits
     all_zeros = '0' * N
 
-    # Get count of all-zeros outcome
-    zero_count = counts.get(all_zeros, 0)
-    success_prob = zero_count / shots
+    zero_count_total = 0
+    shots_done = 0
+    while shots_done < shots:
+        batch = shots if shots_batch <= 0 else min(shots_batch, shots - shots_done)
+        job = backend.run(qc, shots=batch)
+        result = job.result()
+        counts = result.get_counts()
+        zero_count_total += counts.get(all_zeros, 0)
+        shots_done += batch
+
+        if status_cb is not None:
+            status_cb(shots_done, zero_count_total)
+
+    success_prob = zero_count_total / shots
 
     return success_prob
 
@@ -478,6 +492,13 @@ def run_sweep(
     mps_trunc: float = 1e-10,
     limit_entanglement: bool = True,
     benchmark: str = "mirror",
+    families_filter: Optional[List[str]] = None,
+    status_every_sec: int = 30,
+    max_total_executions: int = 200000,
+    force: bool = False,
+    resume: bool = True,
+    shots_batch: int = 0,
+    oneq_set: str = "default",
 ):
     """
     Run the full benchmark sweep across all graph families, N values, and depths.
@@ -517,6 +538,14 @@ def run_sweep(
         ('erdos_renyi', lambda N, rng: (make_erdos_renyi(N, 4.0, rng), N)),
     ]
 
+    if families_filter:
+        family_names = set(families_filter)
+        families = [(name, fn) for name, fn in families if name in family_names]
+
+    if not families:
+        print("No graph families selected; nothing to do.")
+        return
+
     records = []
     total_points = len(families) * len(Ns) * len(depths)
     current_point = 0
@@ -532,8 +561,8 @@ def run_sweep(
     # else: statevector stays as-is
 
     # -----------------------------------------------------------------
-    # Print configuration summary
-    # -----------------------------------------------------------------
+    estimated_total = len(families) * len(Ns) * len(depths) * K * shots
+
     print("=" * 70)
     print("M-flow Benchmark Data Generation")
     print("=" * 70)
@@ -542,6 +571,14 @@ def run_sweep(
     print(f"  Depths: {depths}")
     print(f"  Circuits per point (K): {K}")
     print(f"  Shots per circuit: {shots}")
+    print(f"  Estimated total circuit executions: {estimated_total}")
+    if estimated_total > max_total_executions:
+        print(
+            f"WARNING: Estimated executions {estimated_total} exceed max_total_executions={max_total_executions}"
+        )
+        if not force:
+            print("Use smaller shots/K/families/depths or set --force=1 to proceed.")
+            return
     print(f"  Noise parameters:")
     print(f"    p1 (1-qubit depolarizing): {p1}")
     print(f"    p2 (2-qubit depolarizing): {p2}")
@@ -559,6 +596,29 @@ def run_sweep(
     print(f"  Output file: {outfile}")
     print("=" * 70)
     print()
+
+    log_path = outfile + ".log"
+    log_file = open(log_path, "a", encoding="utf-8")
+    start_time = time.time()
+    last_status = start_time
+
+    def emit_status(family_idx: int, N_idx: int, depth_idx: int, k_idx: int, last_prob: float | None, running_mean: float | None):
+        nonlocal last_status
+        now = time.time()
+        if now - last_status < status_every_sec:
+            return
+        elapsed = now - start_time
+        status = (
+            f"[status] t={elapsed:7.1f}s fam={family_idx}/{len(families)} "
+            f"N_idx={N_idx}/{len(Ns)} depth_idx={depth_idx}/{len(depths)} "
+            f"k={k_idx}/{K} shots={shots} sim={actual_method} "
+            f"last_prob={(last_prob if last_prob is not None else float('nan')):.6f} "
+            f"running_mean={(running_mean if running_mean is not None else float('nan')):.6f}"
+        )
+        print(status, flush=True)
+        log_file.write(status + "\n")
+        log_file.flush()
+        last_status = now
 
     # Build noise model once (it's the same for all circuits)
     noise_model = build_noise_model(p1, p2, pm)
@@ -587,83 +647,140 @@ def run_sweep(
     # -----------------------------------------------------------------
     # Main sweep loop
     # -----------------------------------------------------------------
-    for family_name, family_fn in families:
-        print(f"\n[{family_name}]")
+    completed_points = set()
+    header_needed = not os.path.exists(outfile)
+    if resume and not header_needed:
+        try:
+            existing_df = pd.read_csv(outfile, on_bad_lines='skip')
+            for _, row in existing_df.iterrows():
+                completed_points.add((row['device'], int(row['N']), int(row['depth'])))
+        except Exception:
+            pass
 
-        for N_requested in Ns:
-            # Generate graph for this family and N
-            G, N_initial = family_fn(N_requested, rng)
+    try:
+        for family_idx, (family_name, family_fn) in enumerate(families, start=1):
+            print(f"\n[{family_name}]")
 
-            # Ensure connected (may reduce N for sparse random graphs)
-            G, N_used = ensure_connected(G)
+            for N_idx, N_requested in enumerate(Ns, start=1):
+                # Generate graph for this family and N
+                G, N_initial = family_fn(N_requested, rng)
 
-            # Skip if graph is pathologically small
-            if N_used < 4:
-                print(f"  N={N_requested}: Skipped (graph too small, N_used={N_used})")
-                current_point += len(depths)
-                continue
+                # Ensure connected (may reduce N for sparse random graphs)
+                G, N_used = ensure_connected(G)
 
-            # Warn if N changed significantly
-            if N_used != N_requested and family_name != 'grid':
-                print(f"  N={N_requested}: Using N_used={N_used} (largest connected component)")
-            elif family_name == 'grid' and N_used != N_requested:
-                s = int(round(math.sqrt(N_used)))
-                print(f"  N={N_requested}: Using {s}x{s} grid (N_used={N_used})")
+                # Skip if graph is pathologically small
+                if N_used < 4:
+                    print(f"  N={N_requested}: Skipped (graph too small, N_used={N_used})")
+                    current_point += len(depths)
+                    continue
 
-            # Device label encodes family and actual N
-            device_label = f"{family_name}_N{N_used}"
+                # Warn if N changed significantly
+                if N_used != N_requested and family_name != 'grid':
+                    print(f"  N={N_requested}: Using N_used={N_used} (largest connected component)")
+                elif family_name == 'grid' and N_used != N_requested:
+                    s = int(round(math.sqrt(N_used)))
+                    print(f"  N={N_requested}: Using {s}x{s} grid (N_used={N_used})")
 
-            # Compute lambda2 and C once per (family, N_used) graph
-            lambda2 = normalized_laplacian_lambda2(G)
-            C = N_used * lambda2
+                # Device label encodes family and actual N
+                device_label = f"{family_name}_N{N_used}"
 
-            # Log when global penalty is active
-            if global_gamma > 0:
-                print(f"  [global penalty] {family_name}, N_used={N_used}, "
-                      f"lambda2={lambda2:.4e}, C={C:.4e}, gamma={global_gamma}")
+                # Compute lambda2 and C once per (family, N_used) graph
+                lambda2 = normalized_laplacian_lambda2(G)
+                C = N_used * lambda2
 
-            for depth in depths:
-                current_point += 1
+                # Log when global penalty is active
+                if global_gamma > 0:
+                    print(f"  [global penalty] {family_name}, N_used={N_used}, "
+                          f"lambda2={lambda2:.4e}, C={C:.4e}, gamma={global_gamma}")
 
-                # Run K independent circuit instances and collect success probs
-                success_probs = []
-                for k in range(K):
-                    # Generate new random circuit for this instance
-                    qc = generate_random_circuit(G, depth, rng, limit_entanglement, benchmark)
+                for depth_idx, depth in enumerate(depths, start=1):
+                    current_point += 1
 
-                    # Simulate and get success probability
-                    prob = simulate_circuit(qc, backend, shots)
+                    device_label = f"{family_name}_N{N_used}"
+                    if resume and (device_label, N_used, depth) in completed_points:
+                        print(f"  {device_label}, d={depth:3d}: Skipping (already in {outfile})")
+                        continue
 
-                    # Apply global penalty if enabled: exp(-gamma * C * depth)
-                    if global_gamma > 0:
-                        penalty = math.exp(-global_gamma * C * depth)
-                        prob = prob * penalty
+                    # Run K independent circuit instances and collect success probs
+                    success_probs = []
+                    for k in range(K):
+                        # Generate new random circuit for this instance
+                        qc = generate_random_circuit(G, depth, rng, limit_entanglement, benchmark, oneq_set)
 
-                    success_probs.append(prob)
+                        # Simulate and get success probability
+                        if shots_batch > 0:
+                            def batch_cb(done: int, zero_total: int) -> None:
+                                interim_prob = zero_total / done if done else 0.0
+                                emit_status(
+                                    family_idx,
+                                    N_idx,
+                                    depth_idx,
+                                    k + 1,
+                                    interim_prob,
+                                    float(np.mean(success_probs + [interim_prob])),
+                                )
 
-                # Average success probability across all K instances
-                avg_success_prob = float(np.mean(success_probs))
-                std_success_prob = float(np.std(success_probs))
+                            prob = simulate_circuit(qc, backend, shots, shots_batch, batch_cb)
+                        else:
+                            prob = simulate_circuit(qc, backend, shots, shots_batch)
 
-                # Record result
-                records.append({
-                    'device': device_label,
-                    'N': N_used,
-                    'depth': depth,
-                    'success_prob': avg_success_prob,
-                })
+                        # Apply global penalty if enabled: exp(-gamma * C * depth)
+                        if global_gamma > 0:
+                            penalty = math.exp(-global_gamma * C * depth)
+                            prob = prob * penalty
 
-                # Progress output
-                print(f"  {device_label}, d={depth:3d}: "
-                      f"success_prob = {avg_success_prob:.6f} "
-                      f"(± {std_success_prob:.6f}, K={K}) "
-                      f"[{current_point}/{total_points}]")
+                        success_probs.append(prob)
+                        emit_status(
+                            family_idx,
+                            N_idx,
+                            depth_idx,
+                            k + 1,
+                            prob,
+                            float(np.mean(success_probs)),
+                        )
 
-    # -----------------------------------------------------------------
-    # Save results to CSV
-    # -----------------------------------------------------------------
-    df = pd.DataFrame(records)
-    df.to_csv(outfile, index=False)
+                    # Average success probability across all K instances
+                    avg_success_prob = float(np.mean(success_probs))
+                    std_success_prob = float(np.std(success_probs))
+
+                    # Record result
+                    records.append({
+                        'device': device_label,
+                        'N': N_used,
+                        'depth': depth,
+                        'success_prob': avg_success_prob,
+                    })
+
+                    pd.DataFrame(records[-1:]).to_csv(
+                        outfile,
+                        mode='a',
+                        header=header_needed,
+                        index=False,
+                    )
+                    header_needed = False
+
+                    # Progress output
+                    progress_line = (
+                        f"  {device_label}, d={depth:3d}: success_prob = {avg_success_prob:.6f} "
+                        f"(± {std_success_prob:.6f}, K={K}) [{current_point}/{total_points}]"
+                    )
+                print(progress_line, flush=True)
+                log_file.write(progress_line + "\n")
+                log_file.flush()
+                last_status = time.time()
+
+    except KeyboardInterrupt:
+        print("Interrupted by user. Partial results written; rerun with --resume=1 to continue.")
+    finally:
+        log_file.close()
+
+    try:
+        df = pd.read_csv(outfile, on_bad_lines='skip')
+    except Exception:
+        df = pd.DataFrame(records)
+
+    if df.empty:
+        return
 
     # -----------------------------------------------------------------
     # Print summary
@@ -672,7 +789,7 @@ def run_sweep(
     print("=" * 70)
     print("Summary")
     print("=" * 70)
-    print(f"Total rows generated: {len(records)}")
+    print(f"Total rows generated in this run: {len(records)}")
     print(f"Output saved to: {outfile}")
     print()
     print("Results by family:")
@@ -728,6 +845,11 @@ def main():
         help='Number of measurement shots per circuit'
     )
     parser.add_argument(
+        '--families', type=str, nargs='+', choices=['ring', 'grid', 'random_regular_4', 'small_world', 'erdos_renyi'],
+        default=None,
+        help='Subset of graph families to simulate'
+    )
+    parser.add_argument(
         '--p1', type=float, default=1e-4,
         help='Single-qubit gate depolarizing error probability'
     )
@@ -750,6 +872,10 @@ def main():
         help='Simulation method: auto (mps if max(Ns)>=32 else statevector), statevector, or mps'
     )
     parser.add_argument(
+        '--oneq_set', type=str, choices=['default', 'light'], default='default',
+        help='Single-qubit gate set; light reduces entanglement growth for MPS'
+    )
+    parser.add_argument(
         '--mps_max_bond', type=int, default=256,
         help='MPS max bond dimension (only used when sim_method=mps)'
     )
@@ -760,6 +886,26 @@ def main():
     parser.add_argument(
         '--limit_entanglement', type=int, choices=[0, 1], default=1,
         help='If 1, bias matching toward local edges (small |u-v|) for MPS efficiency'
+    )
+    parser.add_argument(
+        '--shots_batch', type=int, default=0,
+        help='If >0, split shots into batches to provide responsive status updates'
+    )
+    parser.add_argument(
+        '--status_every_sec', type=int, default=30,
+        help='Heartbeat interval for status logging'
+    )
+    parser.add_argument(
+        '--max_total_executions', type=int, default=200000,
+        help='Guardrail threshold for estimated total circuit executions'
+    )
+    parser.add_argument(
+        '--force', type=int, choices=[0, 1], default=0,
+        help='Set to 1 to bypass max_total_executions guardrail'
+    )
+    parser.add_argument(
+        '--resume', type=int, choices=[0, 1], default=1,
+        help='If 1, resume from existing outfile by skipping completed rows'
     )
     parser.add_argument(
         '--benchmark', type=str, choices=['allzeros', 'mirror'], default='mirror',
@@ -783,6 +929,21 @@ def main():
         parser.error("pm must be in [0, 1]")
     if args.global_gamma < 0:
         parser.error("global_gamma must be >= 0")
+    if args.status_every_sec < 1:
+        parser.error("status_every_sec must be at least 1 second")
+    if args.max_total_executions < 1:
+        parser.error("max_total_executions must be positive")
+    if args.shots_batch < 0:
+        parser.error("shots_batch must be >= 0")
+
+    default_shots = parser.get_default('shots')
+    default_K = parser.get_default('K')
+    mps_selected = args.sim_method == 'mps' or (args.sim_method == 'auto' and max(args.Ns) >= 32)
+    if mps_selected:
+        if args.shots == default_shots:
+            args.shots = 512
+        if args.K == default_K:
+            args.K = 3
 
     # Run the sweep
     run_sweep(
@@ -801,6 +962,13 @@ def main():
         mps_trunc=args.mps_trunc,
         limit_entanglement=bool(args.limit_entanglement),
         benchmark=args.benchmark,
+        families_filter=args.families,
+        status_every_sec=args.status_every_sec,
+        max_total_executions=args.max_total_executions,
+        force=bool(args.force),
+        resume=bool(args.resume),
+        shots_batch=args.shots_batch,
+        oneq_set=args.oneq_set,
     )
 
 
