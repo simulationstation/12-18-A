@@ -43,6 +43,7 @@ class AnalysisConfig:
     seed: int
     graph_seed_override: int | None
     show_plots: bool
+    fit_eps: float
 
 
 def parse_device_label(label: str) -> Tuple[str, int]:
@@ -160,7 +161,15 @@ def analyze_benchmark(cfg: AnalysisConfig) -> pd.DataFrame:
         lam2 = normalized_laplacian_lambda2(G)
         C = N_used * lam2
 
-        alpha_hat = fit_alpha_hat(sub["depth"], sub["success_prob"])
+        # Filter out points with success_prob <= fit_eps for regression
+        sub_filtered = sub[sub["success_prob"] > cfg.fit_eps]
+        n_filtered = len(sub_filtered)
+
+        if n_filtered < 2:
+            print(f"  [SKIP] {device}: only {n_filtered} points with success_prob > {cfg.fit_eps}, need >= 2")
+            continue
+
+        alpha_hat = fit_alpha_hat(sub_filtered["depth"], sub_filtered["success_prob"])
 
         records.append(
             {
@@ -171,13 +180,13 @@ def analyze_benchmark(cfg: AnalysisConfig) -> pd.DataFrame:
                 "lambda2": lam2,
                 "C": C,
                 "alpha_hat": alpha_hat,
-                "n_points": n_points,
+                "n_points": n_filtered,
             }
         )
 
         print(
             f"  {device}: family={family}, N_req={N_requested}, N_used={N_used}, "
-            f"lambda2={lam2:.4e}, C={C:.4e}, alpha_hat={alpha_hat:.4e}, n={n_points}"
+            f"lambda2={lam2:.4e}, C={C:.4e}, alpha_hat={alpha_hat:.4e}, n={n_filtered}/{n_points}"
         )
 
     result_df = pd.DataFrame(records)
@@ -258,6 +267,10 @@ def parse_args(argv: list[str]) -> AnalysisConfig:
     ap.add_argument("--show_plots", dest="show_plots", action="store_true", help="Display plots interactively")
     ap.add_argument("--no_show_plots", dest="show_plots", action="store_false", help="Disable interactive plots")
     ap.set_defaults(show_plots=False)
+    ap.add_argument(
+        "--fit_eps", type=float, default=0.001,
+        help="Exclude depth points with success_prob <= fit_eps from alpha_hat regression (default: 0.001)"
+    )
     args = ap.parse_args(argv)
 
     return AnalysisConfig(
@@ -266,6 +279,7 @@ def parse_args(argv: list[str]) -> AnalysisConfig:
         seed=args.seed,
         graph_seed_override=args.graph_seed_override,
         show_plots=args.show_plots,
+        fit_eps=args.fit_eps,
     )
 
 
