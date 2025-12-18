@@ -37,6 +37,30 @@ python mflow_analyze_synth.py --bench_csv bench.csv --outdir results --seed 123 
 This writes `results/alpha_vs_C_synth.csv` plus plots
 `alpha_vs_C_synth.png`, `alpha_vs_N_synth.png`, and `lambda2_vs_N_synth.png`.
 
+### Avoiding giant runs
+
+The all-zeros success metric decays as \(2^{-N}\) for random circuits, so
+statevector runs at large \(N\) quickly become uninformative. Prefer the
+mirror benchmark (`--benchmark mirror`), which keeps noiseless success near 1.
+
+For MPS + noise, start conservatively: `--shots 512 --K 3 --depths 5 10`
+and keep depths \(\leq 10\) while you validate settings. Use `--oneq_set light`
+and leave `--limit_entanglement` enabled to reduce entanglement growth.
+
+Every run prints an estimated total circuit execution count and refuses to run
+if it exceeds `--max_total_executions` (default 200000) unless you pass
+`--force 1`. You can further trim scope via `--families`, `--Ns`, and
+`--depths` without editing code.
+
+Live progress goes to stdout and a sidecar log (e.g., `bench.csv.log`):
+```bash
+tail -f bench.csv.log
+```
+
+Results are appended after each (family, N, depth) point, so you can interrupt
+a long run with Ctrl-C and later resume with `--resume 1` using the same
+arguments. Existing rows are skipped automatically.
+
 ## What this tests
 - **Connectivity metric:** \(C = N \lambda_2\) measures how well-connected the
   architecture is (\(\lambda_2\) is the spectral gap of the normalized
