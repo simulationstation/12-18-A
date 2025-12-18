@@ -264,6 +264,7 @@ def generate_random_circuit(
     depth: int,
     rng: np.random.Generator,
     limit_entanglement: bool = False,
+    benchmark: str = "allzeros",
 ) -> QuantumCircuit:
     """
     Generate a random circuit constrained by coupling graph G.
@@ -274,19 +275,20 @@ def generate_random_circuit(
     2. Select a random maximal matching of the coupling graph
     3. Apply CX gates on each matched edge
 
-    Finally, measure all qubits in the computational basis.
+    If benchmark="mirror", append the inverse of the circuit (U followed by U†).
+    This makes success_prob measurable at large N since noiseless result is ~1.
 
-    The random single-qubit gates prevent trivial commuting structure
-    and ensure the circuit explores the Hilbert space.
+    Finally, measure all qubits in the computational basis.
 
     Args:
         G: The coupling graph defining allowed two-qubit interactions
         depth: Number of layers
         rng: Random generator for reproducibility
         limit_entanglement: If True, bias matching toward local edges for MPS
+        benchmark: "allzeros" (standard) or "mirror" (append inverse circuit)
 
     Returns:
-        QuantumCircuit with depth layers and final measurement
+        QuantumCircuit with depth layers (+ inverse if mirror) and final measurement
     """
     N = G.number_of_nodes()
     qc = QuantumCircuit(N, N)
@@ -294,33 +296,56 @@ def generate_random_circuit(
     # Available single-qubit gates (standard basis gates for most backends)
     single_qubit_gates = ['sx', 'x', 'rz']
 
+    # Record operations for mirror mode
+    # Each entry: ('1q', gate_name, qubit, theta_or_None) or ('2q', 'cx', u, v)
+    operations = []
+
     for layer in range(depth):
         # -----------------------------------------------------------------
         # Step 1: Apply random single-qubit gates to all qubits
-        # This creates non-trivial interference and prevents the circuit
-        # from having simple commuting structure.
         # -----------------------------------------------------------------
         for q in range(N):
             gate_choice = rng.choice(single_qubit_gates)
             if gate_choice == 'sx':
                 qc.sx(q)
+                operations.append(('1q', 'sx', q, None))
             elif gate_choice == 'x':
                 qc.x(q)
+                operations.append(('1q', 'x', q, None))
             elif gate_choice == 'rz':
                 theta = rng.uniform(0, 2 * math.pi)
                 qc.rz(theta, q)
+                operations.append(('1q', 'rz', q, theta))
 
         # -----------------------------------------------------------------
         # Step 2: Get random maximal matching and apply CX gates
-        # The matching ensures gates can be applied in parallel without
-        # conflicts, respecting the coupling graph topology.
         # -----------------------------------------------------------------
         matching = random_maximal_matching(G, rng, limit_entanglement)
         for (u, v) in matching:
             qc.cx(u, v)
+            operations.append(('2q', 'cx', u, v))
 
     # -----------------------------------------------------------------
-    # Step 3: Measure all qubits in computational basis
+    # Step 3: If mirror mode, append inverse circuit
+    # Inverse: X→X, SX→SXdg, RZ(θ)→RZ(-θ), CX→CX
+    # -----------------------------------------------------------------
+    if benchmark == "mirror":
+        for op in reversed(operations):
+            if op[0] == '1q':
+                gate_name, q, theta = op[1], op[2], op[3]
+                if gate_name == 'sx':
+                    qc.sxdg(q)
+                elif gate_name == 'x':
+                    qc.x(q)
+                elif gate_name == 'rz':
+                    qc.rz(-theta, q)
+            elif op[0] == '2q':
+                # CX is self-inverse
+                u, v = op[2], op[3]
+                qc.cx(u, v)
+
+    # -----------------------------------------------------------------
+    # Step 4: Measure all qubits in computational basis
     # -----------------------------------------------------------------
     qc.measure(range(N), range(N))
 
@@ -365,7 +390,7 @@ def build_noise_model(
     if p1 > 0:
         error_1q = depolarizing_error(p1, 1)
         single_qubit_gate_names = [
-            'sx', 'x', 'rz',  # Gates we explicitly use
+            'sx', 'sxdg', 'x', 'rz',  # Gates we explicitly use (including inverse)
             'id', 'h', 's', 'sdg', 't', 'tdg',  # Common gates
             'u1', 'u2', 'u3', 'u',  # Generic single-qubit gates
         ]
@@ -452,6 +477,7 @@ def run_sweep(
     mps_max_bond: int = 256,
     mps_trunc: float = 1e-10,
     limit_entanglement: bool = True,
+    benchmark: str = "mirror",
 ):
     """
     Run the full benchmark sweep across all graph families, N values, and depths.
@@ -521,6 +547,7 @@ def run_sweep(
     print(f"    p2 (2-qubit depolarizing): {p2}")
     print(f"    pm (readout error): {pm}")
     print(f"  Global penalty (gamma): {global_gamma}")
+    print(f"  Benchmark mode: {benchmark}")
     print(f"  Simulation method: {actual_method} (requested: {sim_method})")
     if actual_method == "matrix_product_state":
         print(f"  MPS options:")
@@ -602,7 +629,7 @@ def run_sweep(
                 success_probs = []
                 for k in range(K):
                     # Generate new random circuit for this instance
-                    qc = generate_random_circuit(G, depth, rng, limit_entanglement)
+                    qc = generate_random_circuit(G, depth, rng, limit_entanglement, benchmark)
 
                     # Simulate and get success probability
                     prob = simulate_circuit(qc, backend, shots)
@@ -734,6 +761,12 @@ def main():
         '--limit_entanglement', type=int, choices=[0, 1], default=1,
         help='If 1, bias matching toward local edges (small |u-v|) for MPS efficiency'
     )
+    parser.add_argument(
+        '--benchmark', type=str, choices=['allzeros', 'mirror'], default='mirror',
+        help='Benchmark type: allzeros (random circuit, measure all zeros) or '
+             'mirror (U followed by U†, measure all zeros). Mirror gives measurable '
+             'success_prob at large N.'
+    )
 
     args = parser.parse_args()
 
@@ -767,6 +800,7 @@ def main():
         mps_max_bond=args.mps_max_bond,
         mps_trunc=args.mps_trunc,
         limit_entanglement=bool(args.limit_entanglement),
+        benchmark=args.benchmark,
     )
 
 
