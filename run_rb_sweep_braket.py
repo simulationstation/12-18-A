@@ -1,10 +1,15 @@
 #!/usr/bin/env python3
 """
-AWS Braket RB Sweep Script
+AWS Braket experiment driver (RB + logical code)
 
-Runs randomized benchmarking experiments across diverse qubit subsets
-on AWS Braket quantum devices, measuring alpha/EPC and correlating
-with architecture metrics (lambda2, C).
+Supports:
+    - Randomized benchmarking (mirror circuits) to estimate EPC/alpha
+    - Minimal logical-code experiment (3-qubit repetition) to measure logical
+      success across different induced subgraphs.
+
+Runs experiments across diverse qubit subsets on AWS Braket quantum devices,
+measuring decay/logical performance and correlating with architecture metrics
+(lambda2, C).
 
 Since Braket doesn't have built-in StandardRB, this implements
 mirror circuit benchmarking for equivalent decay analysis.
@@ -18,12 +23,10 @@ import random
 import os
 import sys
 from datetime import datetime
-from collections import deque
 from typing import List, Tuple, Dict, Optional
 import numpy as np
 import networkx as nx
 from scipy.optimize import curve_fit
-from scipy.stats import spearmanr
 
 from braket.aws import AwsDevice
 from braket.circuits import Circuit, gates
@@ -98,7 +101,6 @@ def generate_diverse_subsets(G: nx.Graph, N: int, num_subsets: int, seed: int,
                               max_jaccard: float = 0.7, max_attempts: int = 10000) -> List[Tuple[int, ...]]:
     """Generate diverse connected subsets using BFS with Jaccard diversity check."""
     rng = random.Random(seed)
-    np_rng = np.random.default_rng(seed)
 
     nodes = list(G.nodes())
     subsets = []
@@ -406,6 +408,233 @@ def run_sweep(device, G: nx.Graph, subsets: List[Tuple[int, ...]],
     log(f"Results saved to {output_csv}", logger)
 
 
+def choose_data_qubits_for_repetition(subgraph: nx.Graph) -> List[int]:
+    """
+    Choose three data qubits that form a short path when possible.
+
+    Returns a list of three qubits to serve as the repetition code data block.
+    Prefers a length-2 path (a-b-c) to keep entangling operations hardware
+    compatible; falls back to the first three nodes if no path exists.
+    """
+    nodes = list(subgraph.nodes())
+    if len(nodes) < 3:
+        raise ValueError("Need at least 3 qubits for repetition code")
+
+    # Try to find a path of length 2 (a-b-c)
+    for b in nodes:
+        neighbors_b = list(subgraph.neighbors(b))
+        for a in neighbors_b:
+            for c in neighbors_b:
+                if a != c:
+                    return [a, b, c]
+
+    return sorted(nodes)[:3]
+
+
+def edge_in_subgraph(edges: set, q1: int, q2: int) -> bool:
+    """Return True if an undirected edge (q1, q2) exists in the subgraph."""
+    return (q1, q2) in edges or (q2, q1) in edges or (tuple(sorted((q1, q2))) in edges)
+
+
+def add_parity_check(circuit: Circuit, data_pair: Tuple[int, int], ancilla: int, edges: set) -> bool:
+    """
+    Add a Z-parity check for a data pair using a single ancilla.
+
+    Uses CNOTs data->ancilla. Returns True if both required edges exist;
+    otherwise leaves the circuit unchanged and returns False.
+    """
+    q1, q2 = data_pair
+    if not (edge_in_subgraph(edges, q1, ancilla) and edge_in_subgraph(edges, q2, ancilla)):
+        return False
+    circuit.cnot(q1, ancilla)
+    circuit.cnot(q2, ancilla)
+    return True
+
+
+def build_repetition_code_circuit(data_qubits: List[int], ancillas: List[int], rounds: int, edges: List[Tuple[int, int]]) -> Circuit:
+    """
+    Build a simple 3-qubit repetition code circuit with parity checks.
+
+    - Data qubits encode logical |0>
+    - Each round performs two parity checks (Z1Z2, Z2Z3) using distinct ancillas
+    - Adds shallow CZ entangling between neighboring data qubits when allowed
+    - Measures all used qubits at the end
+    """
+    circuit = Circuit()
+    edge_set = set(tuple(sorted(e)) for e in edges)
+
+    if len(data_qubits) != 3:
+        raise ValueError("Repetition code expects exactly 3 data qubits")
+    if len(ancillas) < 2 * rounds:
+        raise ValueError("Need 2 ancillas per round for parity checks")
+
+    d0, d1, d2 = data_qubits
+
+    for r in range(rounds):
+        a_z12 = ancillas[2 * r]
+        a_z23 = ancillas[2 * r + 1]
+
+        added_12 = add_parity_check(circuit, (d0, d1), a_z12, edge_set)
+        added_23 = add_parity_check(circuit, (d1, d2), a_z23, edge_set)
+
+        # Add shallow entangling/idling to expose architecture effects
+        if edge_in_subgraph(edge_set, d0, d1):
+            circuit.cz(d0, d1)
+        if edge_in_subgraph(edge_set, d1, d2):
+            circuit.cz(d1, d2)
+
+        # If parity checks could not be added due to missing edges, at least add identities
+        if not (added_12 and added_23):
+            circuit.i(d0)
+            circuit.i(d1)
+            circuit.i(d2)
+
+    measure_qubits = sorted(set(data_qubits + ancillas))
+    for q in measure_qubits:
+        circuit.measure(q)
+
+    return circuit
+
+
+def run_logical_repetition_experiment(device,
+                                      subset: Tuple[int, ...],
+                                      subgraph: nx.Graph,
+                                      rounds: int,
+                                      shots: int,
+                                      logger=None) -> Dict:
+    """
+    Run a simple logical repetition code experiment on the given subset.
+
+    Returns logical success/error probabilities and bookkeeping for the run.
+    """
+    data_qubits = choose_data_qubits_for_repetition(subgraph)
+    available = [q for q in subset if q not in data_qubits]
+    if len(available) < 2 * rounds:
+        raise ValueError(f"Subset {subset} does not have enough ancilla qubits for {rounds} rounds")
+    ancillas = available[: 2 * rounds]
+
+    circuit = build_repetition_code_circuit(data_qubits, ancillas, rounds, list(subgraph.edges()))
+    measure_qubits = sorted(set(data_qubits + ancillas))
+
+    task = device.run(circuit, shots=shots)
+    task_result = task.result()
+
+    measurements = np.array(task_result.measurements)
+    measured_qubits = list(task_result.measured_qubits)
+    qubit_index = {q: i for i, q in enumerate(measured_qubits)}
+    data_indices = [qubit_index[q] for q in data_qubits if q in qubit_index]
+    if len(data_indices) != len(data_qubits):
+        raise ValueError("Mismatch between measured qubits and data qubits")
+
+    data_bits = measurements[:, data_indices]
+    ones_count = np.sum(data_bits, axis=1)
+    successes = int(np.sum(ones_count <= len(data_qubits) // 2))
+    shots_run = measurements.shape[0]
+    logical_success_prob = successes / shots_run if shots_run else 0.0
+    logical_error_rate = 1 - logical_success_prob
+
+    if logger:
+        log(f"    Logical success probability: {logical_success_prob:.4f}", logger)
+
+    return {
+        'logical_success_prob': logical_success_prob,
+        'logical_error_rate': logical_error_rate,
+        'shots_run': shots_run,
+        'data_qubits': data_qubits,
+        'ancillas': ancillas,
+        'measured_qubits': measured_qubits
+    }
+
+
+def run_logical_code_sweep(device,
+                           G: nx.Graph,
+                           subsets: List[Tuple[int, ...]],
+                           rounds: int,
+                           shots: int,
+                           seed: int,
+                           output_csv: str,
+                           logger=None,
+                           resume: bool = True):
+    """Run logical code experiments across subsets."""
+
+    completed_subsets = set()
+    if resume and os.path.exists(output_csv):
+        with open(output_csv, 'r') as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                completed_subsets.add(int(row['subset_id']))
+        log(f"Resuming: {len(completed_subsets)} subsets already completed", logger)
+
+    fieldnames = [
+        'experiment_type', 'device', 'subset_id', 'qubits', 'N', 'lambda2', 'C',
+        'rounds', 'shots', 'logical_success_prob', 'logical_error_rate',
+        'data_qubits', 'ancilla_qubits', 'timestamp', 'status'
+    ]
+    write_header = not os.path.exists(output_csv) or os.path.getsize(output_csv) == 0
+
+    os.makedirs(os.path.dirname(output_csv) if os.path.dirname(output_csv) else '.', exist_ok=True)
+    start_time = time.time()
+
+    for i, subset in enumerate(subsets):
+        if i in completed_subsets:
+            log(f"[{i+1}/{len(subsets)}] Subset {i} already completed, skipping", logger)
+            continue
+
+        elapsed = (time.time() - start_time) / 60
+        log(f"\n[{i+1}/{len(subsets)}] Subset {i} (elapsed: {elapsed:.1f} min)", logger)
+        log(f"  Qubits: {subset}", logger)
+
+        subgraph = G.subgraph(subset).copy()
+        metrics = compute_architecture_metrics(subgraph)
+        log(f"  lambda2={metrics['lambda2']:.4f}, C={metrics['C']:.4f}", logger)
+
+        try:
+            results = run_logical_repetition_experiment(
+                device,
+                subset,
+                subgraph,
+                rounds,
+                shots,
+                logger
+            )
+
+            row = {
+                'experiment_type': 'logical_code',
+                'device': device.name if hasattr(device, 'name') else str(device),
+                'subset_id': i,
+                'qubits': str(subset),
+                'N': len(subset),
+                'lambda2': metrics['lambda2'],
+                'C': metrics['C'],
+                'rounds': rounds,
+                'shots': shots,
+                'logical_success_prob': results['logical_success_prob'],
+                'logical_error_rate': results['logical_error_rate'],
+                'data_qubits': str(results['data_qubits']),
+                'ancilla_qubits': str(results['ancillas']),
+                'timestamp': datetime.now().isoformat(),
+                'status': 'ok'
+            }
+
+            with open(output_csv, 'a', newline='') as f:
+                writer = csv.DictWriter(f, fieldnames=fieldnames)
+                if write_header:
+                    writer.writeheader()
+                    write_header = False
+                writer.writerow(row)
+
+            log("  Logical result saved to CSV", logger)
+
+        except Exception as e:
+            log(f"  FAILED logical run: {e}", logger)
+            continue
+
+    elapsed = (time.time() - start_time) / 60
+    log(f"\n{'='*60}", logger)
+    log(f"LOGICAL CODE SWEEP COMPLETE in {elapsed:.1f} minutes", logger)
+    log(f"Results saved to {output_csv}", logger)
+
+
 def main():
     parser = argparse.ArgumentParser(description='AWS Braket RB Sweep')
     parser.add_argument('--device', type=str, default='arn:aws:braket:us-west-1::device/qpu/rigetti/Ankaa-3',
@@ -415,29 +644,39 @@ def main():
     parser.add_argument('--depths', type=str, default='1,2,4,8,16,32', help='Comma-separated depths')
     parser.add_argument('--shots', type=int, default=1000, help='Shots per circuit')
     parser.add_argument('--seed', type=int, default=42, help='Random seed')
-    parser.add_argument('--output', type=str, default='results/rb_sweep_braket.csv', help='Output CSV')
+    parser.add_argument('--output', type=str, default=None, help='Output CSV (auto-set by experiment type)')
     parser.add_argument('--resume', action='store_true', default=True, help='Resume from existing results')
     parser.add_argument('--simulator', action='store_true', help='Use local simulator instead of QPU')
+    parser.add_argument('--experiment', type=str, choices=['rb', 'logical_code'], default='rb',
+                        help='Experiment type: rb (mirror RB) or logical_code (repetition code)')
+    parser.add_argument('--logical-rounds', type=int, default=2, help='Parity-check rounds for logical experiment')
 
     args = parser.parse_args()
 
     depths = [int(d) for d in args.depths.split(',')]
+    output_path = args.output
+    if output_path is None:
+        output_path = 'results/logical_code_sweep.csv' if args.experiment == 'logical_code' else 'results/rb_sweep_braket.csv'
 
     # Setup logging
     os.makedirs('results', exist_ok=True)
-    log_file = args.output.replace('.csv', '.log')
+    log_file = output_path.replace('.csv', '.log')
     logger = open(log_file, 'a')
 
     log("=" * 60, logger)
-    log("AWS Braket RB Sweep", logger)
+    log("AWS Braket Experiment Runner", logger)
     log("=" * 60, logger)
     log(f"Device: {args.device}", logger)
     log(f"Subset size N: {args.N}", logger)
     log(f"Num subsets: {args.num_subsets}", logger)
-    log(f"Depths: {depths}", logger)
+    log(f"Experiment: {args.experiment}", logger)
+    if args.experiment == 'rb':
+        log(f"Depths: {depths}", logger)
+    else:
+        log(f"Rounds: {args.logical_rounds}", logger)
     log(f"Shots: {args.shots}", logger)
     log(f"Seed: {args.seed}", logger)
-    log(f"Output CSV: {args.output}", logger)
+    log(f"Output CSV: {output_path}", logger)
     log(f"Resume: {args.resume}", logger)
     log(f"Simulator: {args.simulator}", logger)
     log("=" * 60, logger)
@@ -462,13 +701,18 @@ def main():
     subsets = generate_diverse_subsets(G, args.N, args.num_subsets, args.seed)
     log(f"Generated {len(subsets)} subsets", logger)
 
-    # Run sweep
+    # Run chosen experiment
     log("\n" + "=" * 60, logger)
-    log("STARTING RB SWEEP", logger)
-    log("=" * 60, logger)
-
-    run_sweep(device, G, subsets, depths, args.shots, args.seed,
-              args.output, logger, args.resume)
+    if args.experiment == 'rb':
+        log("STARTING RB SWEEP", logger)
+        log("=" * 60, logger)
+        run_sweep(device, G, subsets, depths, args.shots, args.seed,
+                  output_path, logger, args.resume)
+    else:
+        log("STARTING LOGICAL CODE SWEEP", logger)
+        log("=" * 60, logger)
+        run_logical_code_sweep(device, G, subsets, args.logical_rounds,
+                               args.shots, args.seed, output_path, logger, args.resume)
 
     logger.close()
 
