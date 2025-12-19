@@ -1,0 +1,71 @@
+================================================================================
+RB SWEEP RESULTS SUMMARY - Rigetti Ankaa-3
+Date: 2025-12-18
+================================================================================
+
+EXPERIMENT DESIGN
+-----------------
+Device: Rigetti Ankaa-3 (AWS Braket)
+Benchmark: Mirror circuit (U followed by U†)
+Depths: [5, 10, 20, 30]
+Shots per circuit: 500
+Subsets per N: 15
+
+N VALUES TESTED
+---------------
+N = 9:  15 subsets, C range [2.22, 3.19]
+N = 11: 15 subsets, C range [1.63, 3.63]
+N = 13: 15 subsets, C range [1.58, 3.81]
+
+CORRELATION RESULTS
+-------------------
+N=9:   ρ(C, success) = -0.111, p = 0.694  → NO CORRELATION
+N=11:  ρ(C, success) = -0.143, p = 0.612  → NO CORRELATION
+N=13:  ρ(C, success) = +0.254, p = 0.362  → NO CORRELATION
+
+VARIANCE ANALYSIS
+-----------------
+N=9:  3.3% of variance explained by C, 96.7% by local noise
+N=11: 0.3% of variance explained by C, 99.7% by local noise
+N=13: 4.4% of variance explained by C, 95.6% by local noise
+
+PERFORMANCE METRICS
+-------------------
+N=9:  Mean success = 71.0% ± 16.7%
+N=11: Mean success = 63.8% ± 17.5%
+N=13: Mean success = 63.8% ± 18.0%
+
+CONCLUSIONS
+-----------
+1. NO SIGNIFICANT CORRELATION between architecture metric C = N×λ₂ and
+   benchmark success at any subsystem size tested (N = 9, 11, 13).
+
+2. LOCAL QUBIT NOISE DOMINATES: >95% of variance in success probability
+   is attributable to subset-specific (local) effects rather than global
+   architecture connectivity.
+
+3. NO SIZE-DEPENDENT EMERGENCE: Correlation strength does not systematically
+   increase with N. The weak positive trend at N=13 (ρ=+0.25) is not
+   statistically significant (p=0.36).
+
+4. IMPLICATIONS: Architecture effects on this device, if present, are below
+   the detection threshold of this experimental design. Either:
+   - The C metric does not capture the relevant physics
+   - Error rates vary too much between individual qubits
+   - Deeper circuits or larger N are needed to see the effect
+   - The effect does not exist on superconducting hardware
+
+COMBINED WITH N=7 RESULTS
+-------------------------
+Including the earlier N=7 sweep:
+N=7:  ρ = -0.014, p = 0.96 → NO CORRELATION
+
+All four N values (7, 9, 11, 13) show null results.
+
+FILES
+-----
+results/rb_sweep_rigetti_N9.csv
+results/rb_sweep_rigetti_N11.csv
+results/rb_sweep_rigetti_N13.csv
+results/rb_sweep_rigetti_comparison.png
+results/rb_sweep_rigetti_comparison.pdf
