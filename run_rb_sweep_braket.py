@@ -24,12 +24,12 @@ import time
 import random
 import os
 import sys
+import subprocess
 from datetime import datetime
-from typing import List, Tuple, Dict
+from typing import Dict, List, Tuple
 import numpy as np
 import networkx as nx
 from scipy.optimize import curve_fit
-from scipy.stats import linregress
 from scipy.stats import linregress
 
 from braket.aws import AwsDevice
@@ -45,6 +45,17 @@ def log(msg: str, logger=None):
     if logger:
         logger.write(line + "\n")
         logger.flush()
+
+
+def get_git_commit_short() -> str:
+    """Return short git commit hash if available, else ''."""
+    try:
+        return subprocess.check_output(
+            ["git", "rev-parse", "--short", "HEAD"],
+            stderr=subprocess.DEVNULL,
+        ).decode().strip()
+    except Exception:
+        return ""
 
 
 def build_coupling_graph(device) -> nx.Graph:
@@ -385,6 +396,77 @@ def generate_diverse_subsets(G: nx.Graph, N: int, num_subsets: int, seed: int,
             subsets.append(subset)
 
     return subsets
+
+
+def summarize_subsets(
+    subsets: List[Tuple[int, ...]],
+    G: nx.Graph,
+    device_name: str,
+    N_requested: int,
+    seed: int,
+    selection_params: Dict,
+    save_path: str = None,
+) -> Dict[int, Dict]:
+    """
+    Compute metrics for subsets and optionally persist to JSON for reuse.
+
+    Returns a mapping subset_id -> metrics dict.
+    """
+    metrics_map: Dict[int, Dict] = {}
+    records = []
+    for i, subset in enumerate(subsets):
+        subgraph = G.subgraph(subset).copy()
+        metrics = compute_architecture_metrics(subgraph)
+        metrics_map[i] = metrics
+        records.append({
+            "subset_id": i,
+            "qubits": [int(q) for q in subset],
+            "N_used": len(subset),
+            "lambda2": metrics["lambda2"],
+            "C": metrics["C"],
+            "diameter": metrics["diameter"],
+        })
+
+    if save_path:
+        os.makedirs(os.path.dirname(save_path) if os.path.dirname(save_path) else ".", exist_ok=True)
+        payload = {
+            "device": device_name,
+            "N_requested": N_requested,
+            "N_used": len(subsets[0]) if subsets else 0,
+            "selection_seed": seed,
+            "selection_params": selection_params,
+            "generated_at": datetime.now().isoformat(),
+            "subsets": records,
+        }
+        with open(save_path, "w") as f:
+            json.dump(payload, f, indent=2)
+    return metrics_map
+
+
+def load_subsets(path: str) -> Tuple[List[Tuple[int, ...]], Dict[int, Dict], Dict]:
+    """Load subsets and metrics from JSON."""
+    with open(path, "r") as f:
+        data = json.load(f)
+
+    subsets: List[Tuple[int, ...]] = []
+    metrics_map: Dict[int, Dict] = {}
+    for entry in sorted(data.get("subsets", []), key=lambda x: int(x.get("subset_id", 0))):
+        subset_id = int(entry["subset_id"])
+        qubits = tuple(sorted(int(q) for q in entry["qubits"]))
+        subsets.append(qubits)
+        metrics_map[subset_id] = {
+            "lambda2": float(entry.get("lambda2", 0)),
+            "C": float(entry.get("C", 0)),
+            "diameter": int(entry.get("diameter", -1)),
+        }
+    metadata = {
+        "device": data.get("device", ""),
+        "N_requested": int(data.get("N_requested", 0)),
+        "N_used": int(data.get("N_used", 0)),
+        "selection_seed": data.get("selection_seed"),
+        "selection_params": data.get("selection_params", {}),
+    }
+    return subsets, metrics_map, metadata
 
 
 def generate_random_clifford_layer(qubits: List[int], rng: random.Random) -> Circuit:
@@ -1036,13 +1118,19 @@ def run_loschmidt_echo_sweep(device,
                              alpha_output: str,
                              fit_eps: float,
                              logger=None,
-                             resume: bool = True):
+                             resume: bool = True,
+                             run_id: str = "",
+                             git_commit: str = "",
+                             subset_metrics: Dict[int, Dict] = None):
     """Run Loschmidt echo experiments across subsets with incremental CSV writes."""
+    subset_metrics = subset_metrics or {}
     completed = set()
     existing_rows: Dict[int, List[Tuple[int, float]]] = {}
+    existing_fieldnames: List[str] = []
     if resume and os.path.exists(output_csv):
         with open(output_csv, 'r') as f:
             reader = csv.DictReader(f)
+            existing_fieldnames = reader.fieldnames or []
             for row in reader:
                 completed.add((int(row['subset_id']), int(row['depth'])))
                 existing_rows.setdefault(int(row['subset_id']), []).append(
@@ -1051,28 +1139,33 @@ def run_loschmidt_echo_sweep(device,
         log(f"Resuming: {len(completed)} depth points already completed", logger)
 
     completed_alpha = set()
+    existing_alpha_fields: List[str] = []
     if resume and os.path.exists(alpha_output):
         with open(alpha_output, 'r') as f:
             reader = csv.DictReader(f)
+            existing_alpha_fields = reader.fieldnames or []
             for row in reader:
                 completed_alpha.add(int(row['subset_id']))
 
     fieldnames = [
-        'experiment_type', 'device', 'subset_id', 'qubits', 'N', 'lambda2', 'C',
+        'experiment_type', 'device', 'run_id', 'git_commit', 'subset_id', 'qubits', 'N', 'lambda2', 'C',
         'depth', 'K', 'shots', 'mean_P_return', 'sem_P_return', 'timestamp'
     ]
     alpha_fields = [
-        'experiment_type', 'device', 'subset_id', 'qubits', 'N', 'lambda2', 'C',
+        'experiment_type', 'device', 'run_id', 'git_commit', 'subset_id', 'qubits', 'N', 'lambda2', 'C',
         'fit_eps', 'alpha', 'alpha_stderr', 'points', 'timestamp'
     ]
 
-    write_header = not os.path.exists(output_csv) or os.path.getsize(output_csv) == 0
-    write_alpha_header = not os.path.exists(alpha_output) or os.path.getsize(alpha_output) == 0
+    write_header = (not os.path.exists(output_csv) or os.path.getsize(output_csv) == 0
+                    or set(existing_fieldnames) != set(fieldnames))
+    write_alpha_header = (not os.path.exists(alpha_output) or os.path.getsize(alpha_output) == 0
+                          or set(existing_alpha_fields) != set(alpha_fields))
 
     os.makedirs(os.path.dirname(output_csv) if os.path.dirname(output_csv) else '.', exist_ok=True)
     os.makedirs(os.path.dirname(alpha_output) if os.path.dirname(alpha_output) else '.', exist_ok=True)
 
     start_time = time.time()
+    num_depths = len(depths)
 
     for i, subset in enumerate(subsets):
         elapsed = (time.time() - start_time) / 60
@@ -1080,7 +1173,7 @@ def run_loschmidt_echo_sweep(device,
         log(f"  Qubits: {subset}", logger)
 
         subgraph = G.subgraph(subset).copy()
-        metrics = compute_architecture_metrics(subgraph)
+        metrics = subset_metrics.get(i) or compute_architecture_metrics(subgraph)
         log(f"  lambda2={metrics['lambda2']:.4f}, C={metrics['C']:.4f}", logger)
 
         if metrics['diameter'] == -1:
@@ -1090,12 +1183,12 @@ def run_loschmidt_echo_sweep(device,
         rng = random.Random(seed + i)
         depth_means: List[Tuple[int, float]] = existing_rows.get(i, []).copy()
 
-        for depth in depths:
+        for depth_idx, depth in enumerate(depths):
             if (i, depth) in completed:
                 log(f"  Depth {depth} already completed, skipping", logger)
                 continue
 
-            log(f"  Depth {depth}: running {K} instances", logger)
+            log(f"  Depth {depth} ({depth_idx+1}/{num_depths}): running {K} instances", logger)
             p_returns: List[float] = []
 
             for k in range(K):
@@ -1129,6 +1222,8 @@ def run_loschmidt_echo_sweep(device,
             row = {
                 'experiment_type': 'loschmidt_echo',
                 'device': device.name if hasattr(device, 'name') else str(device),
+                'run_id': run_id,
+                'git_commit': git_commit,
                 'subset_id': i,
                 'qubits': str(subset),
                 'N': len(subset),
@@ -1165,6 +1260,8 @@ def run_loschmidt_echo_sweep(device,
             alpha_row = {
                 'experiment_type': 'loschmidt_echo',
                 'device': device.name if hasattr(device, 'name') else str(device),
+                'run_id': run_id,
+                'git_commit': git_commit,
                 'subset_id': i,
                 'qubits': str(subset),
                 'N': len(subset),
@@ -1213,8 +1310,18 @@ def main():
     parser.add_argument('--fit-eps', type=float, default=1e-3, help='Minimum P_return to include in alpha fit')
     parser.add_argument('--alpha-output', type=str, default='results/loschmidt_echo_alpha.csv',
                         help='Output CSV for fitted alpha values (per subset)')
+    parser.add_argument('--run-id', type=str, default='', help='Run identifier to tag outputs')
+    parser.add_argument('--save_subsets', type=str, default=None,
+                        help='Save selected subsets and metrics to JSON')
+    parser.add_argument('--load_subsets', type=str, default=None,
+                        help='Load subsets/metrics from JSON instead of selecting anew')
+    parser.add_argument('--subset-max-jaccard', type=float, default=0.7,
+                        help='Max Jaccard similarity when generating diverse subsets')
+    parser.add_argument('--subset-max-attempts', type=int, default=10000,
+                        help='Max attempts for subset generation')
 
     args = parser.parse_args()
+    git_commit = get_git_commit_short()
 
     if args.depths:
         depths = [int(d) for d in args.depths.split(',')]
@@ -1230,9 +1337,14 @@ def main():
         elif args.experiment == 'compiler_fragility':
             output_path = 'results/compiler_fragility_sweep.csv'
         elif args.experiment == 'loschmidt_echo':
-            output_path = 'results/loschmidt_echo_sweep.csv'
+            if args.run_id:
+                output_path = f"results/loschmidt_echo_sweep_{args.run_id}.csv"
+            else:
+                output_path = 'results/loschmidt_echo_sweep.csv'
         else:
             output_path = 'results/rb_sweep_braket.csv'
+    if args.experiment == 'loschmidt_echo' and args.run_id and args.alpha_output == 'results/loschmidt_echo_alpha.csv':
+        args.alpha_output = f"results/loschmidt_echo_alpha_{args.run_id}.csv"
 
     # Setup logging
     os.makedirs('results', exist_ok=True)
@@ -1246,6 +1358,8 @@ def main():
     log(f"Subset size N: {args.N}", logger)
     log(f"Num subsets: {args.num_subsets}", logger)
     log(f"Experiment: {args.experiment}", logger)
+    if args.run_id:
+        log(f"Run ID: {args.run_id}", logger)
     if args.experiment == 'rb':
         log(f"Depths: {depths}", logger)
     elif args.experiment == 'logical_code':
@@ -1282,10 +1396,33 @@ def main():
 
     log(f"Graph: {G.number_of_nodes()} nodes, {G.number_of_edges()} edges", logger)
 
-    # Generate subsets
-    print(f"\nGenerating {args.num_subsets} diverse subsets of size {args.N}...")
-    subsets = generate_diverse_subsets(G, args.N, args.num_subsets, args.seed)
-    log(f"Generated {len(subsets)} subsets", logger)
+    # Generate or load subsets
+    subset_metrics: Dict[int, Dict] = {}
+    if args.load_subsets:
+        subsets, subset_metrics, subset_meta = load_subsets(args.load_subsets)
+        log(f"Loaded {len(subsets)} subsets from {args.load_subsets}", logger)
+        if subset_meta.get("N_used") and subset_meta["N_used"] != args.N:
+            log(f"WARNING: Loaded subsets size {subset_meta['N_used']} != requested N {args.N}", logger)
+    else:
+        print(f"\nGenerating {args.num_subsets} diverse subsets of size {args.N}...")
+        subsets = generate_diverse_subsets(
+            G, args.N, args.num_subsets, args.seed, args.subset_max_jaccard, args.subset_max_attempts
+        )
+        log(f"Generated {len(subsets)} subsets", logger)
+        subset_metrics = summarize_subsets(
+            subsets,
+            G,
+            device.name if hasattr(device, 'name') else str(device),
+            args.N,
+            args.seed,
+            {
+                "max_jaccard": args.subset_max_jaccard,
+                "max_attempts": args.subset_max_attempts,
+            },
+            save_path=args.save_subsets,
+        )
+        if args.save_subsets:
+            log(f"Saved subset list to {args.save_subsets}", logger)
 
     # Run chosen experiment
     log("\n" + "=" * 60, logger)
@@ -1314,7 +1451,10 @@ def main():
             args.alpha_output,
             args.fit_eps,
             logger,
-            args.resume
+            args.resume,
+            run_id=args.run_id,
+            git_commit=git_commit,
+            subset_metrics=subset_metrics if not args.load_subsets else subset_metrics
         )
     else:
         log("STARTING COMPILER FRAGILITY SWEEP", logger)
