@@ -79,6 +79,28 @@ Results are appended after each (family, N, depth) point, so you can interrupt
 a long run with Ctrl-C and later resume with `--resume 1` using the same
 arguments. Existing rows are skipped automatically.
 
+### E) Loschmidt echo experiment (AWS Braket)
+Probe dynamical irreversibility with a GHZ-based Loschmidt echo. Each subset
+prepares GHZ, applies a random brickwork unitary of depth `d`, its exact inverse,
+and unprepares GHZ; \(P_\text{return}\) tracks fidelity to \(|0...0\rangle\).
+
+Run on Rigetti (or simulator):
+```bash
+python run_rb_sweep_braket.py --experiment loschmidt_echo --N 7 --num-subsets 10 \
+    --depths 5,10,20,30 --loschmidt-K 5 --shots 1000 --simulator
+```
+
+Analyze decay vs connectivity:
+```bash
+python analyze_loschmidt_echo.py --input results/loschmidt_echo_sweep.csv \
+    --scatter results/loschmidt_alpha_vs_C.png \
+    --alpha-csv results/loschmidt_echo_alpha_fit.csv
+```
+
+The runner writes `results/loschmidt_echo_sweep.csv` incrementally (one row per
+subset/depth) plus `results/loschmidt_echo_alpha.csv` with fitted slopes
+\(\alpha_\text{echo}\) versus depth for each subset.
+
 ## What this tests
 - **Connectivity metric:** \(C = N \lambda_2\) measures how well-connected the
   architecture is (\(\lambda_2\) is the spectral gap of the normalized
