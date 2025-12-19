@@ -1,0 +1,4 @@
+phase,family,depth,mean_raw,stderr_raw,mean_mitigated,stderr_mitigated,n
+core,expander,0,1.0,0.0,1.0,0.0,6
+core,expander,1,1.0,0.0,1.0,0.0,6
+core,expander,2,1.0,0.0,1.0,0.0,6

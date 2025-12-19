@@ -1,0 +1,69 @@
+[2025-12-19 07:16:36] ============================================================
+[2025-12-19 07:16:36] AWS Braket Experiment Runner
+[2025-12-19 07:16:36] ============================================================
+[2025-12-19 07:16:36] Device: arn:aws:braket:us-west-1::device/qpu/rigetti/Ankaa-3
+[2025-12-19 07:16:36] Subset size N: 8
+[2025-12-19 07:16:36] Num subsets: 3
+[2025-12-19 07:16:36] Experiment: loschmidt_echo_interleaved
+[2025-12-19 07:16:36] Run ID: test
+[2025-12-19 07:16:36] Depths: [2, 4]
+[2025-12-19 07:16:36] K (instances per depth): 2
+[2025-12-19 07:16:36] Blocks: 1
+[2025-12-19 07:16:36] Block shuffle seed: 42
+[2025-12-19 07:16:36] Fit eps: 0.001
+[2025-12-19 07:16:36] U style: mixed
+[2025-12-19 07:16:36] Shots: 100
+[2025-12-19 07:16:36] Seed: 42
+[2025-12-19 07:16:36] Output CSV: results/test_sim.csv
+[2025-12-19 07:16:36] Resume: True
+[2025-12-19 07:16:36] Simulator: True
+[2025-12-19 07:16:36] ============================================================
+[2025-12-19 07:16:36] Using local simulator
+[2025-12-19 07:16:36] Graph: 100 nodes, 180 edges
+[2025-12-19 07:16:36] Selected 3 subsets with max-spread-C strategy
+[2025-12-19 07:16:36] 
+============================================================
+[2025-12-19 07:16:36] STARTING LOSCHMIDT ECHO INTERLEAVED
+[2025-12-19 07:16:36] ============================================================
+[2025-12-19 07:16:36] 
+Block 1/1 order: [1, 0, 2]
+[2025-12-19 07:16:36]   block 1/1, subset 1/3 (id=1), depth 1/2
+[2025-12-19 07:16:36]         P_return=1.0000, GHZ witness=1.0000
+[2025-12-19 07:16:36]     block 1/1, subset 1/3, depth 1/2, instance 1/2, rolling mean P_return=1.0000
+[2025-12-19 07:16:36]         P_return=1.0000, GHZ witness=1.0000
+[2025-12-19 07:16:36]     block 1/1, subset 1/3, depth 1/2, instance 2/2, rolling mean P_return=1.0000
+[2025-12-19 07:16:36]   Saved block 1 subset 1 depth 2 (mean_P_return=1.0000)
+[2025-12-19 07:16:36]   block 1/1, subset 1/3 (id=1), depth 2/2
+[2025-12-19 07:16:36]         P_return=1.0000, GHZ witness=1.0000
+[2025-12-19 07:16:36]     block 1/1, subset 1/3, depth 2/2, instance 1/2, rolling mean P_return=1.0000
+[2025-12-19 07:16:36]         P_return=1.0000, GHZ witness=1.0000
+[2025-12-19 07:16:36]     block 1/1, subset 1/3, depth 2/2, instance 2/2, rolling mean P_return=1.0000
+[2025-12-19 07:16:36]   Saved block 1 subset 1 depth 4 (mean_P_return=1.0000)
+[2025-12-19 07:16:36]   block 1/1, subset 2/3 (id=0), depth 1/2
+[2025-12-19 07:16:36]         P_return=1.0000, GHZ witness=1.0000
+[2025-12-19 07:16:36]     block 1/1, subset 2/3, depth 1/2, instance 1/2, rolling mean P_return=1.0000
+[2025-12-19 07:16:36]         P_return=1.0000, GHZ witness=1.0000
+[2025-12-19 07:16:36]     block 1/1, subset 2/3, depth 1/2, instance 2/2, rolling mean P_return=1.0000
+[2025-12-19 07:16:36]   Saved block 1 subset 0 depth 2 (mean_P_return=1.0000)
+[2025-12-19 07:16:36]   block 1/1, subset 2/3 (id=0), depth 2/2
+[2025-12-19 07:16:36]         P_return=1.0000, GHZ witness=1.0000
+[2025-12-19 07:16:36]     block 1/1, subset 2/3, depth 2/2, instance 1/2, rolling mean P_return=1.0000
+[2025-12-19 07:16:36]         P_return=1.0000, GHZ witness=1.0000
+[2025-12-19 07:16:36]     block 1/1, subset 2/3, depth 2/2, instance 2/2, rolling mean P_return=1.0000
+[2025-12-19 07:16:36]   Saved block 1 subset 0 depth 4 (mean_P_return=1.0000)
+[2025-12-19 07:16:36]   block 1/1, subset 3/3 (id=2), depth 1/2
+[2025-12-19 07:16:36]         P_return=1.0000, GHZ witness=1.0000
+[2025-12-19 07:16:36]     block 1/1, subset 3/3, depth 1/2, instance 1/2, rolling mean P_return=1.0000
+[2025-12-19 07:16:36]         P_return=1.0000, GHZ witness=1.0000
+[2025-12-19 07:16:36]     block 1/1, subset 3/3, depth 1/2, instance 2/2, rolling mean P_return=1.0000
+[2025-12-19 07:16:36]   Saved block 1 subset 2 depth 2 (mean_P_return=1.0000)
+[2025-12-19 07:16:36]   block 1/1, subset 3/3 (id=2), depth 2/2
+[2025-12-19 07:16:36]         P_return=1.0000, GHZ witness=1.0000
+[2025-12-19 07:16:36]     block 1/1, subset 3/3, depth 2/2, instance 1/2, rolling mean P_return=1.0000
+[2025-12-19 07:16:36]         P_return=1.0000, GHZ witness=1.0000
+[2025-12-19 07:16:36]     block 1/1, subset 3/3, depth 2/2, instance 2/2, rolling mean P_return=1.0000
+[2025-12-19 07:16:36]   Saved block 1 subset 2 depth 4 (mean_P_return=1.0000)
+[2025-12-19 07:16:36] 
+============================================================
+[2025-12-19 07:16:36] LOSCHMIDT ECHO INTERLEAVED COMPLETE in 0.0 minutes
+[2025-12-19 07:16:36] Results saved to results/test_sim.csv

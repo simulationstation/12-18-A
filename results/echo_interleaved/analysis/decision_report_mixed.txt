@@ -1,0 +1,14 @@
+Interleaved Loschmidt Echo Report
+========================================
+
+Per-block Spearman rho (alpha_echo vs C):
+  Block 1: rho=-0.2000, p_perm=0.7212, n=6
+  Block 2: rho=0.3143, p_perm=0.5734, n=6
+  Block 3: rho=0.3714, p_perm=0.485, n=6
+  Block 4: rho=-0.7143, p_perm=0.1376, n=6
+
+Stable rho sign across blocks: False
+Blocks with permutation p<0.05: []
+Block-to-block alpha similarity (Spearman): mean=-0.143, median=-0.143
+
+Verdict: C) no clear effect

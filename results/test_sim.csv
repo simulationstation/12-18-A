@@ -1,0 +1,7 @@
+experiment_type,run_id,backend,block_index,subset_id,qubits,N_requested,N_used,lambda2,C,u_style,depth,K,shots,mean_P_return,sem_P_return,timestamp,git_commit
+loschmidt_echo_interleaved,test,StateVectorSimulator,1,1,"(35, 36, 44, 45, 46, 47, 55, 56)",8,8,0.4999999999999999,3.999999999999999,mixed,2,2,100,1.0,0.0,2025-12-19T07:16:36.328793,c22d5a8
+loschmidt_echo_interleaved,test,StateVectorSimulator,1,1,"(35, 36, 44, 45, 46, 47, 55, 56)",8,8,0.4999999999999999,3.999999999999999,mixed,4,2,100,1.0,0.0,2025-12-19T07:16:36.494514,c22d5a8
+loschmidt_echo_interleaved,test,StateVectorSimulator,1,0,"(64, 74, 83, 84, 85, 93, 94, 95)",8,8,0.27771204699360175,2.221696375948814,mixed,2,2,100,1.0,0.0,2025-12-19T07:16:36.531949,c22d5a8
+loschmidt_echo_interleaved,test,StateVectorSimulator,1,0,"(64, 74, 83, 84, 85, 93, 94, 95)",8,8,0.27771204699360175,2.221696375948814,mixed,4,2,100,1.0,0.0,2025-12-19T07:16:36.592788,c22d5a8
+loschmidt_echo_interleaved,test,StateVectorSimulator,1,2,"(4, 5, 13, 14, 15, 16, 24, 25)",8,8,0.4999999999999999,3.999999999999999,mixed,2,2,100,1.0,0.0,2025-12-19T07:16:36.632614,c22d5a8
+loschmidt_echo_interleaved,test,StateVectorSimulator,1,2,"(4, 5, 13, 14, 15, 16, 24, 25)",8,8,0.4999999999999999,3.999999999999999,mixed,4,2,100,1.0,0.0,2025-12-19T07:16:36.694102,c22d5a8

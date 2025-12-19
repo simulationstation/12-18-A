@@ -1,0 +1,102 @@
+{
+  "block_index": 2,
+  "counts_cal0": {
+    "00000000": 500
+  },
+  "counts_cal1": {
+    "11111111": 500
+  },
+  "matrices": [
+    [
+      [
+        1.0,
+        0.0
+      ],
+      [
+        0.0,
+        1.0
+      ]
+    ],
+    [
+      [
+        1.0,
+        0.0
+      ],
+      [
+        0.0,
+        1.0
+      ]
+    ],
+    [
+      [
+        1.0,
+        0.0
+      ],
+      [
+        0.0,
+        1.0
+      ]
+    ],
+    [
+      [
+        1.0,
+        0.0
+      ],
+      [
+        0.0,
+        1.0
+      ]
+    ],
+    [
+      [
+        1.0,
+        0.0
+      ],
+      [
+        0.0,
+        1.0
+      ]
+    ],
+    [
+      [
+        1.0,
+        0.0
+      ],
+      [
+        0.0,
+        1.0
+      ]
+    ],
+    [
+      [
+        1.0,
+        0.0
+      ],
+      [
+        0.0,
+        1.0
+      ]
+    ],
+    [
+      [
+        1.0,
+        0.0
+      ],
+      [
+        0.0,
+        1.0
+      ]
+    ]
+  ],
+  "shots": 500,
+  "device": {
+    "device_arn": "local",
+    "device_name": "StateVectorSimulator",
+    "provider": "local"
+  },
+  "method": "independent per-qubit confusion; mitigated p0 via clipped true-zero estimate product",
+  "hash": "ddf6c1eb953d4db1b47fb9d22538bc244ed16956c47dd39001182ba32f2b8fa0",
+  "timestamp_utc": "2025-12-19T18:47:11.332353",
+  "compilation_mode_cal0": "standard",
+  "compilation_mode_cal1": "standard"
+}

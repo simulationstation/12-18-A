@@ -1,0 +1,23 @@
+{
+  "mean_mitigated": {
+    "0": 1.0,
+    "1": 1.0,
+    "2": 1.0
+  },
+  "stderr_mitigated": {
+    "0": 0.0,
+    "1": 0.0,
+    "2": 0.0
+  },
+  "depths_requested": [
+    0,
+    1,
+    2
+  ],
+  "criterion_diff_pass": false,
+  "criterion_slope_pass": false,
+  "delta_2_vs_16": null,
+  "slope": 0.0,
+  "slope_p_value": NaN,
+  "proceed_to_sweep": false
+}

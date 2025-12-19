@@ -1,0 +1,808 @@
+[2025-12-18 19:22:58] ============================================================
+[2025-12-18 19:22:58] AWS Braket Experiment Runner
+[2025-12-18 19:22:58] ============================================================
+[2025-12-18 19:22:58] Device: arn:aws:braket:us-west-1::device/qpu/rigetti/Ankaa-3
+[2025-12-18 19:22:58] Subset size N: 11
+[2025-12-18 19:22:58] Num subsets: 6
+[2025-12-18 19:22:58] Experiment: loschmidt_echo_interleaved
+[2025-12-18 19:22:58] Run ID: interleaved_N11_mixed
+[2025-12-18 19:22:58] Depths: [3, 5, 7, 9]
+[2025-12-18 19:22:58] K (instances per depth): 3
+[2025-12-18 19:22:58] Blocks: 4
+[2025-12-18 19:22:58] Block shuffle seed: 123
+[2025-12-18 19:22:58] Fit eps: 0.001
+[2025-12-18 19:22:58] U style: mixed
+[2025-12-18 19:22:58] Shots: 2000
+[2025-12-18 19:22:58] Seed: 123
+[2025-12-18 19:22:58] Output CSV: results/echo_interleaved/mixed/echo_interleaved.csv
+[2025-12-18 19:22:58] Resume: True
+[2025-12-18 19:22:58] Simulator: False
+[2025-12-18 19:22:58] ============================================================
+[2025-12-18 19:23:00] Device: Ankaa-3, Status: ONLINE
+[2025-12-18 19:23:00] Graph: 80 nodes, 136 edges
+[2025-12-18 19:23:00] Selected 6 subsets with max-spread-C strategy
+[2025-12-18 19:23:00] Saved subset list to results/echo_interleaved/subsets_N11.json
+[2025-12-18 19:23:00] 
+============================================================
+[2025-12-18 19:23:00] STARTING LOSCHMIDT ECHO INTERLEAVED
+[2025-12-18 19:23:00] ============================================================
+[2025-12-18 19:23:00] 
+Block 1/4 order: [3, 4, 1, 5, 2, 0]
+[2025-12-18 19:23:00]   block 1/4, subset 1/6 (id=3), depth 1/4
+[2025-12-18 19:23:07]         P_return=0.8140, GHZ witness=0.8140
+[2025-12-18 19:23:07]     block 1/4, subset 1/6, depth 1/4, instance 1/3, rolling mean P_return=0.8140
+[2025-12-18 19:23:11]         P_return=0.8140, GHZ witness=0.8140
+[2025-12-18 19:23:11]     block 1/4, subset 1/6, depth 1/4, instance 2/3, rolling mean P_return=0.8140
+[2025-12-18 19:23:12]         P_return=0.8130, GHZ witness=0.8130
+[2025-12-18 19:23:12]     block 1/4, subset 1/6, depth 1/4, instance 3/3, rolling mean P_return=0.8137
+[2025-12-18 19:23:12]   Saved block 1 subset 3 depth 3 (mean_P_return=0.8137)
+[2025-12-18 19:23:12]   block 1/4, subset 1/6 (id=3), depth 2/4
+[2025-12-18 19:23:16]         P_return=0.7990, GHZ witness=0.7990
+[2025-12-18 19:23:16]     block 1/4, subset 1/6, depth 2/4, instance 1/3, rolling mean P_return=0.7990
+[2025-12-18 19:23:19]         P_return=0.8190, GHZ witness=0.8190
+[2025-12-18 19:23:19]     block 1/4, subset 1/6, depth 2/4, instance 2/3, rolling mean P_return=0.8090
+[2025-12-18 19:23:23]         P_return=0.7980, GHZ witness=0.7980
+[2025-12-18 19:23:23]     block 1/4, subset 1/6, depth 2/4, instance 3/3, rolling mean P_return=0.8053
+[2025-12-18 19:23:23]   Saved block 1 subset 3 depth 5 (mean_P_return=0.8053)
+[2025-12-18 19:23:23]   block 1/4, subset 1/6 (id=3), depth 3/4
+[2025-12-18 19:23:29]         P_return=0.8110, GHZ witness=0.8110
+[2025-12-18 19:23:29]     block 1/4, subset 1/6, depth 3/4, instance 1/3, rolling mean P_return=0.8110
+[2025-12-18 19:23:32]         P_return=0.8175, GHZ witness=0.8175
+[2025-12-18 19:23:32]     block 1/4, subset 1/6, depth 3/4, instance 2/3, rolling mean P_return=0.8143
+[2025-12-18 19:23:36]         P_return=0.8160, GHZ witness=0.8160
+[2025-12-18 19:23:36]     block 1/4, subset 1/6, depth 3/4, instance 3/3, rolling mean P_return=0.8148
+[2025-12-18 19:23:36]   Saved block 1 subset 3 depth 7 (mean_P_return=0.8148)
+[2025-12-18 19:23:36]   block 1/4, subset 1/6 (id=3), depth 4/4
+[2025-12-18 19:23:40]         P_return=0.8050, GHZ witness=0.8050
+[2025-12-18 19:23:40]     block 1/4, subset 1/6, depth 4/4, instance 1/3, rolling mean P_return=0.8050
+[2025-12-18 19:23:42]         P_return=0.8230, GHZ witness=0.8230
+[2025-12-18 19:23:42]     block 1/4, subset 1/6, depth 4/4, instance 2/3, rolling mean P_return=0.8140
+[2025-12-18 19:23:46]         P_return=0.8110, GHZ witness=0.8110
+[2025-12-18 19:23:46]     block 1/4, subset 1/6, depth 4/4, instance 3/3, rolling mean P_return=0.8130
+[2025-12-18 19:23:46]   Saved block 1 subset 3 depth 9 (mean_P_return=0.8130)
+[2025-12-18 19:23:46]   block 1/4, subset 2/6 (id=4), depth 1/4
+[2025-12-18 19:23:49]         P_return=0.7055, GHZ witness=0.7055
+[2025-12-18 19:23:49]     block 1/4, subset 2/6, depth 1/4, instance 1/3, rolling mean P_return=0.7055
+[2025-12-18 19:23:52]         P_return=0.7315, GHZ witness=0.7315
+[2025-12-18 19:23:52]     block 1/4, subset 2/6, depth 1/4, instance 2/3, rolling mean P_return=0.7185
+[2025-12-18 19:23:56]         P_return=0.7320, GHZ witness=0.7320
+[2025-12-18 19:23:56]     block 1/4, subset 2/6, depth 1/4, instance 3/3, rolling mean P_return=0.7230
+[2025-12-18 19:23:56]   Saved block 1 subset 4 depth 3 (mean_P_return=0.7230)
+[2025-12-18 19:23:56]   block 1/4, subset 2/6 (id=4), depth 2/4
+[2025-12-18 19:23:59]         P_return=0.7250, GHZ witness=0.7250
+[2025-12-18 19:23:59]     block 1/4, subset 2/6, depth 2/4, instance 1/3, rolling mean P_return=0.7250
+[2025-12-18 19:24:03]         P_return=0.7210, GHZ witness=0.7210
+[2025-12-18 19:24:03]     block 1/4, subset 2/6, depth 2/4, instance 2/3, rolling mean P_return=0.7230
+[2025-12-18 19:24:06]         P_return=0.7025, GHZ witness=0.7025
+[2025-12-18 19:24:06]     block 1/4, subset 2/6, depth 2/4, instance 3/3, rolling mean P_return=0.7162
+[2025-12-18 19:24:06]   Saved block 1 subset 4 depth 5 (mean_P_return=0.7162)
+[2025-12-18 19:24:06]   block 1/4, subset 2/6 (id=4), depth 3/4
+[2025-12-18 19:24:10]         P_return=0.7295, GHZ witness=0.7295
+[2025-12-18 19:24:10]     block 1/4, subset 2/6, depth 3/4, instance 1/3, rolling mean P_return=0.7295
+[2025-12-18 19:24:11]         P_return=0.7260, GHZ witness=0.7260
+[2025-12-18 19:24:11]     block 1/4, subset 2/6, depth 3/4, instance 2/3, rolling mean P_return=0.7278
+[2025-12-18 19:24:15]         P_return=0.7095, GHZ witness=0.7095
+[2025-12-18 19:24:15]     block 1/4, subset 2/6, depth 3/4, instance 3/3, rolling mean P_return=0.7217
+[2025-12-18 19:24:15]   Saved block 1 subset 4 depth 7 (mean_P_return=0.7217)
+[2025-12-18 19:24:15]   block 1/4, subset 2/6 (id=4), depth 4/4
+[2025-12-18 19:24:20]         P_return=0.7110, GHZ witness=0.7110
+[2025-12-18 19:24:20]     block 1/4, subset 2/6, depth 4/4, instance 1/3, rolling mean P_return=0.7110
+[2025-12-18 19:24:24]         P_return=0.6880, GHZ witness=0.6880
+[2025-12-18 19:24:24]     block 1/4, subset 2/6, depth 4/4, instance 2/3, rolling mean P_return=0.6995
+[2025-12-18 19:24:28]         P_return=0.7155, GHZ witness=0.7155
+[2025-12-18 19:24:28]     block 1/4, subset 2/6, depth 4/4, instance 3/3, rolling mean P_return=0.7048
+[2025-12-18 19:24:28]   Saved block 1 subset 4 depth 9 (mean_P_return=0.7048)
+[2025-12-18 19:24:28]   block 1/4, subset 3/6 (id=1), depth 1/4
+[2025-12-18 19:24:32]         P_return=0.8330, GHZ witness=0.8330
+[2025-12-18 19:24:32]     block 1/4, subset 3/6, depth 1/4, instance 1/3, rolling mean P_return=0.8330
+[2025-12-18 19:24:35]         P_return=0.8510, GHZ witness=0.8510
+[2025-12-18 19:24:35]     block 1/4, subset 3/6, depth 1/4, instance 2/3, rolling mean P_return=0.8420
+[2025-12-18 19:24:38]         P_return=0.8435, GHZ witness=0.8435
+[2025-12-18 19:24:38]     block 1/4, subset 3/6, depth 1/4, instance 3/3, rolling mean P_return=0.8425
+[2025-12-18 19:24:38]   Saved block 1 subset 1 depth 3 (mean_P_return=0.8425)
+[2025-12-18 19:24:38]   block 1/4, subset 3/6 (id=1), depth 2/4
+[2025-12-18 19:24:42]         P_return=0.8640, GHZ witness=0.8640
+[2025-12-18 19:24:42]     block 1/4, subset 3/6, depth 2/4, instance 1/3, rolling mean P_return=0.8640
+[2025-12-18 19:24:43]         P_return=0.8350, GHZ witness=0.8350
+[2025-12-18 19:24:43]     block 1/4, subset 3/6, depth 2/4, instance 2/3, rolling mean P_return=0.8495
+[2025-12-18 19:24:47]         P_return=0.8355, GHZ witness=0.8355
+[2025-12-18 19:24:47]     block 1/4, subset 3/6, depth 2/4, instance 3/3, rolling mean P_return=0.8448
+[2025-12-18 19:24:47]   Saved block 1 subset 1 depth 5 (mean_P_return=0.8448)
+[2025-12-18 19:24:47]   block 1/4, subset 3/6 (id=1), depth 3/4
+[2025-12-18 19:24:50]         P_return=0.8150, GHZ witness=0.8150
+[2025-12-18 19:24:50]     block 1/4, subset 3/6, depth 3/4, instance 1/3, rolling mean P_return=0.8150
+[2025-12-18 19:24:54]         P_return=0.8290, GHZ witness=0.8290
+[2025-12-18 19:24:54]     block 1/4, subset 3/6, depth 3/4, instance 2/3, rolling mean P_return=0.8220
+[2025-12-18 19:24:58]         P_return=0.8450, GHZ witness=0.8450
+[2025-12-18 19:24:58]     block 1/4, subset 3/6, depth 3/4, instance 3/3, rolling mean P_return=0.8297
+[2025-12-18 19:24:58]   Saved block 1 subset 1 depth 7 (mean_P_return=0.8297)
+[2025-12-18 19:24:58]   block 1/4, subset 3/6 (id=1), depth 4/4
+[2025-12-18 19:25:02]         P_return=0.8420, GHZ witness=0.8420
+[2025-12-18 19:25:02]     block 1/4, subset 3/6, depth 4/4, instance 1/3, rolling mean P_return=0.8420
+[2025-12-18 19:25:05]         P_return=0.8225, GHZ witness=0.8225
+[2025-12-18 19:25:05]     block 1/4, subset 3/6, depth 4/4, instance 2/3, rolling mean P_return=0.8322
+[2025-12-18 19:25:09]         P_return=0.8565, GHZ witness=0.8565
+[2025-12-18 19:25:09]     block 1/4, subset 3/6, depth 4/4, instance 3/3, rolling mean P_return=0.8403
+[2025-12-18 19:25:09]   Saved block 1 subset 1 depth 9 (mean_P_return=0.8403)
+[2025-12-18 19:25:09]   block 1/4, subset 4/6 (id=5), depth 1/4
+[2025-12-18 19:25:13]         P_return=0.8300, GHZ witness=0.8300
+[2025-12-18 19:25:13]     block 1/4, subset 4/6, depth 1/4, instance 1/3, rolling mean P_return=0.8300
+[2025-12-18 19:25:14]         P_return=0.8320, GHZ witness=0.8320
+[2025-12-18 19:25:14]     block 1/4, subset 4/6, depth 1/4, instance 2/3, rolling mean P_return=0.8310
+[2025-12-18 19:25:17]         P_return=0.8065, GHZ witness=0.8065
+[2025-12-18 19:25:17]     block 1/4, subset 4/6, depth 1/4, instance 3/3, rolling mean P_return=0.8228
+[2025-12-18 19:25:17]   Saved block 1 subset 5 depth 3 (mean_P_return=0.8228)
+[2025-12-18 19:25:17]   block 1/4, subset 4/6 (id=5), depth 2/4
+[2025-12-18 19:25:21]         P_return=0.8440, GHZ witness=0.8440
+[2025-12-18 19:25:21]     block 1/4, subset 4/6, depth 2/4, instance 1/3, rolling mean P_return=0.8440
+[2025-12-18 19:25:25]         P_return=0.8205, GHZ witness=0.8205
+[2025-12-18 19:25:25]     block 1/4, subset 4/6, depth 2/4, instance 2/3, rolling mean P_return=0.8322
+[2025-12-18 19:25:28]         P_return=0.8235, GHZ witness=0.8235
+[2025-12-18 19:25:28]     block 1/4, subset 4/6, depth 2/4, instance 3/3, rolling mean P_return=0.8293
+[2025-12-18 19:25:28]   Saved block 1 subset 5 depth 5 (mean_P_return=0.8293)
+[2025-12-18 19:25:28]   block 1/4, subset 4/6 (id=5), depth 3/4
+[2025-12-18 19:25:34]         P_return=0.8275, GHZ witness=0.8275
+[2025-12-18 19:25:34]     block 1/4, subset 4/6, depth 3/4, instance 1/3, rolling mean P_return=0.8275
+[2025-12-18 19:25:37]         P_return=0.8235, GHZ witness=0.8235
+[2025-12-18 19:25:37]     block 1/4, subset 4/6, depth 3/4, instance 2/3, rolling mean P_return=0.8255
+[2025-12-18 19:25:40]         P_return=0.8245, GHZ witness=0.8245
+[2025-12-18 19:25:40]     block 1/4, subset 4/6, depth 3/4, instance 3/3, rolling mean P_return=0.8252
+[2025-12-18 19:25:40]   Saved block 1 subset 5 depth 7 (mean_P_return=0.8252)
+[2025-12-18 19:25:40]   block 1/4, subset 4/6 (id=5), depth 4/4
+[2025-12-18 19:25:42]         P_return=0.8230, GHZ witness=0.8230
+[2025-12-18 19:25:42]     block 1/4, subset 4/6, depth 4/4, instance 1/3, rolling mean P_return=0.8230
+[2025-12-18 19:25:46]         P_return=0.7960, GHZ witness=0.7960
+[2025-12-18 19:25:46]     block 1/4, subset 4/6, depth 4/4, instance 2/3, rolling mean P_return=0.8095
+[2025-12-18 19:25:49]         P_return=0.8130, GHZ witness=0.8130
+[2025-12-18 19:25:49]     block 1/4, subset 4/6, depth 4/4, instance 3/3, rolling mean P_return=0.8107
+[2025-12-18 19:25:49]   Saved block 1 subset 5 depth 9 (mean_P_return=0.8107)
+[2025-12-18 19:25:49]   block 1/4, subset 5/6 (id=2), depth 1/4
+[2025-12-18 19:25:53]         P_return=0.3405, GHZ witness=0.3405
+[2025-12-18 19:25:53]     block 1/4, subset 5/6, depth 1/4, instance 1/3, rolling mean P_return=0.3405
+[2025-12-18 19:25:56]         P_return=0.3125, GHZ witness=0.3125
+[2025-12-18 19:25:56]     block 1/4, subset 5/6, depth 1/4, instance 2/3, rolling mean P_return=0.3265
+[2025-12-18 19:25:59]         P_return=0.3180, GHZ witness=0.3180
+[2025-12-18 19:25:59]     block 1/4, subset 5/6, depth 1/4, instance 3/3, rolling mean P_return=0.3237
+[2025-12-18 19:25:59]   Saved block 1 subset 2 depth 3 (mean_P_return=0.3237)
+[2025-12-18 19:25:59]   block 1/4, subset 5/6 (id=2), depth 2/4
+[2025-12-18 19:26:03]         P_return=0.3360, GHZ witness=0.3360
+[2025-12-18 19:26:03]     block 1/4, subset 5/6, depth 2/4, instance 1/3, rolling mean P_return=0.3360
+[2025-12-18 19:26:07]         P_return=0.3270, GHZ witness=0.3270
+[2025-12-18 19:26:07]     block 1/4, subset 5/6, depth 2/4, instance 2/3, rolling mean P_return=0.3315
+[2025-12-18 19:26:10]         P_return=0.3300, GHZ witness=0.3300
+[2025-12-18 19:26:10]     block 1/4, subset 5/6, depth 2/4, instance 3/3, rolling mean P_return=0.3310
+[2025-12-18 19:26:10]   Saved block 1 subset 2 depth 5 (mean_P_return=0.3310)
+[2025-12-18 19:26:10]   block 1/4, subset 5/6 (id=2), depth 3/4
+[2025-12-18 19:26:12]         P_return=0.3250, GHZ witness=0.3250
+[2025-12-18 19:26:12]     block 1/4, subset 5/6, depth 3/4, instance 1/3, rolling mean P_return=0.3250
+[2025-12-18 19:26:17]         P_return=0.3180, GHZ witness=0.3180
+[2025-12-18 19:26:17]     block 1/4, subset 5/6, depth 3/4, instance 2/3, rolling mean P_return=0.3215
+[2025-12-18 19:26:21]         P_return=0.3315, GHZ witness=0.3315
+[2025-12-18 19:26:21]     block 1/4, subset 5/6, depth 3/4, instance 3/3, rolling mean P_return=0.3248
+[2025-12-18 19:26:21]   Saved block 1 subset 2 depth 7 (mean_P_return=0.3248)
+[2025-12-18 19:26:21]   block 1/4, subset 5/6 (id=2), depth 4/4
+[2025-12-18 19:26:25]         P_return=0.3085, GHZ witness=0.3085
+[2025-12-18 19:26:25]     block 1/4, subset 5/6, depth 4/4, instance 1/3, rolling mean P_return=0.3085
+[2025-12-18 19:26:29]         P_return=0.3180, GHZ witness=0.3180
+[2025-12-18 19:26:29]     block 1/4, subset 5/6, depth 4/4, instance 2/3, rolling mean P_return=0.3133
+[2025-12-18 19:26:33]         P_return=0.3040, GHZ witness=0.3040
+[2025-12-18 19:26:33]     block 1/4, subset 5/6, depth 4/4, instance 3/3, rolling mean P_return=0.3102
+[2025-12-18 19:26:33]   Saved block 1 subset 2 depth 9 (mean_P_return=0.3102)
+[2025-12-18 19:26:33]   block 1/4, subset 6/6 (id=0), depth 1/4
+[2025-12-18 19:26:36]         P_return=0.8230, GHZ witness=0.8230
+[2025-12-18 19:26:36]     block 1/4, subset 6/6, depth 1/4, instance 1/3, rolling mean P_return=0.8230
+[2025-12-18 19:26:40]         P_return=0.8290, GHZ witness=0.8290
+[2025-12-18 19:26:40]     block 1/4, subset 6/6, depth 1/4, instance 2/3, rolling mean P_return=0.8260
+[2025-12-18 19:26:43]         P_return=0.7945, GHZ witness=0.7945
+[2025-12-18 19:26:43]     block 1/4, subset 6/6, depth 1/4, instance 3/3, rolling mean P_return=0.8155
+[2025-12-18 19:26:43]   Saved block 1 subset 0 depth 3 (mean_P_return=0.8155)
+[2025-12-18 19:26:43]   block 1/4, subset 6/6 (id=0), depth 2/4
+[2025-12-18 19:26:44]         P_return=0.8295, GHZ witness=0.8295
+[2025-12-18 19:26:44]     block 1/4, subset 6/6, depth 2/4, instance 1/3, rolling mean P_return=0.8295
+[2025-12-18 19:26:48]         P_return=0.8160, GHZ witness=0.8160
+[2025-12-18 19:26:48]     block 1/4, subset 6/6, depth 2/4, instance 2/3, rolling mean P_return=0.8227
+[2025-12-18 19:26:51]         P_return=0.8280, GHZ witness=0.8280
+[2025-12-18 19:26:51]     block 1/4, subset 6/6, depth 2/4, instance 3/3, rolling mean P_return=0.8245
+[2025-12-18 19:26:51]   Saved block 1 subset 0 depth 5 (mean_P_return=0.8245)
+[2025-12-18 19:26:51]   block 1/4, subset 6/6 (id=0), depth 3/4
+[2025-12-18 19:26:55]         P_return=0.8255, GHZ witness=0.8255
+[2025-12-18 19:26:55]     block 1/4, subset 6/6, depth 3/4, instance 1/3, rolling mean P_return=0.8255
+[2025-12-18 19:26:58]         P_return=0.8250, GHZ witness=0.8250
+[2025-12-18 19:26:58]     block 1/4, subset 6/6, depth 3/4, instance 2/3, rolling mean P_return=0.8253
+[2025-12-18 19:27:02]         P_return=0.8015, GHZ witness=0.8015
+[2025-12-18 19:27:02]     block 1/4, subset 6/6, depth 3/4, instance 3/3, rolling mean P_return=0.8173
+[2025-12-18 19:27:02]   Saved block 1 subset 0 depth 7 (mean_P_return=0.8173)
+[2025-12-18 19:27:02]   block 1/4, subset 6/6 (id=0), depth 4/4
+[2025-12-18 19:27:07]         P_return=0.8130, GHZ witness=0.8130
+[2025-12-18 19:27:07]     block 1/4, subset 6/6, depth 4/4, instance 1/3, rolling mean P_return=0.8130
+[2025-12-18 19:27:12]         P_return=0.8245, GHZ witness=0.8245
+[2025-12-18 19:27:12]     block 1/4, subset 6/6, depth 4/4, instance 2/3, rolling mean P_return=0.8187
+[2025-12-18 19:27:14]         P_return=0.8000, GHZ witness=0.8000
+[2025-12-18 19:27:14]     block 1/4, subset 6/6, depth 4/4, instance 3/3, rolling mean P_return=0.8125
+[2025-12-18 19:27:14]   Saved block 1 subset 0 depth 9 (mean_P_return=0.8125)
+[2025-12-18 19:27:14] 
+Block 2/4 order: [1, 5, 3, 0, 4, 2]
+[2025-12-18 19:27:14]   block 2/4, subset 1/6 (id=1), depth 1/4
+[2025-12-18 19:27:17]         P_return=0.8660, GHZ witness=0.8660
+[2025-12-18 19:27:17]     block 2/4, subset 1/6, depth 1/4, instance 1/3, rolling mean P_return=0.8660
+[2025-12-18 19:27:21]         P_return=0.8810, GHZ witness=0.8810
+[2025-12-18 19:27:21]     block 2/4, subset 1/6, depth 1/4, instance 2/3, rolling mean P_return=0.8735
+[2025-12-18 19:27:24]         P_return=0.8715, GHZ witness=0.8715
+[2025-12-18 19:27:24]     block 2/4, subset 1/6, depth 1/4, instance 3/3, rolling mean P_return=0.8728
+[2025-12-18 19:27:24]   Saved block 2 subset 1 depth 3 (mean_P_return=0.8728)
+[2025-12-18 19:27:24]   block 2/4, subset 1/6 (id=1), depth 2/4
+[2025-12-18 19:27:28]         P_return=0.8770, GHZ witness=0.8770
+[2025-12-18 19:27:28]     block 2/4, subset 1/6, depth 2/4, instance 1/3, rolling mean P_return=0.8770
+[2025-12-18 19:27:31]         P_return=0.8655, GHZ witness=0.8655
+[2025-12-18 19:27:31]     block 2/4, subset 1/6, depth 2/4, instance 2/3, rolling mean P_return=0.8713
+[2025-12-18 19:27:35]         P_return=0.8705, GHZ witness=0.8705
+[2025-12-18 19:27:35]     block 2/4, subset 1/6, depth 2/4, instance 3/3, rolling mean P_return=0.8710
+[2025-12-18 19:27:35]   Saved block 2 subset 1 depth 5 (mean_P_return=0.8710)
+[2025-12-18 19:27:35]   block 2/4, subset 1/6 (id=1), depth 3/4
+[2025-12-18 19:27:38]         P_return=0.8630, GHZ witness=0.8630
+[2025-12-18 19:27:38]     block 2/4, subset 1/6, depth 3/4, instance 1/3, rolling mean P_return=0.8630
+[2025-12-18 19:27:42]         P_return=0.8815, GHZ witness=0.8815
+[2025-12-18 19:27:42]     block 2/4, subset 1/6, depth 3/4, instance 2/3, rolling mean P_return=0.8722
+[2025-12-18 19:27:44]         P_return=0.8595, GHZ witness=0.8595
+[2025-12-18 19:27:44]     block 2/4, subset 1/6, depth 3/4, instance 3/3, rolling mean P_return=0.8680
+[2025-12-18 19:27:44]   Saved block 2 subset 1 depth 7 (mean_P_return=0.8680)
+[2025-12-18 19:27:44]   block 2/4, subset 1/6 (id=1), depth 4/4
+[2025-12-18 19:27:47]         P_return=0.8740, GHZ witness=0.8740
+[2025-12-18 19:27:47]     block 2/4, subset 1/6, depth 4/4, instance 1/3, rolling mean P_return=0.8740
+[2025-12-18 19:27:51]         P_return=0.8655, GHZ witness=0.8655
+[2025-12-18 19:27:51]     block 2/4, subset 1/6, depth 4/4, instance 2/3, rolling mean P_return=0.8698
+[2025-12-18 19:27:55]         P_return=0.8655, GHZ witness=0.8655
+[2025-12-18 19:27:55]     block 2/4, subset 1/6, depth 4/4, instance 3/3, rolling mean P_return=0.8683
+[2025-12-18 19:27:55]   Saved block 2 subset 1 depth 9 (mean_P_return=0.8683)
+[2025-12-18 19:27:55]   block 2/4, subset 2/6 (id=5), depth 1/4
+[2025-12-18 19:27:58]         P_return=0.8225, GHZ witness=0.8225
+[2025-12-18 19:27:58]     block 2/4, subset 2/6, depth 1/4, instance 1/3, rolling mean P_return=0.8225
+[2025-12-18 19:28:02]         P_return=0.8420, GHZ witness=0.8420
+[2025-12-18 19:28:02]     block 2/4, subset 2/6, depth 1/4, instance 2/3, rolling mean P_return=0.8322
+[2025-12-18 19:28:05]         P_return=0.8165, GHZ witness=0.8165
+[2025-12-18 19:28:05]     block 2/4, subset 2/6, depth 1/4, instance 3/3, rolling mean P_return=0.8270
+[2025-12-18 19:28:05]   Saved block 2 subset 5 depth 3 (mean_P_return=0.8270)
+[2025-12-18 19:28:05]   block 2/4, subset 2/6 (id=5), depth 2/4
+[2025-12-18 19:28:09]         P_return=0.8440, GHZ witness=0.8440
+[2025-12-18 19:28:09]     block 2/4, subset 2/6, depth 2/4, instance 1/3, rolling mean P_return=0.8440
+[2025-12-18 19:28:14]         P_return=0.8345, GHZ witness=0.8345
+[2025-12-18 19:28:14]     block 2/4, subset 2/6, depth 2/4, instance 2/3, rolling mean P_return=0.8393
+[2025-12-18 19:28:15]         P_return=0.8440, GHZ witness=0.8440
+[2025-12-18 19:28:15]     block 2/4, subset 2/6, depth 2/4, instance 3/3, rolling mean P_return=0.8408
+[2025-12-18 19:28:15]   Saved block 2 subset 5 depth 5 (mean_P_return=0.8408)
+[2025-12-18 19:28:15]   block 2/4, subset 2/6 (id=5), depth 3/4
+[2025-12-18 19:28:20]         P_return=0.8505, GHZ witness=0.8505
+[2025-12-18 19:28:20]     block 2/4, subset 2/6, depth 3/4, instance 1/3, rolling mean P_return=0.8505
+[2025-12-18 19:28:23]         P_return=0.8425, GHZ witness=0.8425
+[2025-12-18 19:28:23]     block 2/4, subset 2/6, depth 3/4, instance 2/3, rolling mean P_return=0.8465
+[2025-12-18 19:28:27]         P_return=0.8465, GHZ witness=0.8465
+[2025-12-18 19:28:27]     block 2/4, subset 2/6, depth 3/4, instance 3/3, rolling mean P_return=0.8465
+[2025-12-18 19:28:27]   Saved block 2 subset 5 depth 7 (mean_P_return=0.8465)
+[2025-12-18 19:28:27]   block 2/4, subset 2/6 (id=5), depth 4/4
+[2025-12-18 19:28:31]         P_return=0.8260, GHZ witness=0.8260
+[2025-12-18 19:28:31]     block 2/4, subset 2/6, depth 4/4, instance 1/3, rolling mean P_return=0.8260
+[2025-12-18 19:28:35]         P_return=0.8345, GHZ witness=0.8345
+[2025-12-18 19:28:35]     block 2/4, subset 2/6, depth 4/4, instance 2/3, rolling mean P_return=0.8302
+[2025-12-18 19:28:39]         P_return=0.8310, GHZ witness=0.8310
+[2025-12-18 19:28:39]     block 2/4, subset 2/6, depth 4/4, instance 3/3, rolling mean P_return=0.8305
+[2025-12-18 19:28:39]   Saved block 2 subset 5 depth 9 (mean_P_return=0.8305)
+[2025-12-18 19:28:39]   block 2/4, subset 3/6 (id=3), depth 1/4
+[2025-12-18 19:28:42]         P_return=0.8125, GHZ witness=0.8125
+[2025-12-18 19:28:42]     block 2/4, subset 3/6, depth 1/4, instance 1/3, rolling mean P_return=0.8125
+[2025-12-18 19:28:43]         P_return=0.8275, GHZ witness=0.8275
+[2025-12-18 19:28:43]     block 2/4, subset 3/6, depth 1/4, instance 2/3, rolling mean P_return=0.8200
+[2025-12-18 19:28:46]         P_return=0.8160, GHZ witness=0.8160
+[2025-12-18 19:28:46]     block 2/4, subset 3/6, depth 1/4, instance 3/3, rolling mean P_return=0.8187
+[2025-12-18 19:28:46]   Saved block 2 subset 3 depth 3 (mean_P_return=0.8187)
+[2025-12-18 19:28:46]   block 2/4, subset 3/6 (id=3), depth 2/4
+[2025-12-18 19:28:50]         P_return=0.8065, GHZ witness=0.8065
+[2025-12-18 19:28:50]     block 2/4, subset 3/6, depth 2/4, instance 1/3, rolling mean P_return=0.8065
+[2025-12-18 19:28:53]         P_return=0.8190, GHZ witness=0.8190
+[2025-12-18 19:28:53]     block 2/4, subset 3/6, depth 2/4, instance 2/3, rolling mean P_return=0.8127
+[2025-12-18 19:28:56]         P_return=0.8180, GHZ witness=0.8180
+[2025-12-18 19:28:56]     block 2/4, subset 3/6, depth 2/4, instance 3/3, rolling mean P_return=0.8145
+[2025-12-18 19:28:56]   Saved block 2 subset 3 depth 5 (mean_P_return=0.8145)
+[2025-12-18 19:28:56]   block 2/4, subset 3/6 (id=3), depth 3/4
+[2025-12-18 19:29:00]         P_return=0.8140, GHZ witness=0.8140
+[2025-12-18 19:29:00]     block 2/4, subset 3/6, depth 3/4, instance 1/3, rolling mean P_return=0.8140
+[2025-12-18 19:29:04]         P_return=0.8060, GHZ witness=0.8060
+[2025-12-18 19:29:04]     block 2/4, subset 3/6, depth 3/4, instance 2/3, rolling mean P_return=0.8100
+[2025-12-18 19:29:07]         P_return=0.8245, GHZ witness=0.8245
+[2025-12-18 19:29:07]     block 2/4, subset 3/6, depth 3/4, instance 3/3, rolling mean P_return=0.8148
+[2025-12-18 19:29:07]   Saved block 2 subset 3 depth 7 (mean_P_return=0.8148)
+[2025-12-18 19:29:07]   block 2/4, subset 3/6 (id=3), depth 4/4
+[2025-12-18 19:29:11]         P_return=0.8130, GHZ witness=0.8130
+[2025-12-18 19:29:11]     block 2/4, subset 3/6, depth 4/4, instance 1/3, rolling mean P_return=0.8130
+[2025-12-18 19:29:13]         P_return=0.8210, GHZ witness=0.8210
+[2025-12-18 19:29:13]     block 2/4, subset 3/6, depth 4/4, instance 2/3, rolling mean P_return=0.8170
+[2025-12-18 19:29:17]         P_return=0.8195, GHZ witness=0.8195
+[2025-12-18 19:29:17]     block 2/4, subset 3/6, depth 4/4, instance 3/3, rolling mean P_return=0.8178
+[2025-12-18 19:29:17]   Saved block 2 subset 3 depth 9 (mean_P_return=0.8178)
+[2025-12-18 19:29:17]   block 2/4, subset 4/6 (id=0), depth 1/4
+[2025-12-18 19:29:21]         P_return=0.8205, GHZ witness=0.8205
+[2025-12-18 19:29:21]     block 2/4, subset 4/6, depth 1/4, instance 1/3, rolling mean P_return=0.8205
+[2025-12-18 19:29:25]         P_return=0.8105, GHZ witness=0.8105
+[2025-12-18 19:29:25]     block 2/4, subset 4/6, depth 1/4, instance 2/3, rolling mean P_return=0.8155
+[2025-12-18 19:29:28]         P_return=0.8050, GHZ witness=0.8050
+[2025-12-18 19:29:28]     block 2/4, subset 4/6, depth 1/4, instance 3/3, rolling mean P_return=0.8120
+[2025-12-18 19:29:28]   Saved block 2 subset 0 depth 3 (mean_P_return=0.8120)
+[2025-12-18 19:29:28]   block 2/4, subset 4/6 (id=0), depth 2/4
+[2025-12-18 19:29:31]         P_return=0.8080, GHZ witness=0.8080
+[2025-12-18 19:29:31]     block 2/4, subset 4/6, depth 2/4, instance 1/3, rolling mean P_return=0.8080
+[2025-12-18 19:29:34]         P_return=0.8070, GHZ witness=0.8070
+[2025-12-18 19:29:34]     block 2/4, subset 4/6, depth 2/4, instance 2/3, rolling mean P_return=0.8075
+[2025-12-18 19:29:38]         P_return=0.8205, GHZ witness=0.8205
+[2025-12-18 19:29:38]     block 2/4, subset 4/6, depth 2/4, instance 3/3, rolling mean P_return=0.8118
+[2025-12-18 19:29:38]   Saved block 2 subset 0 depth 5 (mean_P_return=0.8118)
+[2025-12-18 19:29:38]   block 2/4, subset 4/6 (id=0), depth 3/4
+[2025-12-18 19:29:42]         P_return=0.8280, GHZ witness=0.8280
+[2025-12-18 19:29:42]     block 2/4, subset 4/6, depth 3/4, instance 1/3, rolling mean P_return=0.8280
+[2025-12-18 19:29:44]         P_return=0.8120, GHZ witness=0.8120
+[2025-12-18 19:29:44]     block 2/4, subset 4/6, depth 3/4, instance 2/3, rolling mean P_return=0.8200
+[2025-12-18 19:29:47]         P_return=0.8100, GHZ witness=0.8100
+[2025-12-18 19:29:47]     block 2/4, subset 4/6, depth 3/4, instance 3/3, rolling mean P_return=0.8167
+[2025-12-18 19:29:47]   Saved block 2 subset 0 depth 7 (mean_P_return=0.8167)
+[2025-12-18 19:29:47]   block 2/4, subset 4/6 (id=0), depth 4/4
+[2025-12-18 19:29:51]         P_return=0.8070, GHZ witness=0.8070
+[2025-12-18 19:29:51]     block 2/4, subset 4/6, depth 4/4, instance 1/3, rolling mean P_return=0.8070
+[2025-12-18 19:29:55]         P_return=0.8215, GHZ witness=0.8215
+[2025-12-18 19:29:55]     block 2/4, subset 4/6, depth 4/4, instance 2/3, rolling mean P_return=0.8143
+[2025-12-18 19:29:58]         P_return=0.8195, GHZ witness=0.8195
+[2025-12-18 19:29:58]     block 2/4, subset 4/6, depth 4/4, instance 3/3, rolling mean P_return=0.8160
+[2025-12-18 19:29:58]   Saved block 2 subset 0 depth 9 (mean_P_return=0.8160)
+[2025-12-18 19:29:58]   block 2/4, subset 5/6 (id=4), depth 1/4
+[2025-12-18 19:30:02]         P_return=0.7250, GHZ witness=0.7250
+[2025-12-18 19:30:02]     block 2/4, subset 5/6, depth 1/4, instance 1/3, rolling mean P_return=0.7250
+[2025-12-18 19:30:06]         P_return=0.7095, GHZ witness=0.7095
+[2025-12-18 19:30:06]     block 2/4, subset 5/6, depth 1/4, instance 2/3, rolling mean P_return=0.7172
+[2025-12-18 19:30:09]         P_return=0.7025, GHZ witness=0.7025
+[2025-12-18 19:30:09]     block 2/4, subset 5/6, depth 1/4, instance 3/3, rolling mean P_return=0.7123
+[2025-12-18 19:30:09]   Saved block 2 subset 4 depth 3 (mean_P_return=0.7123)
+[2025-12-18 19:30:09]   block 2/4, subset 5/6 (id=4), depth 2/4
+[2025-12-18 19:30:12]         P_return=0.7265, GHZ witness=0.7265
+[2025-12-18 19:30:12]     block 2/4, subset 5/6, depth 2/4, instance 1/3, rolling mean P_return=0.7265
+[2025-12-18 19:30:16]         P_return=0.7070, GHZ witness=0.7070
+[2025-12-18 19:30:16]     block 2/4, subset 5/6, depth 2/4, instance 2/3, rolling mean P_return=0.7167
+[2025-12-18 19:30:19]         P_return=0.6940, GHZ witness=0.6940
+[2025-12-18 19:30:19]     block 2/4, subset 5/6, depth 2/4, instance 3/3, rolling mean P_return=0.7092
+[2025-12-18 19:30:19]   Saved block 2 subset 4 depth 5 (mean_P_return=0.7092)
+[2025-12-18 19:30:19]   block 2/4, subset 5/6 (id=4), depth 3/4
+[2025-12-18 19:30:24]         P_return=0.6910, GHZ witness=0.6910
+[2025-12-18 19:30:24]     block 2/4, subset 5/6, depth 3/4, instance 1/3, rolling mean P_return=0.6910
+[2025-12-18 19:30:28]         P_return=0.7330, GHZ witness=0.7330
+[2025-12-18 19:30:28]     block 2/4, subset 5/6, depth 3/4, instance 2/3, rolling mean P_return=0.7120
+[2025-12-18 19:30:31]         P_return=0.7090, GHZ witness=0.7090
+[2025-12-18 19:30:31]     block 2/4, subset 5/6, depth 3/4, instance 3/3, rolling mean P_return=0.7110
+[2025-12-18 19:30:31]   Saved block 2 subset 4 depth 7 (mean_P_return=0.7110)
+[2025-12-18 19:30:31]   block 2/4, subset 5/6 (id=4), depth 4/4
+[2025-12-18 19:30:35]         P_return=0.7220, GHZ witness=0.7220
+[2025-12-18 19:30:35]     block 2/4, subset 5/6, depth 4/4, instance 1/3, rolling mean P_return=0.7220
+[2025-12-18 19:30:39]         P_return=0.7210, GHZ witness=0.7210
+[2025-12-18 19:30:39]     block 2/4, subset 5/6, depth 4/4, instance 2/3, rolling mean P_return=0.7215
+[2025-12-18 19:30:43]         P_return=0.7175, GHZ witness=0.7175
+[2025-12-18 19:30:43]     block 2/4, subset 5/6, depth 4/4, instance 3/3, rolling mean P_return=0.7202
+[2025-12-18 19:30:43]   Saved block 2 subset 4 depth 9 (mean_P_return=0.7202)
+[2025-12-18 19:30:43]   block 2/4, subset 6/6 (id=2), depth 1/4
+[2025-12-18 19:30:44]         P_return=0.3255, GHZ witness=0.3255
+[2025-12-18 19:30:44]     block 2/4, subset 6/6, depth 1/4, instance 1/3, rolling mean P_return=0.3255
+[2025-12-18 19:30:47]         P_return=0.3085, GHZ witness=0.3085
+[2025-12-18 19:30:47]     block 2/4, subset 6/6, depth 1/4, instance 2/3, rolling mean P_return=0.3170
+[2025-12-18 19:30:51]         P_return=0.3390, GHZ witness=0.3390
+[2025-12-18 19:30:51]     block 2/4, subset 6/6, depth 1/4, instance 3/3, rolling mean P_return=0.3243
+[2025-12-18 19:30:51]   Saved block 2 subset 2 depth 3 (mean_P_return=0.3243)
+[2025-12-18 19:30:51]   block 2/4, subset 6/6 (id=2), depth 2/4
+[2025-12-18 19:30:54]         P_return=0.3195, GHZ witness=0.3195
+[2025-12-18 19:30:54]     block 2/4, subset 6/6, depth 2/4, instance 1/3, rolling mean P_return=0.3195
+[2025-12-18 19:30:57]         P_return=0.3125, GHZ witness=0.3125
+[2025-12-18 19:30:57]     block 2/4, subset 6/6, depth 2/4, instance 2/3, rolling mean P_return=0.3160
+[2025-12-18 19:31:00]         P_return=0.3090, GHZ witness=0.3090
+[2025-12-18 19:31:00]     block 2/4, subset 6/6, depth 2/4, instance 3/3, rolling mean P_return=0.3137
+[2025-12-18 19:31:00]   Saved block 2 subset 2 depth 5 (mean_P_return=0.3137)
+[2025-12-18 19:31:00]   block 2/4, subset 6/6 (id=2), depth 3/4
+[2025-12-18 19:31:05]         P_return=0.3065, GHZ witness=0.3065
+[2025-12-18 19:31:05]     block 2/4, subset 6/6, depth 3/4, instance 1/3, rolling mean P_return=0.3065
+[2025-12-18 19:31:08]         P_return=0.3230, GHZ witness=0.3230
+[2025-12-18 19:31:08]     block 2/4, subset 6/6, depth 3/4, instance 2/3, rolling mean P_return=0.3147
+[2025-12-18 19:31:12]         P_return=0.3335, GHZ witness=0.3335
+[2025-12-18 19:31:12]     block 2/4, subset 6/6, depth 3/4, instance 3/3, rolling mean P_return=0.3210
+[2025-12-18 19:31:12]   Saved block 2 subset 2 depth 7 (mean_P_return=0.3210)
+[2025-12-18 19:31:12]   block 2/4, subset 6/6 (id=2), depth 4/4
+[2025-12-18 19:31:13]         P_return=0.3535, GHZ witness=0.3535
+[2025-12-18 19:31:13]     block 2/4, subset 6/6, depth 4/4, instance 1/3, rolling mean P_return=0.3535
+[2025-12-18 19:31:17]         P_return=0.3325, GHZ witness=0.3325
+[2025-12-18 19:31:17]     block 2/4, subset 6/6, depth 4/4, instance 2/3, rolling mean P_return=0.3430
+[2025-12-18 19:31:23]         P_return=0.3315, GHZ witness=0.3315
+[2025-12-18 19:31:23]     block 2/4, subset 6/6, depth 4/4, instance 3/3, rolling mean P_return=0.3392
+[2025-12-18 19:31:23]   Saved block 2 subset 2 depth 9 (mean_P_return=0.3392)
+[2025-12-18 19:31:23] 
+Block 3/4 order: [4, 0, 3, 2, 5, 1]
+[2025-12-18 19:31:23]   block 3/4, subset 1/6 (id=4), depth 1/4
+[2025-12-18 19:31:26]         P_return=0.7200, GHZ witness=0.7200
+[2025-12-18 19:31:26]     block 3/4, subset 1/6, depth 1/4, instance 1/3, rolling mean P_return=0.7200
+[2025-12-18 19:31:29]         P_return=0.7010, GHZ witness=0.7010
+[2025-12-18 19:31:29]     block 3/4, subset 1/6, depth 1/4, instance 2/3, rolling mean P_return=0.7105
+[2025-12-18 19:31:32]         P_return=0.7205, GHZ witness=0.7205
+[2025-12-18 19:31:32]     block 3/4, subset 1/6, depth 1/4, instance 3/3, rolling mean P_return=0.7138
+[2025-12-18 19:31:32]   Saved block 3 subset 4 depth 3 (mean_P_return=0.7138)
+[2025-12-18 19:31:32]   block 3/4, subset 1/6 (id=4), depth 2/4
+[2025-12-18 19:31:36]         P_return=0.7150, GHZ witness=0.7150
+[2025-12-18 19:31:36]     block 3/4, subset 1/6, depth 2/4, instance 1/3, rolling mean P_return=0.7150
+[2025-12-18 19:31:40]         P_return=0.7235, GHZ witness=0.7235
+[2025-12-18 19:31:40]     block 3/4, subset 1/6, depth 2/4, instance 2/3, rolling mean P_return=0.7192
+[2025-12-18 19:31:44]         P_return=0.7195, GHZ witness=0.7195
+[2025-12-18 19:31:44]     block 3/4, subset 1/6, depth 2/4, instance 3/3, rolling mean P_return=0.7193
+[2025-12-18 19:31:44]   Saved block 3 subset 4 depth 5 (mean_P_return=0.7193)
+[2025-12-18 19:31:44]   block 3/4, subset 1/6 (id=4), depth 3/4
+[2025-12-18 19:31:45]         P_return=0.7015, GHZ witness=0.7015
+[2025-12-18 19:31:45]     block 3/4, subset 1/6, depth 3/4, instance 1/3, rolling mean P_return=0.7015
+[2025-12-18 19:31:48]         P_return=0.7140, GHZ witness=0.7140
+[2025-12-18 19:31:48]     block 3/4, subset 1/6, depth 3/4, instance 2/3, rolling mean P_return=0.7077
+[2025-12-18 19:31:52]         P_return=0.7145, GHZ witness=0.7145
+[2025-12-18 19:31:52]     block 3/4, subset 1/6, depth 3/4, instance 3/3, rolling mean P_return=0.7100
+[2025-12-18 19:31:52]   Saved block 3 subset 4 depth 7 (mean_P_return=0.7100)
+[2025-12-18 19:31:52]   block 3/4, subset 1/6 (id=4), depth 4/4
+[2025-12-18 19:31:56]         P_return=0.7070, GHZ witness=0.7070
+[2025-12-18 19:31:56]     block 3/4, subset 1/6, depth 4/4, instance 1/3, rolling mean P_return=0.7070
+[2025-12-18 19:31:59]         P_return=0.7060, GHZ witness=0.7060
+[2025-12-18 19:31:59]     block 3/4, subset 1/6, depth 4/4, instance 2/3, rolling mean P_return=0.7065
+[2025-12-18 19:32:04]         P_return=0.7185, GHZ witness=0.7185
+[2025-12-18 19:32:04]     block 3/4, subset 1/6, depth 4/4, instance 3/3, rolling mean P_return=0.7105
+[2025-12-18 19:32:04]   Saved block 3 subset 4 depth 9 (mean_P_return=0.7105)
+[2025-12-18 19:32:04]   block 3/4, subset 2/6 (id=0), depth 1/4
+[2025-12-18 19:32:08]         P_return=0.8135, GHZ witness=0.8135
+[2025-12-18 19:32:08]     block 3/4, subset 2/6, depth 1/4, instance 1/3, rolling mean P_return=0.8135
+[2025-12-18 19:32:11]         P_return=0.8075, GHZ witness=0.8075
+[2025-12-18 19:32:11]     block 3/4, subset 2/6, depth 1/4, instance 2/3, rolling mean P_return=0.8105
+[2025-12-18 19:32:12]         P_return=0.8010, GHZ witness=0.8010
+[2025-12-18 19:32:12]     block 3/4, subset 2/6, depth 1/4, instance 3/3, rolling mean P_return=0.8073
+[2025-12-18 19:32:12]   Saved block 3 subset 0 depth 3 (mean_P_return=0.8073)
+[2025-12-18 19:32:12]   block 3/4, subset 2/6 (id=0), depth 2/4
+[2025-12-18 19:32:16]         P_return=0.8075, GHZ witness=0.8075
+[2025-12-18 19:32:16]     block 3/4, subset 2/6, depth 2/4, instance 1/3, rolling mean P_return=0.8075
+[2025-12-18 19:32:19]         P_return=0.8135, GHZ witness=0.8135
+[2025-12-18 19:32:19]     block 3/4, subset 2/6, depth 2/4, instance 2/3, rolling mean P_return=0.8105
+[2025-12-18 19:32:24]         P_return=0.8200, GHZ witness=0.8200
+[2025-12-18 19:32:24]     block 3/4, subset 2/6, depth 2/4, instance 3/3, rolling mean P_return=0.8137
+[2025-12-18 19:32:24]   Saved block 3 subset 0 depth 5 (mean_P_return=0.8137)
+[2025-12-18 19:32:24]   block 3/4, subset 2/6 (id=0), depth 3/4
+[2025-12-18 19:32:28]         P_return=0.8150, GHZ witness=0.8150
+[2025-12-18 19:32:28]     block 3/4, subset 2/6, depth 3/4, instance 1/3, rolling mean P_return=0.8150
+[2025-12-18 19:32:31]         P_return=0.8270, GHZ witness=0.8270
+[2025-12-18 19:32:31]     block 3/4, subset 2/6, depth 3/4, instance 2/3, rolling mean P_return=0.8210
+[2025-12-18 19:32:35]         P_return=0.8125, GHZ witness=0.8125
+[2025-12-18 19:32:35]     block 3/4, subset 2/6, depth 3/4, instance 3/3, rolling mean P_return=0.8182
+[2025-12-18 19:32:35]   Saved block 3 subset 0 depth 7 (mean_P_return=0.8182)
+[2025-12-18 19:32:35]   block 3/4, subset 2/6 (id=0), depth 4/4
+[2025-12-18 19:32:39]         P_return=0.7965, GHZ witness=0.7965
+[2025-12-18 19:32:39]     block 3/4, subset 2/6, depth 4/4, instance 1/3, rolling mean P_return=0.7965
+[2025-12-18 19:32:42]         P_return=0.8280, GHZ witness=0.8280
+[2025-12-18 19:32:42]     block 3/4, subset 2/6, depth 4/4, instance 2/3, rolling mean P_return=0.8122
+[2025-12-18 19:32:44]         P_return=0.8175, GHZ witness=0.8175
+[2025-12-18 19:32:44]     block 3/4, subset 2/6, depth 4/4, instance 3/3, rolling mean P_return=0.8140
+[2025-12-18 19:32:44]   Saved block 3 subset 0 depth 9 (mean_P_return=0.8140)
+[2025-12-18 19:32:44]   block 3/4, subset 3/6 (id=3), depth 1/4
+[2025-12-18 19:32:47]         P_return=0.8345, GHZ witness=0.8345
+[2025-12-18 19:32:47]     block 3/4, subset 3/6, depth 1/4, instance 1/3, rolling mean P_return=0.8345
+[2025-12-18 19:32:50]         P_return=0.8235, GHZ witness=0.8235
+[2025-12-18 19:32:50]     block 3/4, subset 3/6, depth 1/4, instance 2/3, rolling mean P_return=0.8290
+[2025-12-18 19:32:54]         P_return=0.8125, GHZ witness=0.8125
+[2025-12-18 19:32:54]     block 3/4, subset 3/6, depth 1/4, instance 3/3, rolling mean P_return=0.8235
+[2025-12-18 19:32:54]   Saved block 3 subset 3 depth 3 (mean_P_return=0.8235)
+[2025-12-18 19:32:54]   block 3/4, subset 3/6 (id=3), depth 2/4
+[2025-12-18 19:32:57]         P_return=0.8140, GHZ witness=0.8140
+[2025-12-18 19:32:57]     block 3/4, subset 3/6, depth 2/4, instance 1/3, rolling mean P_return=0.8140
+[2025-12-18 19:33:00]         P_return=0.8325, GHZ witness=0.8325
+[2025-12-18 19:33:00]     block 3/4, subset 3/6, depth 2/4, instance 2/3, rolling mean P_return=0.8233
+[2025-12-18 19:33:04]         P_return=0.8150, GHZ witness=0.8150
+[2025-12-18 19:33:04]     block 3/4, subset 3/6, depth 2/4, instance 3/3, rolling mean P_return=0.8205
+[2025-12-18 19:33:04]   Saved block 3 subset 3 depth 5 (mean_P_return=0.8205)
+[2025-12-18 19:33:04]   block 3/4, subset 3/6 (id=3), depth 3/4
+[2025-12-18 19:33:07]         P_return=0.8085, GHZ witness=0.8085
+[2025-12-18 19:33:07]     block 3/4, subset 3/6, depth 3/4, instance 1/3, rolling mean P_return=0.8085
+[2025-12-18 19:33:12]         P_return=0.8245, GHZ witness=0.8245
+[2025-12-18 19:33:12]     block 3/4, subset 3/6, depth 3/4, instance 2/3, rolling mean P_return=0.8165
+[2025-12-18 19:33:14]         P_return=0.8110, GHZ witness=0.8110
+[2025-12-18 19:33:14]     block 3/4, subset 3/6, depth 3/4, instance 3/3, rolling mean P_return=0.8147
+[2025-12-18 19:33:14]   Saved block 3 subset 3 depth 7 (mean_P_return=0.8147)
+[2025-12-18 19:33:14]   block 3/4, subset 3/6 (id=3), depth 4/4
+[2025-12-18 19:33:17]         P_return=0.8240, GHZ witness=0.8240
+[2025-12-18 19:33:17]     block 3/4, subset 3/6, depth 4/4, instance 1/3, rolling mean P_return=0.8240
+[2025-12-18 19:33:21]         P_return=0.8180, GHZ witness=0.8180
+[2025-12-18 19:33:21]     block 3/4, subset 3/6, depth 4/4, instance 2/3, rolling mean P_return=0.8210
+[2025-12-18 19:33:29]         P_return=0.8210, GHZ witness=0.8210
+[2025-12-18 19:33:29]     block 3/4, subset 3/6, depth 4/4, instance 3/3, rolling mean P_return=0.8210
+[2025-12-18 19:33:29]   Saved block 3 subset 3 depth 9 (mean_P_return=0.8210)
+[2025-12-18 19:33:29]   block 3/4, subset 4/6 (id=2), depth 1/4
+[2025-12-18 19:33:33]         P_return=0.3190, GHZ witness=0.3190
+[2025-12-18 19:33:33]     block 3/4, subset 4/6, depth 1/4, instance 1/3, rolling mean P_return=0.3190
+[2025-12-18 19:33:36]         P_return=0.3230, GHZ witness=0.3230
+[2025-12-18 19:33:36]     block 3/4, subset 4/6, depth 1/4, instance 2/3, rolling mean P_return=0.3210
+[2025-12-18 19:33:39]         P_return=0.3210, GHZ witness=0.3210
+[2025-12-18 19:33:39]     block 3/4, subset 4/6, depth 1/4, instance 3/3, rolling mean P_return=0.3210
+[2025-12-18 19:33:39]   Saved block 3 subset 2 depth 3 (mean_P_return=0.3210)
+[2025-12-18 19:33:39]   block 3/4, subset 4/6 (id=2), depth 2/4
+[2025-12-18 19:33:42]         P_return=0.3230, GHZ witness=0.3230
+[2025-12-18 19:33:42]     block 3/4, subset 4/6, depth 2/4, instance 1/3, rolling mean P_return=0.3230
+[2025-12-18 19:33:43]         P_return=0.3160, GHZ witness=0.3160
+[2025-12-18 19:33:43]     block 3/4, subset 4/6, depth 2/4, instance 2/3, rolling mean P_return=0.3195
+[2025-12-18 19:33:46]         P_return=0.3355, GHZ witness=0.3355
+[2025-12-18 19:33:46]     block 3/4, subset 4/6, depth 2/4, instance 3/3, rolling mean P_return=0.3248
+[2025-12-18 19:33:46]   Saved block 3 subset 2 depth 5 (mean_P_return=0.3248)
+[2025-12-18 19:33:46]   block 3/4, subset 4/6 (id=2), depth 3/4
+[2025-12-18 19:33:50]         P_return=0.3390, GHZ witness=0.3390
+[2025-12-18 19:33:50]     block 3/4, subset 4/6, depth 3/4, instance 1/3, rolling mean P_return=0.3390
+[2025-12-18 19:33:54]         P_return=0.3150, GHZ witness=0.3150
+[2025-12-18 19:33:54]     block 3/4, subset 4/6, depth 3/4, instance 2/3, rolling mean P_return=0.3270
+[2025-12-18 19:33:58]         P_return=0.3065, GHZ witness=0.3065
+[2025-12-18 19:33:58]     block 3/4, subset 4/6, depth 3/4, instance 3/3, rolling mean P_return=0.3202
+[2025-12-18 19:33:58]   Saved block 3 subset 2 depth 7 (mean_P_return=0.3202)
+[2025-12-18 19:33:58]   block 3/4, subset 4/6 (id=2), depth 4/4
+[2025-12-18 19:34:02]         P_return=0.3250, GHZ witness=0.3250
+[2025-12-18 19:34:02]     block 3/4, subset 4/6, depth 4/4, instance 1/3, rolling mean P_return=0.3250
+[2025-12-18 19:34:06]         P_return=0.3125, GHZ witness=0.3125
+[2025-12-18 19:34:06]     block 3/4, subset 4/6, depth 4/4, instance 2/3, rolling mean P_return=0.3187
+[2025-12-18 19:34:10]         P_return=0.3155, GHZ witness=0.3155
+[2025-12-18 19:34:10]     block 3/4, subset 4/6, depth 4/4, instance 3/3, rolling mean P_return=0.3177
+[2025-12-18 19:34:10]   Saved block 3 subset 2 depth 9 (mean_P_return=0.3177)
+[2025-12-18 19:34:10]   block 3/4, subset 5/6 (id=5), depth 1/4
+[2025-12-18 19:34:14]         P_return=0.8395, GHZ witness=0.8395
+[2025-12-18 19:34:14]     block 3/4, subset 5/6, depth 1/4, instance 1/3, rolling mean P_return=0.8395
+[2025-12-18 19:34:15]         P_return=0.8400, GHZ witness=0.8400
+[2025-12-18 19:34:15]     block 3/4, subset 5/6, depth 1/4, instance 2/3, rolling mean P_return=0.8397
+[2025-12-18 19:34:18]         P_return=0.8585, GHZ witness=0.8585
+[2025-12-18 19:34:18]     block 3/4, subset 5/6, depth 1/4, instance 3/3, rolling mean P_return=0.8460
+[2025-12-18 19:34:18]   Saved block 3 subset 5 depth 3 (mean_P_return=0.8460)
+[2025-12-18 19:34:18]   block 3/4, subset 5/6 (id=5), depth 2/4
+[2025-12-18 19:34:22]         P_return=0.8385, GHZ witness=0.8385
+[2025-12-18 19:34:22]     block 3/4, subset 5/6, depth 2/4, instance 1/3, rolling mean P_return=0.8385
+[2025-12-18 19:34:25]         P_return=0.8475, GHZ witness=0.8475
+[2025-12-18 19:34:25]     block 3/4, subset 5/6, depth 2/4, instance 2/3, rolling mean P_return=0.8430
+[2025-12-18 19:34:30]         P_return=0.8315, GHZ witness=0.8315
+[2025-12-18 19:34:30]     block 3/4, subset 5/6, depth 2/4, instance 3/3, rolling mean P_return=0.8392
+[2025-12-18 19:34:30]   Saved block 3 subset 5 depth 5 (mean_P_return=0.8392)
+[2025-12-18 19:34:30]   block 3/4, subset 5/6 (id=5), depth 3/4
+[2025-12-18 19:34:33]         P_return=0.8460, GHZ witness=0.8460
+[2025-12-18 19:34:33]     block 3/4, subset 5/6, depth 3/4, instance 1/3, rolling mean P_return=0.8460
+[2025-12-18 19:34:36]         P_return=0.8370, GHZ witness=0.8370
+[2025-12-18 19:34:36]     block 3/4, subset 5/6, depth 3/4, instance 2/3, rolling mean P_return=0.8415
+[2025-12-18 19:34:40]         P_return=0.8320, GHZ witness=0.8320
+[2025-12-18 19:34:40]     block 3/4, subset 5/6, depth 3/4, instance 3/3, rolling mean P_return=0.8383
+[2025-12-18 19:34:40]   Saved block 3 subset 5 depth 7 (mean_P_return=0.8383)
+[2025-12-18 19:34:40]   block 3/4, subset 5/6 (id=5), depth 4/4
+[2025-12-18 19:34:44]         P_return=0.8360, GHZ witness=0.8360
+[2025-12-18 19:34:44]     block 3/4, subset 5/6, depth 4/4, instance 1/3, rolling mean P_return=0.8360
+[2025-12-18 19:34:45]         P_return=0.8445, GHZ witness=0.8445
+[2025-12-18 19:34:45]     block 3/4, subset 5/6, depth 4/4, instance 2/3, rolling mean P_return=0.8402
+[2025-12-18 19:34:49]         P_return=0.8470, GHZ witness=0.8470
+[2025-12-18 19:34:49]     block 3/4, subset 5/6, depth 4/4, instance 3/3, rolling mean P_return=0.8425
+[2025-12-18 19:34:49]   Saved block 3 subset 5 depth 9 (mean_P_return=0.8425)
+[2025-12-18 19:34:49]   block 3/4, subset 6/6 (id=1), depth 1/4
+[2025-12-18 19:34:52]         P_return=0.8710, GHZ witness=0.8710
+[2025-12-18 19:34:52]     block 3/4, subset 6/6, depth 1/4, instance 1/3, rolling mean P_return=0.8710
+[2025-12-18 19:34:56]         P_return=0.8850, GHZ witness=0.8850
+[2025-12-18 19:34:56]     block 3/4, subset 6/6, depth 1/4, instance 2/3, rolling mean P_return=0.8780
+[2025-12-18 19:34:59]         P_return=0.8805, GHZ witness=0.8805
+[2025-12-18 19:34:59]     block 3/4, subset 6/6, depth 1/4, instance 3/3, rolling mean P_return=0.8788
+[2025-12-18 19:34:59]   Saved block 3 subset 1 depth 3 (mean_P_return=0.8788)
+[2025-12-18 19:34:59]   block 3/4, subset 6/6 (id=1), depth 2/4
+[2025-12-18 19:35:03]         P_return=0.8705, GHZ witness=0.8705
+[2025-12-18 19:35:03]     block 3/4, subset 6/6, depth 2/4, instance 1/3, rolling mean P_return=0.8705
+[2025-12-18 19:35:07]         P_return=0.8885, GHZ witness=0.8885
+[2025-12-18 19:35:07]     block 3/4, subset 6/6, depth 2/4, instance 2/3, rolling mean P_return=0.8795
+[2025-12-18 19:35:10]         P_return=0.8645, GHZ witness=0.8645
+[2025-12-18 19:35:10]     block 3/4, subset 6/6, depth 2/4, instance 3/3, rolling mean P_return=0.8745
+[2025-12-18 19:35:10]   Saved block 3 subset 1 depth 5 (mean_P_return=0.8745)
+[2025-12-18 19:35:10]   block 3/4, subset 6/6 (id=1), depth 3/4
+[2025-12-18 19:35:13]         P_return=0.8660, GHZ witness=0.8660
+[2025-12-18 19:35:13]     block 3/4, subset 6/6, depth 3/4, instance 1/3, rolling mean P_return=0.8660
+[2025-12-18 19:35:15]         P_return=0.8770, GHZ witness=0.8770
+[2025-12-18 19:35:15]     block 3/4, subset 6/6, depth 3/4, instance 2/3, rolling mean P_return=0.8715
+[2025-12-18 19:35:19]         P_return=0.8890, GHZ witness=0.8890
+[2025-12-18 19:35:19]     block 3/4, subset 6/6, depth 3/4, instance 3/3, rolling mean P_return=0.8773
+[2025-12-18 19:35:19]   Saved block 3 subset 1 depth 7 (mean_P_return=0.8773)
+[2025-12-18 19:35:19]   block 3/4, subset 6/6 (id=1), depth 4/4
+[2025-12-18 19:35:23]         P_return=0.8780, GHZ witness=0.8780
+[2025-12-18 19:35:23]     block 3/4, subset 6/6, depth 4/4, instance 1/3, rolling mean P_return=0.8780
+[2025-12-18 19:35:26]         P_return=0.8860, GHZ witness=0.8860
+[2025-12-18 19:35:26]     block 3/4, subset 6/6, depth 4/4, instance 2/3, rolling mean P_return=0.8820
+[2025-12-18 19:35:31]         P_return=0.8585, GHZ witness=0.8585
+[2025-12-18 19:35:31]     block 3/4, subset 6/6, depth 4/4, instance 3/3, rolling mean P_return=0.8742
+[2025-12-18 19:35:31]   Saved block 3 subset 1 depth 9 (mean_P_return=0.8742)
+[2025-12-18 19:35:31] 
+Block 4/4 order: [1, 2, 5, 3, 0, 4]
+[2025-12-18 19:35:31]   block 4/4, subset 1/6 (id=1), depth 1/4
+[2025-12-18 19:35:35]         P_return=0.8785, GHZ witness=0.8785
+[2025-12-18 19:35:35]     block 4/4, subset 1/6, depth 1/4, instance 1/3, rolling mean P_return=0.8785
+[2025-12-18 19:35:38]         P_return=0.8760, GHZ witness=0.8760
+[2025-12-18 19:35:38]     block 4/4, subset 1/6, depth 1/4, instance 2/3, rolling mean P_return=0.8772
+[2025-12-18 19:35:42]         P_return=0.8715, GHZ witness=0.8715
+[2025-12-18 19:35:42]     block 4/4, subset 1/6, depth 1/4, instance 3/3, rolling mean P_return=0.8753
+[2025-12-18 19:35:42]   Saved block 4 subset 1 depth 3 (mean_P_return=0.8753)
+[2025-12-18 19:35:42]   block 4/4, subset 1/6 (id=1), depth 2/4
+[2025-12-18 19:35:43]         P_return=0.8705, GHZ witness=0.8705
+[2025-12-18 19:35:43]     block 4/4, subset 1/6, depth 2/4, instance 1/3, rolling mean P_return=0.8705
+[2025-12-18 19:35:47]         P_return=0.8755, GHZ witness=0.8755
+[2025-12-18 19:35:47]     block 4/4, subset 1/6, depth 2/4, instance 2/3, rolling mean P_return=0.8730
+[2025-12-18 19:35:50]         P_return=0.8845, GHZ witness=0.8845
+[2025-12-18 19:35:50]     block 4/4, subset 1/6, depth 2/4, instance 3/3, rolling mean P_return=0.8768
+[2025-12-18 19:35:50]   Saved block 4 subset 1 depth 5 (mean_P_return=0.8768)
+[2025-12-18 19:35:50]   block 4/4, subset 1/6 (id=1), depth 3/4
+[2025-12-18 19:35:54]         P_return=0.8870, GHZ witness=0.8870
+[2025-12-18 19:35:54]     block 4/4, subset 1/6, depth 3/4, instance 1/3, rolling mean P_return=0.8870
+[2025-12-18 19:35:57]         P_return=0.8625, GHZ witness=0.8625
+[2025-12-18 19:35:57]     block 4/4, subset 1/6, depth 3/4, instance 2/3, rolling mean P_return=0.8748
+[2025-12-18 19:36:01]         P_return=0.8710, GHZ witness=0.8710
+[2025-12-18 19:36:01]     block 4/4, subset 1/6, depth 3/4, instance 3/3, rolling mean P_return=0.8735
+[2025-12-18 19:36:01]   Saved block 4 subset 1 depth 7 (mean_P_return=0.8735)
+[2025-12-18 19:36:01]   block 4/4, subset 1/6 (id=1), depth 4/4
+[2025-12-18 19:36:06]         P_return=0.8895, GHZ witness=0.8895
+[2025-12-18 19:36:06]     block 4/4, subset 1/6, depth 4/4, instance 1/3, rolling mean P_return=0.8895
+[2025-12-18 19:36:10]         P_return=0.8825, GHZ witness=0.8825
+[2025-12-18 19:36:10]     block 4/4, subset 1/6, depth 4/4, instance 2/3, rolling mean P_return=0.8860
+[2025-12-18 19:36:13]         P_return=0.8700, GHZ witness=0.8700
+[2025-12-18 19:36:13]     block 4/4, subset 1/6, depth 4/4, instance 3/3, rolling mean P_return=0.8807
+[2025-12-18 19:36:13]   Saved block 4 subset 1 depth 9 (mean_P_return=0.8807)
+[2025-12-18 19:36:13]   block 4/4, subset 2/6 (id=2), depth 1/4
+[2025-12-18 19:36:15]         P_return=0.3070, GHZ witness=0.3070
+[2025-12-18 19:36:15]     block 4/4, subset 2/6, depth 1/4, instance 1/3, rolling mean P_return=0.3070
+[2025-12-18 19:36:18]         P_return=0.3310, GHZ witness=0.3310
+[2025-12-18 19:36:18]     block 4/4, subset 2/6, depth 1/4, instance 2/3, rolling mean P_return=0.3190
+[2025-12-18 19:36:22]         P_return=0.3200, GHZ witness=0.3200
+[2025-12-18 19:36:22]     block 4/4, subset 2/6, depth 1/4, instance 3/3, rolling mean P_return=0.3193
+[2025-12-18 19:36:22]   Saved block 4 subset 2 depth 3 (mean_P_return=0.3193)
+[2025-12-18 19:36:22]   block 4/4, subset 2/6 (id=2), depth 2/4
+[2025-12-18 19:36:25]         P_return=0.3165, GHZ witness=0.3165
+[2025-12-18 19:36:25]     block 4/4, subset 2/6, depth 2/4, instance 1/3, rolling mean P_return=0.3165
+[2025-12-18 19:36:28]         P_return=0.3155, GHZ witness=0.3155
+[2025-12-18 19:36:28]     block 4/4, subset 2/6, depth 2/4, instance 2/3, rolling mean P_return=0.3160
+[2025-12-18 19:36:33]         P_return=0.3275, GHZ witness=0.3275
+[2025-12-18 19:36:33]     block 4/4, subset 2/6, depth 2/4, instance 3/3, rolling mean P_return=0.3198
+[2025-12-18 19:36:33]   Saved block 4 subset 2 depth 5 (mean_P_return=0.3198)
+[2025-12-18 19:36:33]   block 4/4, subset 2/6 (id=2), depth 3/4
+[2025-12-18 19:36:37]         P_return=0.3145, GHZ witness=0.3145
+[2025-12-18 19:36:37]     block 4/4, subset 2/6, depth 3/4, instance 1/3, rolling mean P_return=0.3145
+[2025-12-18 19:36:41]         P_return=0.3180, GHZ witness=0.3180
+[2025-12-18 19:36:41]     block 4/4, subset 2/6, depth 3/4, instance 2/3, rolling mean P_return=0.3163
+[2025-12-18 19:36:42]         P_return=0.3050, GHZ witness=0.3050
+[2025-12-18 19:36:42]     block 4/4, subset 2/6, depth 3/4, instance 3/3, rolling mean P_return=0.3125
+[2025-12-18 19:36:42]   Saved block 4 subset 2 depth 7 (mean_P_return=0.3125)
+[2025-12-18 19:36:42]   block 4/4, subset 2/6 (id=2), depth 4/4
+[2025-12-18 19:36:46]         P_return=0.3175, GHZ witness=0.3175
+[2025-12-18 19:36:46]     block 4/4, subset 2/6, depth 4/4, instance 1/3, rolling mean P_return=0.3175
+[2025-12-18 19:36:50]         P_return=0.2960, GHZ witness=0.2960
+[2025-12-18 19:36:50]     block 4/4, subset 2/6, depth 4/4, instance 2/3, rolling mean P_return=0.3067
+[2025-12-18 19:36:53]         P_return=0.3145, GHZ witness=0.3145
+[2025-12-18 19:36:53]     block 4/4, subset 2/6, depth 4/4, instance 3/3, rolling mean P_return=0.3093
+[2025-12-18 19:36:53]   Saved block 4 subset 2 depth 9 (mean_P_return=0.3093)
+[2025-12-18 19:36:53]   block 4/4, subset 3/6 (id=5), depth 1/4
+[2025-12-18 19:36:57]         P_return=0.8345, GHZ witness=0.8345
+[2025-12-18 19:36:57]     block 4/4, subset 3/6, depth 1/4, instance 1/3, rolling mean P_return=0.8345
+[2025-12-18 19:37:00]         P_return=0.8340, GHZ witness=0.8340
+[2025-12-18 19:37:00]     block 4/4, subset 3/6, depth 1/4, instance 2/3, rolling mean P_return=0.8342
+[2025-12-18 19:37:04]         P_return=0.8400, GHZ witness=0.8400
+[2025-12-18 19:37:04]     block 4/4, subset 3/6, depth 1/4, instance 3/3, rolling mean P_return=0.8362
+[2025-12-18 19:37:04]   Saved block 4 subset 5 depth 3 (mean_P_return=0.8362)
+[2025-12-18 19:37:04]   block 4/4, subset 3/6 (id=5), depth 2/4
+[2025-12-18 19:37:07]         P_return=0.8380, GHZ witness=0.8380
+[2025-12-18 19:37:07]     block 4/4, subset 3/6, depth 2/4, instance 1/3, rolling mean P_return=0.8380
+[2025-12-18 19:37:10]         P_return=0.8395, GHZ witness=0.8395
+[2025-12-18 19:37:10]     block 4/4, subset 3/6, depth 2/4, instance 2/3, rolling mean P_return=0.8387
+[2025-12-18 19:37:14]         P_return=0.8390, GHZ witness=0.8390
+[2025-12-18 19:37:14]     block 4/4, subset 3/6, depth 2/4, instance 3/3, rolling mean P_return=0.8388
+[2025-12-18 19:37:14]   Saved block 4 subset 5 depth 5 (mean_P_return=0.8388)
+[2025-12-18 19:37:14]   block 4/4, subset 3/6 (id=5), depth 3/4
+[2025-12-18 19:37:15]         P_return=0.8430, GHZ witness=0.8430
+[2025-12-18 19:37:15]     block 4/4, subset 3/6, depth 3/4, instance 1/3, rolling mean P_return=0.8430
+[2025-12-18 19:37:19]         P_return=0.8405, GHZ witness=0.8405
+[2025-12-18 19:37:19]     block 4/4, subset 3/6, depth 3/4, instance 2/3, rolling mean P_return=0.8417
+[2025-12-18 19:37:23]         P_return=0.8410, GHZ witness=0.8410
+[2025-12-18 19:37:23]     block 4/4, subset 3/6, depth 3/4, instance 3/3, rolling mean P_return=0.8415
+[2025-12-18 19:37:23]   Saved block 4 subset 5 depth 7 (mean_P_return=0.8415)
+[2025-12-18 19:37:23]   block 4/4, subset 3/6 (id=5), depth 4/4
+[2025-12-18 19:37:27]         P_return=0.8300, GHZ witness=0.8300
+[2025-12-18 19:37:27]     block 4/4, subset 3/6, depth 4/4, instance 1/3, rolling mean P_return=0.8300
+[2025-12-18 19:37:31]         P_return=0.8485, GHZ witness=0.8485
+[2025-12-18 19:37:31]     block 4/4, subset 3/6, depth 4/4, instance 2/3, rolling mean P_return=0.8393
+[2025-12-18 19:37:35]         P_return=0.8560, GHZ witness=0.8560
+[2025-12-18 19:37:35]     block 4/4, subset 3/6, depth 4/4, instance 3/3, rolling mean P_return=0.8448
+[2025-12-18 19:37:35]   Saved block 4 subset 5 depth 9 (mean_P_return=0.8448)
+[2025-12-18 19:37:35]   block 4/4, subset 4/6 (id=3), depth 1/4
+[2025-12-18 19:37:39]         P_return=0.8230, GHZ witness=0.8230
+[2025-12-18 19:37:39]     block 4/4, subset 4/6, depth 1/4, instance 1/3, rolling mean P_return=0.8230
+[2025-12-18 19:37:42]         P_return=0.8120, GHZ witness=0.8120
+[2025-12-18 19:37:42]     block 4/4, subset 4/6, depth 1/4, instance 2/3, rolling mean P_return=0.8175
+[2025-12-18 19:37:43]         P_return=0.7975, GHZ witness=0.7975
+[2025-12-18 19:37:43]     block 4/4, subset 4/6, depth 1/4, instance 3/3, rolling mean P_return=0.8108
+[2025-12-18 19:37:43]   Saved block 4 subset 3 depth 3 (mean_P_return=0.8108)
+[2025-12-18 19:37:43]   block 4/4, subset 4/6 (id=3), depth 2/4
+[2025-12-18 19:37:47]         P_return=0.8060, GHZ witness=0.8060
+[2025-12-18 19:37:47]     block 4/4, subset 4/6, depth 2/4, instance 1/3, rolling mean P_return=0.8060
+[2025-12-18 19:37:50]         P_return=0.8210, GHZ witness=0.8210
+[2025-12-18 19:37:50]     block 4/4, subset 4/6, depth 2/4, instance 2/3, rolling mean P_return=0.8135
+[2025-12-18 19:37:54]         P_return=0.8315, GHZ witness=0.8315
+[2025-12-18 19:37:54]     block 4/4, subset 4/6, depth 2/4, instance 3/3, rolling mean P_return=0.8195
+[2025-12-18 19:37:54]   Saved block 4 subset 3 depth 5 (mean_P_return=0.8195)
+[2025-12-18 19:37:54]   block 4/4, subset 4/6 (id=3), depth 3/4
+[2025-12-18 19:37:58]         P_return=0.8305, GHZ witness=0.8305
+[2025-12-18 19:37:58]     block 4/4, subset 4/6, depth 3/4, instance 1/3, rolling mean P_return=0.8305
+[2025-12-18 19:38:02]         P_return=0.8185, GHZ witness=0.8185
+[2025-12-18 19:38:02]     block 4/4, subset 4/6, depth 3/4, instance 2/3, rolling mean P_return=0.8245
+[2025-12-18 19:38:06]         P_return=0.8140, GHZ witness=0.8140
+[2025-12-18 19:38:06]     block 4/4, subset 4/6, depth 3/4, instance 3/3, rolling mean P_return=0.8210
+[2025-12-18 19:38:06]   Saved block 4 subset 3 depth 7 (mean_P_return=0.8210)
+[2025-12-18 19:38:06]   block 4/4, subset 4/6 (id=3), depth 4/4
+[2025-12-18 19:38:10]         P_return=0.8035, GHZ witness=0.8035
+[2025-12-18 19:38:10]     block 4/4, subset 4/6, depth 4/4, instance 1/3, rolling mean P_return=0.8035
+[2025-12-18 19:38:14]         P_return=0.8225, GHZ witness=0.8225
+[2025-12-18 19:38:14]     block 4/4, subset 4/6, depth 4/4, instance 2/3, rolling mean P_return=0.8130
+[2025-12-18 19:38:16]         P_return=0.8170, GHZ witness=0.8170
+[2025-12-18 19:38:16]     block 4/4, subset 4/6, depth 4/4, instance 3/3, rolling mean P_return=0.8143
+[2025-12-18 19:38:16]   Saved block 4 subset 3 depth 9 (mean_P_return=0.8143)
+[2025-12-18 19:38:16]   block 4/4, subset 5/6 (id=0), depth 1/4
+[2025-12-18 19:38:19]         P_return=0.8175, GHZ witness=0.8175
+[2025-12-18 19:38:19]     block 4/4, subset 5/6, depth 1/4, instance 1/3, rolling mean P_return=0.8175
+[2025-12-18 19:38:23]         P_return=0.7995, GHZ witness=0.7995
+[2025-12-18 19:38:23]     block 4/4, subset 5/6, depth 1/4, instance 2/3, rolling mean P_return=0.8085
+[2025-12-18 19:38:26]         P_return=0.8135, GHZ witness=0.8135
+[2025-12-18 19:38:26]     block 4/4, subset 5/6, depth 1/4, instance 3/3, rolling mean P_return=0.8102
+[2025-12-18 19:38:26]   Saved block 4 subset 0 depth 3 (mean_P_return=0.8102)
+[2025-12-18 19:38:26]   block 4/4, subset 5/6 (id=0), depth 2/4
+[2025-12-18 19:38:31]         P_return=0.8150, GHZ witness=0.8150
+[2025-12-18 19:38:31]     block 4/4, subset 5/6, depth 2/4, instance 1/3, rolling mean P_return=0.8150
+[2025-12-18 19:38:34]         P_return=0.8280, GHZ witness=0.8280
+[2025-12-18 19:38:34]     block 4/4, subset 5/6, depth 2/4, instance 2/3, rolling mean P_return=0.8215
+[2025-12-18 19:38:38]         P_return=0.8185, GHZ witness=0.8185
+[2025-12-18 19:38:38]     block 4/4, subset 5/6, depth 2/4, instance 3/3, rolling mean P_return=0.8205
+[2025-12-18 19:38:38]   Saved block 4 subset 0 depth 5 (mean_P_return=0.8205)
+[2025-12-18 19:38:38]   block 4/4, subset 5/6 (id=0), depth 3/4
+[2025-12-18 19:38:42]         P_return=0.7955, GHZ witness=0.7955
+[2025-12-18 19:38:42]     block 4/4, subset 5/6, depth 3/4, instance 1/3, rolling mean P_return=0.7955
+[2025-12-18 19:38:43]         P_return=0.8175, GHZ witness=0.8175
+[2025-12-18 19:38:43]     block 4/4, subset 5/6, depth 3/4, instance 2/3, rolling mean P_return=0.8065
+[2025-12-18 19:38:47]         P_return=0.8055, GHZ witness=0.8055
+[2025-12-18 19:38:47]     block 4/4, subset 5/6, depth 3/4, instance 3/3, rolling mean P_return=0.8062
+[2025-12-18 19:38:47]   Saved block 4 subset 0 depth 7 (mean_P_return=0.8062)
+[2025-12-18 19:38:47]   block 4/4, subset 5/6 (id=0), depth 4/4
+[2025-12-18 19:38:50]         P_return=0.8090, GHZ witness=0.8090
+[2025-12-18 19:38:50]     block 4/4, subset 5/6, depth 4/4, instance 1/3, rolling mean P_return=0.8090
+[2025-12-18 19:38:54]         P_return=0.8150, GHZ witness=0.8150
+[2025-12-18 19:38:54]     block 4/4, subset 5/6, depth 4/4, instance 2/3, rolling mean P_return=0.8120
+[2025-12-18 19:38:58]         P_return=0.7985, GHZ witness=0.7985
+[2025-12-18 19:38:58]     block 4/4, subset 5/6, depth 4/4, instance 3/3, rolling mean P_return=0.8075
+[2025-12-18 19:38:58]   Saved block 4 subset 0 depth 9 (mean_P_return=0.8075)
+[2025-12-18 19:38:58]   block 4/4, subset 6/6 (id=4), depth 1/4
+[2025-12-18 19:39:01]         P_return=0.7210, GHZ witness=0.7210
+[2025-12-18 19:39:01]     block 4/4, subset 6/6, depth 1/4, instance 1/3, rolling mean P_return=0.7210
+[2025-12-18 19:39:06]         P_return=0.7165, GHZ witness=0.7165
+[2025-12-18 19:39:06]     block 4/4, subset 6/6, depth 1/4, instance 2/3, rolling mean P_return=0.7188
+[2025-12-18 19:39:09]         P_return=0.7185, GHZ witness=0.7185
+[2025-12-18 19:39:09]     block 4/4, subset 6/6, depth 1/4, instance 3/3, rolling mean P_return=0.7187
+[2025-12-18 19:39:09]   Saved block 4 subset 4 depth 3 (mean_P_return=0.7187)
+[2025-12-18 19:39:09]   block 4/4, subset 6/6 (id=4), depth 2/4
+[2025-12-18 19:39:13]         P_return=0.7215, GHZ witness=0.7215
+[2025-12-18 19:39:13]     block 4/4, subset 6/6, depth 2/4, instance 1/3, rolling mean P_return=0.7215
+[2025-12-18 19:39:14]         P_return=0.7125, GHZ witness=0.7125
+[2025-12-18 19:39:14]     block 4/4, subset 6/6, depth 2/4, instance 2/3, rolling mean P_return=0.7170
+[2025-12-18 19:39:17]         P_return=0.7360, GHZ witness=0.7360
+[2025-12-18 19:39:17]     block 4/4, subset 6/6, depth 2/4, instance 3/3, rolling mean P_return=0.7233
+[2025-12-18 19:39:17]   Saved block 4 subset 4 depth 5 (mean_P_return=0.7233)
+[2025-12-18 19:39:17]   block 4/4, subset 6/6 (id=4), depth 3/4
+[2025-12-18 19:39:23]         P_return=0.7045, GHZ witness=0.7045
+[2025-12-18 19:39:23]     block 4/4, subset 6/6, depth 3/4, instance 1/3, rolling mean P_return=0.7045
+[2025-12-18 19:39:26]         P_return=0.7160, GHZ witness=0.7160
+[2025-12-18 19:39:26]     block 4/4, subset 6/6, depth 3/4, instance 2/3, rolling mean P_return=0.7103
+[2025-12-18 19:39:30]         P_return=0.7300, GHZ witness=0.7300
+[2025-12-18 19:39:30]     block 4/4, subset 6/6, depth 3/4, instance 3/3, rolling mean P_return=0.7168
+[2025-12-18 19:39:30]   Saved block 4 subset 4 depth 7 (mean_P_return=0.7168)
+[2025-12-18 19:39:30]   block 4/4, subset 6/6 (id=4), depth 4/4
+[2025-12-18 19:39:34]         P_return=0.7330, GHZ witness=0.7330
+[2025-12-18 19:39:34]     block 4/4, subset 6/6, depth 4/4, instance 1/3, rolling mean P_return=0.7330
+[2025-12-18 19:39:38]         P_return=0.7400, GHZ witness=0.7400
+[2025-12-18 19:39:38]     block 4/4, subset 6/6, depth 4/4, instance 2/3, rolling mean P_return=0.7365
+[2025-12-18 19:39:42]         P_return=0.7070, GHZ witness=0.7070
+[2025-12-18 19:39:42]     block 4/4, subset 6/6, depth 4/4, instance 3/3, rolling mean P_return=0.7267
+[2025-12-18 19:39:42]   Saved block 4 subset 4 depth 9 (mean_P_return=0.7267)
+[2025-12-18 19:39:42] 
+============================================================
+[2025-12-18 19:39:42] LOSCHMIDT ECHO INTERLEAVED COMPLETE in 16.7 minutes
+[2025-12-18 19:39:42] Results saved to results/echo_interleaved/mixed/echo_interleaved.csv
