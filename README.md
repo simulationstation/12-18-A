@@ -101,6 +101,33 @@ The runner writes `results/loschmidt_echo_sweep.csv` incrementally (one row per
 subset/depth) plus `results/loschmidt_echo_alpha.csv` with fitted slopes
 \(\alpha_\text{echo}\) versus depth for each subset.
 
+### F) Interleaved Loschmidt echo (block-structured)
+Detect time-varying vs architecture-linked effects by interleaving subsets
+across multiple blocks with randomized order. The experiment fixes a spread of
+low/high-\(C\) subsets (optionally loaded from JSON), shuffles them each block,
+and logs per-(block, subset, depth) return probabilities plus decay fits.
+
+Run (requires `--run-id`):
+```bash
+python run_rb_sweep_braket.py --experiment loschmidt_echo_interleaved \
+    --run-id test --N 11 --num-subsets 6 --depths 3,5,7,9 --loschmidt-K 3 \
+    --num-blocks 4 --shots 2000 --simulator --output results/loschmidt_interleaved.csv
+```
+Use `--u-style local` (short-range) or `--u-style global` (long-range) to bias
+the entangling pattern as a control.
+
+Analyze interleaved data:
+```bash
+python analyze_loschmidt_interleaved.py --inputs results/loschmidt_interleaved.csv \
+    --alpha-csv results/alpha_by_block.csv --corr-csv results/block_corr_summary.csv \
+    --report results/interleaved_report.txt
+```
+
+Permutation histograms are written alongside the correlation summary
+(`rho_perm_block{b}.png`). The report highlights whether the signature is
+architecture-linked (consistent Spearman rho across blocks) or drift-like
+(coherent block-to-block shifts).
+
 ## What this tests
 - **Connectivity metric:** \(C = N \lambda_2\) measures how well-connected the
   architecture is (\(\lambda_2\) is the spectral gap of the normalized
