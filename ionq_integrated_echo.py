@@ -768,18 +768,24 @@ def ionq_native_verbatim_smoke_test(n_qubits: int = 4, depth: int = 2) -> None:
         outer.measure(q)
 
     instruction_names = [_instruction_name(instr) for instr in getattr(outer, "instructions", [])]
-    verbatim_count = sum(1 for name in instruction_names if "verbatim" in name)
+    verbatim_count = sum(1 for name in instruction_names if name == "startverbatimbox")
     if verbatim_count != 1:
         raise RuntimeError(f"Expected exactly one verbatim box; found {verbatim_count}")
-    if len(instruction_names) != verbatim_count:
-        raise RuntimeError("Found non-verbatim instructions outside the verbatim box in native mode.")
+    # Check that only measurements appear after EndVerbatimBox
+    after_end = False
+    for name in instruction_names:
+        if name == "endverbatimbox":
+            after_end = True
+        elif after_end and name not in ("measure", "measurement"):
+            raise RuntimeError(f"Found non-measurement instruction '{name}' outside the verbatim box.")
 
     allowed_inner = {"gpi", "gpi2", "ms", "measure", "measurement"}
     inner_names = {_instruction_name(instr) for instr in getattr(native_prog, "instructions", [])}
     if not inner_names.issubset(allowed_inner):
         raise RuntimeError(f"Unexpected gate(s) inside verbatim program: {inner_names - allowed_inner}")
-    if len(getattr(outer, "result_types", [])) != n_qubits:
-        raise RuntimeError("Measurement operations must sit outside the verbatim box for every qubit.")
+    measure_count = sum(1 for name in instruction_names if name in ("measure", "measurement"))
+    if measure_count != n_qubits:
+        raise RuntimeError(f"Expected {n_qubits} measurements outside verbatim box; found {measure_count}.")
 
     try:
         ir_text = outer.to_ir().json().lower()
@@ -849,12 +855,12 @@ def _decision_from_core(records: List[Dict], depths: List[int]) -> Dict[str, Any
         "mean_mitigated": mean_map,
         "stderr_mitigated": stderr_map,
         "depths_requested": depths,
-        "criterion_diff_pass": diff_pass,
-        "criterion_slope_pass": slope_pass,
-        "delta_2_vs_16": diff_score,
-        "slope": slope,
-        "slope_p_value": p_value,
-        "proceed_to_sweep": decision,
+        "criterion_diff_pass": bool(diff_pass),
+        "criterion_slope_pass": bool(slope_pass),
+        "delta_2_vs_16": float(diff_score) if diff_score is not None else None,
+        "slope": float(slope) if slope is not None else None,
+        "slope_p_value": float(p_value) if p_value is not None else None,
+        "proceed_to_sweep": bool(decision),
     }
 
 
