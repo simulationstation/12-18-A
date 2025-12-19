@@ -371,6 +371,95 @@ def apply_entangler(circ: Circuit, q1: int, q2: int, params: Dict[str, float], m
     raise ValueError(f"Unsupported entangler mode: {mode}")
 
 
+def _apply_native_one_qubit(circ: Circuit, gate_name: str, qubit: int, phi: float) -> Gate:
+    method = getattr(circ, gate_name, None)
+    if callable(method):
+        method(qubit, phi)
+    else:
+        gate_cls = gates.GPi if gate_name == "gpi" else gates.GPi2
+        circ.add(gate_cls(phi), [qubit])
+    return (gate_name, (qubit,), (phi,))
+
+
+def _apply_native_ms(circ: Circuit, q1: int, q2: int, theta: float, phi: float) -> Gate:
+    ms_method = getattr(circ, "ms", None)
+    if callable(ms_method):
+        try:
+            ms_method(q1, q2, theta, phi)
+        except TypeError:
+            ms_method(q1, q2, theta)
+    else:
+        try:
+            circ.add(gates.MS(theta, phi), [q1, q2])
+        except TypeError:
+            circ.add(gates.MS(theta), [q1, q2])
+    return ("ms", (q1, q2), (theta, phi))
+
+
+def _native_scramble_layer(circ: Circuit, n_qubits: int, rng: np.random.Generator) -> List[Gate]:
+    log: List[Gate] = []
+    for q in range(n_qubits):
+        phi1 = float(rng.uniform(0, 2 * np.pi))
+        phi2 = float(rng.uniform(0, 2 * np.pi))
+        phi3 = float(rng.uniform(0, 2 * np.pi))
+        log.append(_apply_native_one_qubit(circ, "gpi2", q, phi1))
+        log.append(_apply_native_one_qubit(circ, "gpi", q, phi2))
+        log.append(_apply_native_one_qubit(circ, "gpi2", q, phi3))
+    return log
+
+
+def _apply_native_matching_layer(
+    circ: Circuit, layer: Matching, entangler_params: Optional[Dict[str, float]] = None
+) -> List[Gate]:
+    entangler_params = entangler_params or _default_entangler_params("ms")
+    theta = entangler_params.get("theta", math.pi / 2)
+    phi = entangler_params.get("phi", 0.0)
+    log: List[Gate] = []
+    for q1, q2 in layer:
+        log.append(_apply_native_ms(circ, q1, q2, theta, phi))
+    return log
+
+
+def invert_native_gate(circ: Circuit, gate: Gate) -> None:
+    name, qubits, params = gate
+    if name == "gpi":
+        _apply_native_one_qubit(circ, "gpi", qubits[0], params[0])
+    elif name == "gpi2":
+        inv_phi = (params[0] + math.pi) % (2 * math.pi)
+        _apply_native_one_qubit(circ, "gpi2", qubits[0], inv_phi)
+    elif name == "ms":
+        theta = params[0]
+        phi = params[1] if len(params) > 1 else 0.0
+        _apply_native_ms(circ, qubits[0], qubits[1], -theta, phi)
+    else:
+        raise ValueError(f"Unsupported native gate for inversion: {name}")
+
+
+def build_echo_program_native_ionq(
+    family: str,
+    depth: int,
+    n_qubits: int,
+    rng: np.random.Generator,
+    entangler_params: Optional[Dict[str, float]] = None,
+) -> Tuple[Circuit, List[Matching]]:
+    native_prog = Circuit()
+    log: List[Gate] = []
+    schedule: List[Matching] = []
+    if depth == 0:
+        pass
+    elif depth == 1:
+        log.extend(_native_scramble_layer(native_prog, n_qubits, rng))
+    else:
+        schedule = matching_schedule(family, n_qubits, depth, rng)
+        for layer in schedule:
+            log.extend(_native_scramble_layer(native_prog, n_qubits, rng))
+            log.extend(_apply_native_matching_layer(native_prog, layer, entangler_params))
+
+    for gate in reversed(log):
+        invert_native_gate(native_prog, gate)
+    return native_prog, schedule
+
+
 # ---------------------------------------------------------------------------
 # Calibration + mitigation
 # ---------------------------------------------------------------------------
@@ -549,6 +638,7 @@ def run_and_collect_metadata(
     shots: int,
     prefer_verbatim: bool,
     n_qubits: int,
+    logical_circuit: Optional[Circuit] = None,
 ) -> Tuple[Dict[str, int], float, str, Dict[str, Any], int, Dict[str, Any], int, str]:
     started = time.time()
     result = None
@@ -568,7 +658,7 @@ def run_and_collect_metadata(
 
     counts = dict(result.measurement_counts)
     runtime_s = time.time() - started
-    logical_counts, logical_depth = gate_count_summary(circ)
+    logical_counts, logical_depth = gate_count_summary(logical_circuit or circ)
     circuit_ir_hash = circuit_hash(circ)
     compiled_counts, compiled_depth, compiled_ir_hash, compiled_info = compiled_metadata_from_result(
         result, logical_counts, logical_depth, circuit_ir_hash
@@ -598,7 +688,7 @@ class ExperimentJob:
     seed: int
 
 
-def build_integrated_loschmidt(
+def build_echo_program_generic(
     family: str,
     depth: int,
     n_qubits: int,
@@ -626,11 +716,22 @@ def build_integrated_loschmidt(
     return circ, schedule
 
 
+def build_integrated_loschmidt(
+    family: str,
+    depth: int,
+    n_qubits: int,
+    rng: np.random.Generator,
+    gate_label: str,
+    entangler_params: Optional[Dict[str, float]] = None,
+) -> Tuple[Circuit, List[Matching]]:
+    return build_echo_program_generic(family, depth, n_qubits, rng, gate_label, entangler_params)
+
+
 def entangler_smoke_test(entangler_mode: str) -> None:
     """Small local check to ensure selected entangler serializes and runs for N=4, depth=2."""
     rng = np.random.default_rng(123)
     schedule = matching_schedule("ring", 4, 2, rng)
-    circ, _ = build_integrated_loschmidt(
+    circ, _ = build_echo_program_generic(
         family="ring",
         depth=2,
         n_qubits=4,
@@ -642,6 +743,51 @@ def entangler_smoke_test(entangler_mode: str) -> None:
     if entangler_mode in ("zz", "ms") and "cz" in circ_text:
         raise RuntimeError("Entangler smoke test detected CZ when a native IonQ entangler was requested.")
     LocalSimulator().run(circ, shots=4).result()
+
+
+def _instruction_name(instr) -> str:
+    op = getattr(instr, "operator", None)
+    if op is None:
+        return ""
+    return getattr(op, "name", op.__class__.__name__).lower()
+
+
+def ionq_native_verbatim_smoke_test(n_qubits: int = 4, depth: int = 2) -> None:
+    """Verify the native verbatim builder keeps a single verbatim box with allowed gates only."""
+    rng = np.random.default_rng(999)
+    native_prog, _ = build_echo_program_native_ionq(
+        family="ring",
+        depth=depth,
+        n_qubits=n_qubits,
+        rng=rng,
+        entangler_params=_default_entangler_params("ms"),
+    )
+    outer = Circuit()
+    outer.add_verbatim_box(native_prog)
+    for q in range(n_qubits):
+        outer.measure(q)
+
+    instruction_names = [_instruction_name(instr) for instr in getattr(outer, "instructions", [])]
+    verbatim_count = sum(1 for name in instruction_names if "verbatim" in name)
+    if verbatim_count != 1:
+        raise RuntimeError(f"Expected exactly one verbatim box; found {verbatim_count}")
+    if len(instruction_names) != verbatim_count:
+        raise RuntimeError("Found non-verbatim instructions outside the verbatim box in native mode.")
+
+    allowed_inner = {"gpi", "gpi2", "ms", "measure", "measurement"}
+    inner_names = {_instruction_name(instr) for instr in getattr(native_prog, "instructions", [])}
+    if not inner_names.issubset(allowed_inner):
+        raise RuntimeError(f"Unexpected gate(s) inside verbatim program: {inner_names - allowed_inner}")
+    if len(getattr(outer, "result_types", [])) != n_qubits:
+        raise RuntimeError("Measurement operations must sit outside the verbatim box for every qubit.")
+
+    try:
+        ir_text = outer.to_ir().json().lower()
+    except Exception:
+        ir_text = str(outer).lower()
+    for forbidden in ("cz", "zz", "cnot"):
+        if forbidden in ir_text:
+            raise RuntimeError(f"Forbidden gate {forbidden} detected in native verbatim circuit IR.")
 
 
 def _jobs_for_block(phase: str, families: Sequence[str], depths: Sequence[int], seeds: Sequence[int]) -> List[ExperimentJob]:
@@ -899,11 +1045,13 @@ def run_phase(
     start_block: int,
     entangler_params: Optional[Dict[str, float]] = None,
     skip_calibration: bool = False,
+    ionq_native_verbatim: bool = False,
 ) -> Tuple[List[Dict[str, Any]], int]:
     records: List[Dict[str, Any]] = []
     block_groups = _block_seeds(n_seeds, recalibrate_every)
     block_index = start_block
     entangler_params = entangler_params or _default_entangler_params(gate_label)
+    prefer_verbatim_effective = prefer_verbatim or ionq_native_verbatim
     for seeds in block_groups:
         if skip_calibration:
             # Create null calibration (identity matrices = no SPAM correction)
@@ -926,32 +1074,55 @@ def run_phase(
                 shots=calibration_shots,
                 block_index=block_index,
                 output_dir=os.path.dirname(output_jsonl) or ".",
-                prefer_verbatim=prefer_verbatim,
+                prefer_verbatim=prefer_verbatim_effective,
                 device_info=device_info,
             )
         jobs = _jobs_for_block(phase, families, depths, seeds)
         for job in jobs:
             seed_seq = np.random.SeedSequence([base_seed, job.seed, job.depth, hash(job.family) & 0xFFFFFFFF])
             rng = np.random.default_rng(seed_seq)
-            circ, schedule = build_integrated_loschmidt(
-                family=job.family,
-                depth=job.depth,
-                n_qubits=n_qubits,
-                rng=rng,
-                gate_label=gate_label,
-                entangler_params=entangler_params,
-            )
+            native_gate_set_used: List[str] = []
+            compilation_mode_label = "compiled"
+            logical_circ: Circuit
+            if ionq_native_verbatim:
+                entangler_params = entangler_params or _default_entangler_params("ms")
+                native_prog, schedule = build_echo_program_native_ionq(
+                    family=job.family,
+                    depth=job.depth,
+                    n_qubits=n_qubits,
+                    rng=rng,
+                    entangler_params=entangler_params,
+                )
+                circ = Circuit()
+                circ.add_verbatim_box(native_prog)
+                for q in range(n_qubits):
+                    circ.measure(q)
+                logical_circ = native_prog
+                native_gate_set_used = ["gpi", "gpi2", "ms"]
+                compilation_mode_label = "ionq_native_verbatim"
+            else:
+                circ, schedule = build_echo_program_generic(
+                    family=job.family,
+                    depth=job.depth,
+                    n_qubits=n_qubits,
+                    rng=rng,
+                    gate_label=gate_label,
+                    entangler_params=entangler_params,
+                )
+                logical_circ = circ
             (
                 counts,
                 runtime_s,
-                compilation_mode,
+                hardware_mode,
                 logical_counts,
                 logical_depth,
                 compiled_counts,
                 compiled_depth,
                 compiled_ir_hash,
                 compiled_info,
-            ) = run_and_collect_metadata(device, circ, shots, prefer_verbatim, n_qubits)
+            ) = run_and_collect_metadata(
+                device, circ, shots, prefer_verbatim_effective, n_qubits, logical_circuit=logical_circ
+            )
 
             raw_p = counts.get("0" * n_qubits, 0) / float(shots)
             mitigated = mitigated_p_return(counts, n_qubits, shots, calib.matrices)
@@ -972,7 +1143,10 @@ def run_phase(
                 "calibration_hash": calib.hash,
                 "calibration_block": calib.block_index,
                 "calibration_metadata": calib.file_path,
-                "compilation_mode": compilation_mode,
+                "compilation_mode": compilation_mode_label,
+                "hardware_compilation_mode": hardware_mode,
+                "native_gate_set_used": native_gate_set_used,
+                "ionq_native_verbatim": ionq_native_verbatim,
                 "logical_gate_counts": logical_counts,
                 "logical_circuit_depth": logical_depth,
                 "compiled_gate_counts": compiled_counts,
@@ -985,13 +1159,13 @@ def run_phase(
                 "schedule": schedule,
                 "base_seed": base_seed,
                 "entangler_mode": gate_label,
-                "verbatim_requested": prefer_verbatim,
+                "verbatim_requested": prefer_verbatim_effective,
             }
             write_jsonl(output_jsonl, record)
             records.append(record)
             print(
                 f"[{record['timestamp_utc']}] {phase} {job.family} depth {job.depth} seed {job.seed} "
-                f"raw={raw_p:.4f} mitigated={mitigated:.4f} calib={calib.hash[:8]} mode={compilation_mode}"
+                f"raw={raw_p:.4f} mitigated={mitigated:.4f} calib={calib.hash[:8]} mode={hardware_mode}"
             )
         block_index += 1
     return records, block_index
@@ -999,8 +1173,10 @@ def run_phase(
 
 def run_integrated(args) -> None:
     device, device_info = resolve_device(args.device)
-    gate_label = _two_qubit_gate_fn(device, args.two_qubit_entangler)
+    gate_label = "ms" if args.ionq_native_verbatim else _two_qubit_gate_fn(device, args.two_qubit_entangler)
     entangler_params = _default_entangler_params(gate_label)
+    if args.ionq_native_verbatim and args.two_qubit_entangler != "auto":
+        print("IonQ native verbatim mode overrides --two_qubit_entangler to 'ms'.")
     base_seed = args.base_seed
     n_qubits = args.n_qubits
     require_even_qubits(n_qubits)
@@ -1011,10 +1187,14 @@ def run_integrated(args) -> None:
     depths_sweep = [int(d) for d in args.depths_sweep.split(",") if str(d).strip()]
 
     print(f"Selected device: {device_info['device_name']} ({device_info['device_arn']}) provider={device_info['provider']}")
-    if gate_label in ("zz", "ms"):
+    if args.ionq_native_verbatim:
+        print("Running IonQ native verbatim smoke test on local simulator...")
+        ionq_native_verbatim_smoke_test(n_qubits=min(4, n_qubits))
+    elif gate_label in ("zz", "ms"):
         print(f"Running entangler smoke test (mode={gate_label}) on local simulator...")
         entangler_smoke_test(gate_label)
-    print(f"Entangler mode: {gate_label} (flag={args.two_qubit_entangler})")
+    entangler_flag = "ionq_native_verbatim" if args.ionq_native_verbatim else args.two_qubit_entangler
+    print(f"Entangler mode: {gate_label} (flag={entangler_flag})")
     print("Starting Phase A (core)...")
     core_records, next_block = run_phase(
         device=device,
@@ -1029,11 +1209,12 @@ def run_integrated(args) -> None:
         output_jsonl=output_jsonl,
         calibration_shots=args.calibration_shots,
         recalibrate_every=args.recalibrate_every,
-        prefer_verbatim=args.use_verbatim,
+        prefer_verbatim=True if args.ionq_native_verbatim else args.use_verbatim,
         gate_label=gate_label,
         start_block=0,
         entangler_params=entangler_params,
         skip_calibration=args.skip_calibration,
+        ionq_native_verbatim=args.ionq_native_verbatim,
     )
 
     decision = _decision_from_core(core_records, depths_core)
@@ -1058,11 +1239,12 @@ def run_integrated(args) -> None:
             output_jsonl=output_jsonl,
             calibration_shots=args.calibration_shots,
             recalibrate_every=args.recalibrate_every,
-            prefer_verbatim=args.use_verbatim,
+            prefer_verbatim=True if args.ionq_native_verbatim else args.use_verbatim,
             gate_label=gate_label,
             start_block=next_block,
             entangler_params=entangler_params,
             skip_calibration=args.skip_calibration,
+            ionq_native_verbatim=args.ionq_native_verbatim,
         )
     else:
         print("Skipping Phase B sweep because decay criterion was not met.")
@@ -1107,6 +1289,13 @@ def parse_args():
         action=argparse.BooleanOptionalAction,
         default=True,
         help="Request verbatim/native compilation when supported.",
+    )
+    run_p.add_argument(
+        "--ionq_native_verbatim",
+        dest="ionq_native_verbatim",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+        help="Build the entire program as a single IonQ-native verbatim box (gpi/gpi2/ms only).",
     )
     run_p.add_argument(
         "--two_qubit_entangler",
