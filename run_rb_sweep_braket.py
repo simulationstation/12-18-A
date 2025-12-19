@@ -25,10 +25,12 @@ import random
 import os
 import sys
 from datetime import datetime
-from typing import List, Tuple, Dict, Optional
+from typing import List, Tuple, Dict
 import numpy as np
 import networkx as nx
 from scipy.optimize import curve_fit
+from scipy.stats import linregress
+from scipy.stats import linregress
 
 from braket.aws import AwsDevice
 from braket.circuits import Circuit, gates
@@ -156,6 +158,186 @@ def compute_ghz_success_prob(measurements: np.ndarray) -> float:
     ones_counts = np.sum(measurements, axis=1)
     successes = np.sum((ones_counts == 0) | (ones_counts == qubits))
     return successes / shots
+
+
+def compute_all_zero_prob(measurements: np.ndarray) -> float:
+    """Return success probability for measuring all zeros."""
+    if measurements.ndim != 2:
+        raise ValueError("Measurements array must be 2D (shots, qubits)")
+    shots = measurements.shape[0]
+    if shots == 0:
+        raise ValueError("No measurement shots returned")
+    zeros = np.sum(np.all(measurements == 0, axis=1))
+    return zeros / shots
+
+
+def invert_instruction(circuit: Circuit, instruction) -> None:
+    """Append the inverse of a single instruction to the circuit."""
+    name = instruction.operator.name.upper()
+    targets = instruction.target
+
+    if name == 'H':
+        circuit.h(targets[0])
+    elif name == 'X':
+        circuit.x(targets[0])
+    elif name == 'Y':
+        circuit.y(targets[0])
+    elif name == 'Z':
+        circuit.z(targets[0])
+    elif name == 'CNOT':
+        circuit.cnot(targets[0], targets[1])
+    elif name == 'CZ':
+        circuit.cz(targets[0], targets[1])
+    elif name == 'RX':
+        circuit.rx(targets[0], -instruction.operator.angle)
+    elif name == 'RY':
+        circuit.ry(targets[0], -instruction.operator.angle)
+    elif name == 'RZ':
+        circuit.rz(targets[0], -instruction.operator.angle)
+    elif name == 'PHASESHIFT':
+        circuit.phaseshift(targets[0], -instruction.operator.angle)
+    else:
+        raise ValueError(f"Unsupported gate for inversion: {name}")
+
+
+def append_inverse_from_instructions(circuit: Circuit, instructions: List) -> None:
+    """Append inverses for a list of instructions to the circuit (reverse order)."""
+    for instr in reversed(instructions):
+        invert_instruction(circuit, instr)
+
+
+def generate_brickwork_unitary(qubits: List[int], edges: List[Tuple[int, int]], depth: int,
+                               rng: random.Random, circuit: Circuit) -> List[List[Tuple]]:
+    """
+    Generate a brickwork pattern of 1Q rotations + 2Q entanglers.
+
+    Returns a log of operations for later inversion: list over layers, each layer
+    is a list of tuples ('rx'/'ry'/'rz'/'cz', params...).
+    """
+    op_log: List[List[Tuple]] = []
+
+    for _ in range(depth):
+        layer_ops: List[Tuple] = []
+
+        # 1Q rotations
+        for q in qubits:
+            theta_x = rng.uniform(0, 2 * np.pi)
+            theta_z = rng.uniform(0, 2 * np.pi)
+            circuit.rx(q, theta_x)
+            circuit.rz(q, theta_z)
+            layer_ops.append(('rx', q, theta_x))
+            layer_ops.append(('rz', q, theta_z))
+
+        # 2Q entanglers on disjoint edges to keep depth modest
+        available_edges = list(edges)
+        rng.shuffle(available_edges)
+        used: set = set()
+        for q1, q2 in available_edges:
+            if q1 in used or q2 in used:
+                continue
+            if rng.random() < 0.5:
+                circuit.cz(q1, q2)
+                layer_ops.append(('cz', q1, q2))
+                used.add(q1)
+                used.add(q2)
+
+        op_log.append(layer_ops)
+
+    return op_log
+
+
+def append_inverse_brickwork(circuit: Circuit, op_log: List[List[Tuple]]) -> None:
+    """Append the exact inverse of the brickwork operations."""
+    for layer_ops in reversed(op_log):
+        for op in reversed(layer_ops):
+            if op[0] == 'rx':
+                circuit.rx(op[1], -op[2])
+            elif op[0] == 'ry':
+                circuit.ry(op[1], -op[2])
+            elif op[0] == 'rz':
+                circuit.rz(op[1], -op[2])
+            elif op[0] == 'cz':
+                circuit.cz(op[1], op[2])
+            else:
+                raise ValueError(f"Unknown op in brickwork log: {op[0]}")
+
+
+def build_loschmidt_echo_circuit(subgraph: nx.Graph,
+                                 depth: int,
+                                 rng: random.Random) -> Circuit:
+    """
+    Build a Loschmidt echo circuit:
+        - Prepare GHZ on the connected subgraph
+        - Apply forward brickwork unitary U (depth layers)
+        - Apply exact inverse U†
+        - Unprepare GHZ (inverse of prep)
+        - Measure all qubits in Z
+    """
+    if not nx.is_connected(subgraph):
+        raise ValueError("Subgraph must be connected for Loschmidt echo")
+
+    qubits = sorted(subgraph.nodes())
+    edges = list(subgraph.edges())
+
+    circuit = Circuit()
+
+    # GHZ preparation with recorded instructions for inversion
+    ghz_circuit = build_randomized_ghz_circuit(subgraph, rng)
+    ghz_instructions = list(ghz_circuit.instructions)
+    circuit.add_circuit(ghz_circuit)
+
+    # Forward unitary
+    op_log = generate_brickwork_unitary(qubits, edges, depth, rng, circuit)
+
+    # Exact inverse
+    append_inverse_brickwork(circuit, op_log)
+
+    # Uncompute GHZ
+    append_inverse_from_instructions(circuit, ghz_instructions)
+
+    # Measurements
+    for q in qubits:
+        circuit.measure(q)
+
+    return circuit
+
+
+def run_loschmidt_echo_instance(device,
+                                subset: Tuple[int, ...],
+                                subgraph: nx.Graph,
+                                depth: int,
+                                shots: int,
+                                rng: random.Random,
+                                logger=None) -> Tuple[float, float]:
+    """Run a single Loschmidt echo instance and return (P_return, GHZ_witness)."""
+    circuit = build_loschmidt_echo_circuit(subgraph, depth, rng)
+    task = device.run(circuit, shots=shots)
+    result = task.result()
+    measurements = np.array(result.measurements)
+
+    p_return = compute_all_zero_prob(measurements)
+    ghz_witness = compute_ghz_success_prob(measurements)
+
+    if logger:
+        log(f"        P_return={p_return:.4f}, GHZ witness={ghz_witness:.4f}", logger)
+
+    return p_return, ghz_witness
+
+
+def fit_loschmidt_alpha(depths: List[int], p_returns: List[float], fit_eps: float) -> Tuple[float, float, int]:
+    """
+    Fit slope alpha via linear regression of -log(P_return) vs depth.
+
+    Only include points with P_return > fit_eps to avoid log underflow.
+    Returns (alpha, stderr, num_points).
+    """
+    valid = [(d, p) for d, p in zip(depths, p_returns) if p > fit_eps]
+    if len(valid) < 2:
+        return np.nan, np.nan, len(valid)
+    xs, ys = zip(*valid)
+    neg_logs = [-np.log(p) for p in ys]
+    res = linregress(xs, neg_logs)
+    return res.slope, res.stderr, len(valid)
 
 
 def generate_diverse_subsets(G: nx.Graph, N: int, num_subsets: int, seed: int,
@@ -843,33 +1025,212 @@ def run_compiler_fragility_sweep(device,
     log(f"Results saved to {output_csv}", logger)
 
 
+def run_loschmidt_echo_sweep(device,
+                             G: nx.Graph,
+                             subsets: List[Tuple[int, ...]],
+                             depths: List[int],
+                             shots: int,
+                             K: int,
+                             seed: int,
+                             output_csv: str,
+                             alpha_output: str,
+                             fit_eps: float,
+                             logger=None,
+                             resume: bool = True):
+    """Run Loschmidt echo experiments across subsets with incremental CSV writes."""
+    completed = set()
+    existing_rows: Dict[int, List[Tuple[int, float]]] = {}
+    if resume and os.path.exists(output_csv):
+        with open(output_csv, 'r') as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                completed.add((int(row['subset_id']), int(row['depth'])))
+                existing_rows.setdefault(int(row['subset_id']), []).append(
+                    (int(row['depth']), float(row['mean_P_return']))
+                )
+        log(f"Resuming: {len(completed)} depth points already completed", logger)
+
+    completed_alpha = set()
+    if resume and os.path.exists(alpha_output):
+        with open(alpha_output, 'r') as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                completed_alpha.add(int(row['subset_id']))
+
+    fieldnames = [
+        'experiment_type', 'device', 'subset_id', 'qubits', 'N', 'lambda2', 'C',
+        'depth', 'K', 'shots', 'mean_P_return', 'sem_P_return', 'timestamp'
+    ]
+    alpha_fields = [
+        'experiment_type', 'device', 'subset_id', 'qubits', 'N', 'lambda2', 'C',
+        'fit_eps', 'alpha', 'alpha_stderr', 'points', 'timestamp'
+    ]
+
+    write_header = not os.path.exists(output_csv) or os.path.getsize(output_csv) == 0
+    write_alpha_header = not os.path.exists(alpha_output) or os.path.getsize(alpha_output) == 0
+
+    os.makedirs(os.path.dirname(output_csv) if os.path.dirname(output_csv) else '.', exist_ok=True)
+    os.makedirs(os.path.dirname(alpha_output) if os.path.dirname(alpha_output) else '.', exist_ok=True)
+
+    start_time = time.time()
+
+    for i, subset in enumerate(subsets):
+        elapsed = (time.time() - start_time) / 60
+        log(f"\n[{i+1}/{len(subsets)}] Subset {i} (elapsed: {elapsed:.1f} min)", logger)
+        log(f"  Qubits: {subset}", logger)
+
+        subgraph = G.subgraph(subset).copy()
+        metrics = compute_architecture_metrics(subgraph)
+        log(f"  lambda2={metrics['lambda2']:.4f}, C={metrics['C']:.4f}", logger)
+
+        if metrics['diameter'] == -1:
+            log("  SKIPPING: disconnected subset", logger)
+            continue
+
+        rng = random.Random(seed + i)
+        depth_means: List[Tuple[int, float]] = existing_rows.get(i, []).copy()
+
+        for depth in depths:
+            if (i, depth) in completed:
+                log(f"  Depth {depth} already completed, skipping", logger)
+                continue
+
+            log(f"  Depth {depth}: running {K} instances", logger)
+            p_returns: List[float] = []
+
+            for k in range(K):
+                log(f"    Instance {k+1}/{K}", logger)
+                try:
+                    p_return, _ = run_loschmidt_echo_instance(
+                        device,
+                        subset,
+                        subgraph,
+                        depth,
+                        shots,
+                        rng,
+                        logger
+                    )
+                    p_returns.append(p_return)
+                    running_mean = float(np.mean(p_returns))
+                    log(f"      Running mean P_return={running_mean:.4f}", logger)
+                except Exception as e:
+                    log(f"      FAILED instance {k+1}: {e}", logger)
+                    p_returns.append(np.nan)
+
+            finite = [p for p in p_returns if not np.isnan(p)]
+            if not finite:
+                log(f"  FAILED: all instances failed at depth {depth}", logger)
+                continue
+
+            mean_p = float(np.mean(finite))
+            sem_p = float(np.std(finite, ddof=1) / np.sqrt(len(finite))) if len(finite) > 1 else 0.0
+            depth_means.append((depth, mean_p))
+
+            row = {
+                'experiment_type': 'loschmidt_echo',
+                'device': device.name if hasattr(device, 'name') else str(device),
+                'subset_id': i,
+                'qubits': str(subset),
+                'N': len(subset),
+                'lambda2': metrics['lambda2'],
+                'C': metrics['C'],
+                'depth': depth,
+                'K': K,
+                'shots': shots,
+                'mean_P_return': mean_p,
+                'sem_P_return': sem_p,
+                'timestamp': datetime.now().isoformat()
+            }
+
+            with open(output_csv, 'a', newline='') as f:
+                writer = csv.DictWriter(f, fieldnames=fieldnames)
+                if write_header:
+                    writer.writeheader()
+                    write_header = False
+                writer.writerow(row)
+
+            log(f"  Saved depth {depth} result (mean_P_return={mean_p:.4f})", logger)
+
+        # Fit alpha for this subset
+        if i in completed_alpha:
+            log("  Alpha fit already exists, skipping fit", logger)
+            continue
+
+        if depth_means:
+            depth_means.sort(key=lambda x: x[0])
+            depths_sorted = [d for d, _ in depth_means]
+            p_sorted = [p for _, p in depth_means]
+            alpha, stderr, points = fit_loschmidt_alpha(depths_sorted, p_sorted, fit_eps)
+
+            alpha_row = {
+                'experiment_type': 'loschmidt_echo',
+                'device': device.name if hasattr(device, 'name') else str(device),
+                'subset_id': i,
+                'qubits': str(subset),
+                'N': len(subset),
+                'lambda2': metrics['lambda2'],
+                'C': metrics['C'],
+                'fit_eps': fit_eps,
+                'alpha': alpha,
+                'alpha_stderr': stderr,
+                'points': points,
+                'timestamp': datetime.now().isoformat()
+            }
+
+            with open(alpha_output, 'a', newline='') as f:
+                writer = csv.DictWriter(f, fieldnames=alpha_fields)
+                if write_alpha_header:
+                    writer.writeheader()
+                    write_alpha_header = False
+                writer.writerow(alpha_row)
+
+            log(f"  Alpha fit saved (alpha={alpha:.4f}, points={points})", logger)
+
+    elapsed = (time.time() - start_time) / 60
+    log(f"\n{'='*60}", logger)
+    log(f"LOSCHMIDT ECHO SWEEP COMPLETE in {elapsed:.1f} minutes", logger)
+    log(f"Results saved to {output_csv}", logger)
+
+
 def main():
     parser = argparse.ArgumentParser(description='AWS Braket RB Sweep')
     parser.add_argument('--device', type=str, default='arn:aws:braket:us-west-1::device/qpu/rigetti/Ankaa-3',
                         help='Braket device ARN')
     parser.add_argument('--N', type=int, default=7, help='Subset size')
     parser.add_argument('--num-subsets', type=int, default=30, help='Number of subsets')
-    parser.add_argument('--depths', type=str, default='1,2,4,8,16,32', help='Comma-separated depths')
+    parser.add_argument('--depths', type=str, default=None, help='Comma-separated depths')
     parser.add_argument('--shots', type=int, default=1000, help='Shots per circuit')
     parser.add_argument('--seed', type=int, default=42, help='Random seed')
     parser.add_argument('--output', type=str, default=None, help='Output CSV (auto-set by experiment type)')
     parser.add_argument('--resume', action='store_true', default=True, help='Resume from existing results')
     parser.add_argument('--simulator', action='store_true', help='Use local simulator instead of QPU')
-    parser.add_argument('--experiment', type=str, choices=['rb', 'logical_code', 'compiler_fragility'], default='rb',
-                        help='Experiment type: rb (mirror RB), logical_code (repetition code), or compiler_fragility (GHZ variance)')
+    parser.add_argument('--experiment', type=str, choices=['rb', 'logical_code', 'compiler_fragility', 'loschmidt_echo'], default='rb',
+                        help='Experiment type: rb (mirror RB), logical_code (repetition code), compiler_fragility (GHZ variance), or loschmidt_echo (echo decay).')
     parser.add_argument('--logical-rounds', type=int, default=2, help='Parity-check rounds for logical experiment')
     parser.add_argument('--num-compilations', type=int, default=10,
                         help='Number of compilations/layouts for compiler fragility experiment')
+    parser.add_argument('--loschmidt-K', type=int, default=5, help='Number of random unitaries per depth for echo')
+    parser.add_argument('--fit-eps', type=float, default=1e-3, help='Minimum P_return to include in alpha fit')
+    parser.add_argument('--alpha-output', type=str, default='results/loschmidt_echo_alpha.csv',
+                        help='Output CSV for fitted alpha values (per subset)')
 
     args = parser.parse_args()
 
-    depths = [int(d) for d in args.depths.split(',')]
+    if args.depths:
+        depths = [int(d) for d in args.depths.split(',')]
+    else:
+        if args.experiment == 'loschmidt_echo':
+            depths = [5, 10, 20, 30]
+        else:
+            depths = [1, 2, 4, 8, 16, 32]
     output_path = args.output
     if output_path is None:
         if args.experiment == 'logical_code':
             output_path = 'results/logical_code_sweep.csv'
         elif args.experiment == 'compiler_fragility':
             output_path = 'results/compiler_fragility_sweep.csv'
+        elif args.experiment == 'loschmidt_echo':
+            output_path = 'results/loschmidt_echo_sweep.csv'
         else:
             output_path = 'results/rb_sweep_braket.csv'
 
@@ -889,11 +1250,19 @@ def main():
         log(f"Depths: {depths}", logger)
     elif args.experiment == 'logical_code':
         log(f"Rounds: {args.logical_rounds}", logger)
+    elif args.experiment == 'loschmidt_echo':
+        if args.N not in (7, 9):
+            log(f"WARNING: loschmidt_echo validated for N in [7, 9]; using N={args.N}", logger)
+        log(f"Depths: {depths}", logger)
+        log(f"K (instances per depth): {args.loschmidt_K}", logger)
+        log(f"Fit eps: {args.fit_eps}", logger)
     else:
         log(f"Num compilations: {args.num_compilations}", logger)
     log(f"Shots: {args.shots}", logger)
     log(f"Seed: {args.seed}", logger)
     log(f"Output CSV: {output_path}", logger)
+    if args.experiment == 'loschmidt_echo':
+        log(f"Alpha CSV: {args.alpha_output}", logger)
     log(f"Resume: {args.resume}", logger)
     log(f"Simulator: {args.simulator}", logger)
     log("=" * 60, logger)
@@ -930,6 +1299,23 @@ def main():
         log("=" * 60, logger)
         run_logical_code_sweep(device, G, subsets, args.logical_rounds,
                                args.shots, args.seed, output_path, logger, args.resume)
+    elif args.experiment == 'loschmidt_echo':
+        log("STARTING LOSCHMIDT ECHO SWEEP", logger)
+        log("=" * 60, logger)
+        run_loschmidt_echo_sweep(
+            device,
+            G,
+            subsets,
+            depths,
+            args.shots,
+            args.loschmidt_K,
+            args.seed,
+            output_path,
+            args.alpha_output,
+            args.fit_eps,
+            logger,
+            args.resume
+        )
     else:
         log("STARTING COMPILER FRAGILITY SWEEP", logger)
         log("=" * 60, logger)
