@@ -1,0 +1,49 @@
+[2025-12-18 17:18:42] ============================================================
+[2025-12-18 17:18:42] AWS Braket Experiment Runner
+[2025-12-18 17:18:42] ============================================================
+[2025-12-18 17:18:42] Device: arn:aws:braket:us-west-1::device/qpu/rigetti/Ankaa-3
+[2025-12-18 17:18:42] Subset size N: 7
+[2025-12-18 17:18:42] Num subsets: 1
+[2025-12-18 17:18:42] Experiment: loschmidt_echo
+[2025-12-18 17:18:42] Depths: [5, 10]
+[2025-12-18 17:18:42] K (instances per depth): 2
+[2025-12-18 17:18:42] Fit eps: 0.001
+[2025-12-18 17:18:42] Shots: 500
+[2025-12-18 17:18:42] Seed: 42
+[2025-12-18 17:18:42] Output CSV: results/loschmidt_echo_test.csv
+[2025-12-18 17:18:42] Alpha CSV: results/loschmidt_echo_alpha.csv
+[2025-12-18 17:18:42] Resume: True
+[2025-12-18 17:18:42] Simulator: False
+[2025-12-18 17:18:42] ============================================================
+[2025-12-18 17:18:44] Device: Ankaa-3, Status: ONLINE
+[2025-12-18 17:18:44] Graph: 80 nodes, 136 edges
+[2025-12-18 17:18:44] Generated 1 subsets
+[2025-12-18 17:18:44] 
+============================================================
+[2025-12-18 17:18:44] STARTING LOSCHMIDT ECHO SWEEP
+[2025-12-18 17:18:44] ============================================================
+[2025-12-18 17:18:44] 
+[1/1] Subset 0 (elapsed: 0.0 min)
+[2025-12-18 17:18:44]   Qubits: (7, 14, 15, 16, 21, 22, 28)
+[2025-12-18 17:18:44]   lambda2=0.4226, C=2.9585
+[2025-12-18 17:18:44]   Depth 5: running 2 instances
+[2025-12-18 17:18:44]     Instance 1/2
+[2025-12-18 17:18:48]         P_return=0.8500, GHZ witness=0.8500
+[2025-12-18 17:18:48]       Running mean P_return=0.8500
+[2025-12-18 17:18:48]     Instance 2/2
+[2025-12-18 17:18:51]         P_return=0.8460, GHZ witness=0.8460
+[2025-12-18 17:18:51]       Running mean P_return=0.8480
+[2025-12-18 17:18:51]   Saved depth 5 result (mean_P_return=0.8480)
+[2025-12-18 17:18:51]   Depth 10: running 2 instances
+[2025-12-18 17:18:51]     Instance 1/2
+[2025-12-18 17:18:54]         P_return=0.8420, GHZ witness=0.8420
+[2025-12-18 17:18:54]       Running mean P_return=0.8420
+[2025-12-18 17:18:54]     Instance 2/2
+[2025-12-18 17:18:57]         P_return=0.8540, GHZ witness=0.8540
+[2025-12-18 17:18:57]       Running mean P_return=0.8480
+[2025-12-18 17:18:57]   Saved depth 10 result (mean_P_return=0.8480)
+[2025-12-18 17:18:57]   Alpha fit saved (alpha=0.0000, points=2)
+[2025-12-18 17:18:57] 
+============================================================
+[2025-12-18 17:18:57] LOSCHMIDT ECHO SWEEP COMPLETE in 0.2 minutes
+[2025-12-18 17:18:57] Results saved to results/loschmidt_echo_test.csv

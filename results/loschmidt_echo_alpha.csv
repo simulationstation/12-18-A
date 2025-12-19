@@ -1,0 +1,2 @@
+experiment_type,device,subset_id,qubits,N,lambda2,C,fit_eps,alpha,alpha_stderr,points,timestamp
+loschmidt_echo,Ankaa-3,0,"(7, 14, 15, 16, 21, 22, 28)",7,0.4226497308103742,2.9585481156726194,0.001,0.0,0.0,2,2025-12-18T17:18:57.520850
