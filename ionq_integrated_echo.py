@@ -212,8 +212,11 @@ def invert_gate(circ: Circuit, gate: Gate) -> None:
 
 
 def circuit_hash(circ: Circuit) -> str:
-    ir_json = circ.to_ir().json()
-    return hashlib.sha256(ir_json.encode("utf-8")).hexdigest()
+    try:
+        ir_json = circ.to_ir().json()
+        return hashlib.sha256(ir_json.encode("utf-8")).hexdigest()
+    except NotImplementedError:
+        return hashlib.sha256(str(circ).encode("utf-8")).hexdigest()
 
 
 def gate_count_summary(circ: Circuit) -> Tuple[Dict[str, Any], int]:
@@ -418,11 +421,13 @@ def run_calibration_block(
     device_info: Dict[str, str],
 ) -> CalibrationData:
     cal0 = Circuit()
-    cal0.measure_all()
+    for q in range(n_qubits):
+        cal0.measure(q)
     cal1 = Circuit()
     for q in range(n_qubits):
         cal1.x(q)
-    cal1.measure_all()
+    for q in range(n_qubits):
+        cal1.measure(q)
 
     counts0, mode0 = run_circuit(device, cal0, shots, prefer_verbatim)
     counts1, mode1 = run_circuit(device, cal1, shots, prefer_verbatim)
@@ -610,7 +615,8 @@ def build_integrated_loschmidt(
             log.extend(apply_matching_layer(circ, layer, gate_label, entangler_params))
     for gate in reversed(log):
         invert_gate(circ, gate)
-    circ.measure_all()
+    for q in range(n_qubits):
+        circ.measure(q)
     return circ, schedule
 
 
@@ -626,8 +632,8 @@ def entangler_smoke_test(entangler_mode: str) -> None:
         gate_label=entangler_mode,
         entangler_params=_default_entangler_params(entangler_mode),
     )
-    ir_text = circ.to_ir().json().lower()
-    if entangler_mode in ("zz", "ms") and "cz" in ir_text:
+    circ_text = str(circ).lower()
+    if entangler_mode in ("zz", "ms") and "cz" in circ_text:
         raise RuntimeError("Entangler smoke test detected CZ when a native IonQ entangler was requested.")
     LocalSimulator().run(circ, shots=4).result()
 

@@ -335,7 +335,8 @@ def build_loschmidt_circuit(
     for gate in reversed(log):
         invert_gate(circ, gate)
 
-    circ.measure_all()
+    for q in range(n_qubits):
+        circ.measure(q)
     return circ
 
 
@@ -350,8 +351,8 @@ def entangler_smoke_test(entangler_mode: str) -> None:
         gate_label=entangler_mode,
         entangler_params=_default_entangler_params(entangler_mode),
     )
-    ir_text = circ.to_ir().json().lower()
-    if entangler_mode in ("zz", "ms") and "cz" in ir_text:
+    circ_text = str(circ).lower()
+    if entangler_mode in ("zz", "ms") and "cz" in circ_text:
         raise RuntimeError("Entangler smoke test detected CZ in IR while a native IonQ entangler was requested.")
     LocalSimulator().run(circ, shots=4).result()
 
@@ -368,8 +369,11 @@ class SweepJob:
 
 
 def circuit_hash(circ: Circuit) -> str:
-    ir_json = circ.to_ir().json()
-    return hashlib.sha256(ir_json.encode("utf-8")).hexdigest()
+    try:
+        ir_json = circ.to_ir().json()
+        return hashlib.sha256(ir_json.encode("utf-8")).hexdigest()
+    except NotImplementedError:
+        return hashlib.sha256(str(circ).encode("utf-8")).hexdigest()
 
 
 def schedule_hash(schedule: List[Matching]) -> str:
@@ -560,7 +564,8 @@ def build_plateau_circuit(
 
     for gate in reversed(log):
         invert_gate(circ, gate)
-    circ.measure_all()
+    for q in range(n_qubits):
+        circ.measure(q)
     return circ, schedule, matching_layers
 
 
