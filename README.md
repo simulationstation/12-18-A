@@ -128,6 +128,35 @@ Permutation histograms are written alongside the correlation summary
 architecture-linked (consistent Spearman rho across blocks) or drift-like
 (coherent block-to-block shifts).
 
+### G) Spectral-gap sweep (Loschmidt echo on Braket)
+Probe a “spectral gap / mixing-time crossover” by fixing the two-qubit budget
+per layer and sweeping depths across matching-based architectures:
+ring (even/odd ring matchings), grid (alternating horizontal/vertical
+matchings on an approximately square layout), and expander (fresh random
+perfect matchings). Each layer applies random single-qubit scrambles before the
+2Q gates, then appends the exact inverse circuit so that drift/noise drive
+deviations from \(P_\text{return}=1\).
+
+Run a sweep (local simulator or ARN) and log JSONL results:
+```bash
+python spectral_gap_sweep_braket.py sweep --device local --n_qubits 8 \
+    --depths 2,4,8,16,32 --n_seeds 3 --shots 500 \
+    --output_dir results --families ring,grid,expander --interleave
+```
+Analyze and export CSV summaries (mean/stderr by depth plus a two-regime
+log-decay crossover fit):
+```bash
+python spectral_gap_sweep_braket.py analyze --input results/spectral_gap_loschmidt.jsonl \
+    --csv_out results/spectral_gap_loschmidt_summary.csv \
+    --crossover_csv results/spectral_gap_loschmidt_crossover.csv
+```
+Self-test (local simulator, N=8, depths 2 and 4, 200 shots) that prints
+\(P_\text{return}\) and writes JSONL:
+```bash
+python spectral_gap_sweep_braket.py sweep --device local --n_qubits 8 \
+    --depths 2,4 --shots 200 --self_test --output_dir results
+```
+
 ## What this tests
 - **Connectivity metric:** \(C = N \lambda_2\) measures how well-connected the
   architecture is (\(\lambda_2\) is the spectral gap of the normalized
