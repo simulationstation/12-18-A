@@ -26,6 +26,9 @@ CLI modes:
       logging one JSON record per (family, depth, seed).
     - analyze: load JSONL results, compute mean/stderr p_return vs depth, fit
       a simple two-regime log-decay crossover, and export CSV summaries.
+    - plateau_diagnostic / plateau_analyze: baseline controls at depths 0/1/2
+      (optional 4) to isolate SPAM vs 1Q vs first entangling-layer collapse
+      and to report compiled distinctness across families.
 """
 
 import argparse
@@ -37,7 +40,7 @@ import os
 import time
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Dict, Iterable, List, Optional, Sequence, Tuple
+from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
 
 import numpy as np
 
@@ -308,6 +311,178 @@ def hamming_weight_hist(counts: Dict[str, int]) -> Dict[int, int]:
     return hist
 
 
+# ---------------------------------------------------------------------------
+# Plateau diagnostic helpers
+# ---------------------------------------------------------------------------
+
+PLATEAU_DEPTH_MODE = "plateau_depth: 0=no gates, 1=1Q scramble+inverse, depth>=2 uses depth//2 matching layers"
+
+
+def _is_result_type_instruction(instr) -> bool:
+    op = getattr(instr, "operator", None)
+    if op is None:
+        return True
+    module = op.__class__.__module__.lower()
+    if "result_types" in module:
+        return True
+    name = getattr(op, "name", "").lower()
+    return name.startswith("resulttype")
+
+
+def gate_count_summary(circ: Circuit) -> Tuple[Dict[str, Any], int]:
+    """
+    Count gates in a circuit, returning (summary_dict, depth).
+    Measurements/result types are excluded from the counts.
+    """
+    counts_by_type: Dict[str, int] = {}
+    total_1q = 0
+    total_2q = 0
+    gate_instructions = 0
+    for instr in getattr(circ, "instructions", []):
+        if _is_result_type_instruction(instr):
+            continue
+        op = getattr(instr, "operator", None)
+        if op is None:
+            continue
+        name = getattr(op, "name", op.__class__.__name__).lower()
+        counts_by_type[name] = counts_by_type.get(name, 0) + 1
+        qcount = len(getattr(instr, "target", ()))
+        if qcount == 1:
+            total_1q += 1
+        elif qcount == 2:
+            total_2q += 1
+        gate_instructions += 1
+    try:
+        depth_val = int(getattr(circ, "depth"))
+    except Exception:
+        depth_val = gate_instructions
+    summary = {
+        "total_1q": total_1q,
+        "total_2q": total_2q,
+        "by_type": counts_by_type,
+    }
+    return summary, depth_val
+
+
+def _action_from_result(result):
+    """Best-effort extraction of the compiled/action IR payload from a Braket result."""
+    add_meta = getattr(result, "additional_metadata", None) or getattr(result, "additionalMetadata", None)
+    action = None
+    if add_meta is not None:
+        if isinstance(add_meta, dict):
+            action = add_meta.get("compiledProgram") or add_meta.get("compiled_program") or add_meta.get("action")
+        else:
+            action = (
+                getattr(add_meta, "compiledProgram", None)
+                or getattr(add_meta, "compiled_program", None)
+                or getattr(add_meta, "action", None)
+            )
+    return action
+
+
+def _circuit_from_action(action) -> Optional[Circuit]:
+    """Attempt to rebuild a Circuit from an action/IR payload."""
+    if action is None:
+        return None
+    try:
+        return Circuit.from_ir(action)
+    except Exception:
+        pass
+    try:
+        if hasattr(action, "json"):
+            return Circuit.from_ir(action.json())
+        if hasattr(action, "dict"):
+            return Circuit.from_ir(action.dict())
+    except Exception:
+        pass
+    try:
+        if isinstance(action, str):
+            return Circuit.from_ir(action)
+        return Circuit.from_ir(json.dumps(action))
+    except Exception:
+        return None
+
+
+def _hash_payload(payload) -> Optional[str]:
+    try:
+        if isinstance(payload, str):
+            raw = payload
+        else:
+            raw = json.dumps(payload, sort_keys=True, default=str)
+        return hashlib.sha256(raw.encode("utf-8")).hexdigest()
+    except Exception:
+        return None
+
+
+def compiled_metadata_from_result(
+    result, logical_gate_counts: Dict[str, Dict[str, int]], logical_circuit_depth: int, circuit_ir_hash: str
+) -> Tuple[Dict[str, Dict[str, int]], int, str, str]:
+    """
+    Extract compiled counts/depth/hash when available, otherwise fall back to logical values.
+
+    Returns (compiled_gate_counts, compiled_depth, compiled_ir_hash, compiled_info_source).
+    """
+    compiled_counts = logical_gate_counts
+    compiled_depth = logical_circuit_depth
+    compiled_ir_hash = circuit_ir_hash
+    info_source = "logical_fallback"
+
+    action = _action_from_result(result)
+    if action is not None:
+        compiled_circ = _circuit_from_action(action)
+        if compiled_circ is not None:
+            compiled_counts, compiled_depth_val = gate_count_summary(compiled_circ)
+            compiled_ir_hash = circuit_hash(compiled_circ)
+            compiled_depth = compiled_depth_val
+            info_source = "compiled_circuit"
+        else:
+            payload_hash = _hash_payload(action)
+            if payload_hash is not None:
+                compiled_ir_hash = payload_hash
+                info_source = "compiled_payload_hash"
+
+    return compiled_counts, compiled_depth, compiled_ir_hash, info_source
+
+
+def build_plateau_circuit(
+    family: str,
+    depth: int,
+    n_qubits: int,
+    rng: np.random.Generator,
+    gate_label: str,
+) -> Tuple[Circuit, List[Matching], int]:
+    """
+    Build plateau-style circuits:
+        depth=0: prepare |0...0>, measure.
+        depth=1: scramble-only layer and exact inverse (no 2Q gates).
+        depth>=2: include depth//2 matching layers, each with 1Q scramble + 2Q entanglers and exact inverse.
+    Returns (circuit, schedule, logical_depth).
+    """
+    require_even_qubits(n_qubits)
+    if depth < 0:
+        raise ValueError(f"Plateau depth must be non-negative; got {depth}")
+    circ = Circuit()
+    schedule: List[Matching] = []
+    log: List[Gate] = []
+
+    if depth == 0:
+        matching_layers = 0
+    elif depth == 1:
+        log.extend(build_scramble_layer(circ, n_qubits, rng))
+        matching_layers = 0
+    else:
+        matching_layers = max(1, depth // 2)
+        schedule = matching_schedule(family, n_qubits, matching_layers, rng)
+        for layer in schedule:
+            log.extend(build_scramble_layer(circ, n_qubits, rng))
+            log.extend(apply_matching_layer(circ, layer, gate_label))
+
+    for gate in reversed(log):
+        invert_gate(circ, gate)
+    circ.measure_all()
+    return circ, schedule, matching_layers
+
+
 def run_job(
     device,
     job: SweepJob,
@@ -347,6 +522,67 @@ def run_job(
     return record
 
 
+def run_plateau_job(
+    device,
+    job: SweepJob,
+    n_qubits: int,
+    base_seed: int,
+    shots: int,
+    gate_label: str,
+    embed_strategy: str,
+) -> Dict:
+    seed_seq = np.random.SeedSequence([base_seed, job.seed, job.depth, hash(job.family) & 0xFFFFFFFF])
+    rng = np.random.default_rng(seed_seq)
+    circ, schedule, matching_layers = build_plateau_circuit(
+        family=job.family,
+        depth=job.depth,
+        n_qubits=n_qubits,
+        rng=rng,
+        gate_label=gate_label,
+    )
+
+    started = time.time()
+    result = device.run(circ, shots=shots).result()
+    counts = dict(result.measurement_counts)
+    runtime_s = time.time() - started
+
+    circuit_ir_hash = circuit_hash(circ)
+    logical_gate_counts, logical_circuit_depth = gate_count_summary(circ)
+    compiled_gate_counts, compiled_depth, compiled_ir_hash, compiled_info_source = compiled_metadata_from_result(
+        result, logical_gate_counts, logical_circuit_depth, circuit_ir_hash
+    )
+
+    record = {
+        "timestamp": datetime.utcnow().isoformat(),
+        "device": getattr(device, "arn", "local"),
+        "n_qubits": n_qubits,
+        "family": job.family,
+        "depth": job.depth,
+        "logical_depth": job.depth,
+        "matching_layers": matching_layers,
+        "logical_circuit_depth": logical_circuit_depth,
+        "seed": job.seed,
+        "control_mode": "plateau_diagnostic",
+        "depth_mode": PLATEAU_DEPTH_MODE,
+        "circuit_hash": circuit_ir_hash,
+        "circuit_ir_hash": circuit_ir_hash,
+        "compiled_ir_hash": compiled_ir_hash,
+        "compiled_info_source": compiled_info_source,
+        "schedule": schedule,
+        "schedule_hash": schedule_hash(schedule),
+        "shots": shots,
+        "counts": counts,
+        "p_return": p_return_from_counts(counts, n_qubits, shots),
+        "hamming_weight_histogram": hamming_weight_hist(counts),
+        "runtime_seconds": runtime_s,
+        "embed_strategy": embed_strategy,
+        "logical_gate_counts": logical_gate_counts,
+        "compiled_gate_counts": compiled_gate_counts,
+        "compiled_depth": compiled_depth,
+    }
+    return record
+
+
 def jobs_in_order(
     families: Sequence[str],
     depths: Sequence[int],
@@ -371,6 +607,10 @@ def ensure_output_dir(path: str) -> None:
     os.makedirs(path, exist_ok=True)
 
 
+def parse_depths_arg(depths: str) -> List[int]:
+    return [int(d) for d in depths.split(",") if str(d).strip()]
+
+
 def sweep(
     device,
     families: Sequence[str],
@@ -390,6 +630,42 @@ def sweep(
         for job in jobs:
             print(f"[{datetime.utcnow().isoformat()}] Running {job.family} depth {job.depth} seed {job.seed}")
             rec = run_job(
+                device=device,
+                job=job,
+                n_qubits=n_qubits,
+                base_seed=base_seed,
+                shots=shots,
+                gate_label=gate_label,
+                embed_strategy=embed_strategy,
+            )
+            f.write(json.dumps(rec) + "\n")
+            f.flush()
+            print(
+                f"  p_return={rec['p_return']:.4f} schedule_hash={rec['schedule_hash']} runtime={rec['runtime_seconds']:.2f}s"
+            )
+
+
+def plateau_sweep(
+    device,
+    families: Sequence[str],
+    depths: Sequence[int],
+    n_seeds: int,
+    n_qubits: int,
+    shots: int,
+    output_jsonl: str,
+    interleave: bool,
+    base_seed: int,
+    embed_strategy: str,
+) -> None:
+    gate_label = _two_qubit_gate_fn(device)
+    ensure_output_dir(os.path.dirname(output_jsonl) or ".")
+    jobs = jobs_in_order(families, depths, n_seeds, interleave)
+    with open(output_jsonl, "a", encoding="utf-8") as f:
+        for job in jobs:
+            print(
+                f"[{datetime.utcnow().isoformat()}] Plateau control {job.family} depth {job.depth} seed {job.seed}"
+            )
+            rec = run_plateau_job(
                 device=device,
                 job=job,
                 n_qubits=n_qubits,
@@ -510,6 +786,120 @@ def write_csv(path: str, rows: List[Dict], fieldnames: List[str]) -> None:
         writer.writerows(rows)
 
 
+def plateau_summaries(
+    results: List[Dict],
+    depths_of_interest: Sequence[int],
+) -> Tuple[List[Dict], List[Dict], List[Dict]]:
+    """
+    Compute mean/stderr by (family, depth), deltas across {0,1,2}, and compiled distinctness summaries.
+    """
+    filtered = [
+        row
+        for row in results
+        if row.get("control_mode") == "plateau_diagnostic" or row.get("depth_mode") == PLATEAU_DEPTH_MODE
+    ]
+    if not filtered:
+        filtered = results
+
+    by_key: Dict[Tuple[str, int], List[float]] = {}
+    depth_set = {int(d) for d in depths_of_interest}
+    for row in filtered:
+        if depth_set and int(row["depth"]) not in depth_set:
+            continue
+        key = (row["family"], int(row["depth"]))
+        by_key.setdefault(key, []).append(float(row["p_return"]))
+
+    summary_rows: List[Dict] = []
+    for (family, depth), vals in sorted(by_key.items(), key=lambda kv: (kv[0][0], kv[0][1])):
+        mean, err = mean_stderr(vals)
+        summary_rows.append(
+            {
+                "family": family,
+                "depth": depth,
+                "mean_p_return": mean,
+                "stderr_p_return": err,
+                "n": len(vals),
+            }
+        )
+
+    by_family_depth_mean: Dict[str, Dict[int, float]] = {}
+    for row in summary_rows:
+        by_family_depth_mean.setdefault(row["family"], {})[int(row["depth"])] = float(row["mean_p_return"])
+
+    delta_rows: List[Dict] = []
+    for family, depth_means in sorted(by_family_depth_mean.items()):
+        delta01 = None
+        delta12 = None
+        if 0 in depth_means and 1 in depth_means:
+            delta01 = depth_means[0] - depth_means[1]
+        if 1 in depth_means and 2 in depth_means:
+            delta12 = depth_means[1] - depth_means[2]
+        delta_rows.append(
+            {
+                "family": family,
+                "delta01": delta01,
+                "delta12": delta12,
+            }
+        )
+
+    distinct_rows: List[Dict] = []
+    for (family, depth), vals in sorted(by_key.items(), key=lambda kv: (kv[0][0], kv[0][1])):
+        compiled_depths: List[float] = []
+        compiled_two_q: List[float] = []
+        compiled_hashes: List[str] = []
+        for row in filtered:
+            if row["family"] != family or int(row["depth"]) != depth:
+                continue
+            if row.get("compiled_depth") is not None:
+                compiled_depths.append(float(row["compiled_depth"]))
+            gate_counts = row.get("compiled_gate_counts") or {}
+            if gate_counts.get("total_2q") is not None:
+                compiled_two_q.append(float(gate_counts["total_2q"]))
+            compiled_hashes.append(row.get("compiled_ir_hash") or row.get("circuit_ir_hash") or row["circuit_hash"])
+
+        distinct_rows.append(
+            {
+                "family": family,
+                "depth": depth,
+                "median_compiled_depth": float(np.median(compiled_depths)) if compiled_depths else None,
+                "median_compiled_2q": float(np.median(compiled_two_q)) if compiled_two_q else None,
+                "unique_compiled_ir_hash": len(set(compiled_hashes)),
+                "n": len(compiled_hashes),
+            }
+        )
+
+    return summary_rows, delta_rows, distinct_rows
+
+
+def print_plateau_summary(
+    summary_rows: List[Dict],
+    delta_rows: List[Dict],
+    distinct_rows: List[Dict],
+) -> None:
+    print("\nPlateau diagnostic p_return summary (mean ± stderr):")
+    for row in summary_rows:
+        mean = row["mean_p_return"]
+        err = row["stderr_p_return"]
+        print(
+            f"  {row['family']:8s} depth={row['depth']:2d} -> {mean:.4f} ± {err:.4f} (n={row['n']})"
+        )
+
+    print("\nPlateau deltas (delta01=depth0-depth1, delta12=depth1-depth2):")
+    for row in delta_rows:
+        d01 = "NA" if row["delta01"] is None else f"{row['delta01']:.4f}"
+        d12 = "NA" if row["delta12"] is None else f"{row['delta12']:.4f}"
+        print(f"  {row['family']:8s} delta01={d01} delta12={d12}")
+
+    print("\nCompiled distinctness check (median compiled depth/2Q count, unique compiled_ir_hash):")
+    for row in distinct_rows:
+        d_med = "NA" if row["median_compiled_depth"] is None else f"{row['median_compiled_depth']:.2f}"
+        twoq = "NA" if row["median_compiled_2q"] is None else f"{row['median_compiled_2q']:.1f}"
+        print(
+            f"  {row['family']:8s} depth={row['depth']:2d} med_depth={d_med} med_2Q={twoq} "
+            f"unique_hashes={row['unique_compiled_ir_hash']} (n={row['n']})"
+        )
+
+
 # ---------------------------------------------------------------------------
 # CLI
 # ---------------------------------------------------------------------------
@@ -566,6 +956,102 @@ def parse_args() -> argparse.Namespace:
         help="Output CSV for crossover fit.",
     )
 
+    plateau_p = subparsers.add_parser(
+        "plateau_diagnostic", help="Run plateau control suite (depth 0/1/2 baselines plus compiled distinctness)."
+    )
+    plateau_p.add_argument("--device", required=True, help='Braket device ARN or "local"')
+    plateau_p.add_argument("--n_qubits", type=int, required=True, help="Number of qubits (must be even).")
+    plateau_p.add_argument("--depths", type=str, default="0,1,2", help='Comma-separated depths (default "0,1,2").')
+    plateau_p.add_argument(
+        "--families",
+        type=str,
+        default="ring,grid,expander",
+        help="Comma-separated matching families (ring,grid,expander).",
+    )
+    plateau_p.add_argument("--seeds", type=int, default=10, help="Seeds per (family, depth).")
+    plateau_p.add_argument("--shots", type=int, default=1000, help="Shots per circuit.")
+    plateau_p.add_argument("--output_dir", type=str, default="results", help="Directory for JSONL output.")
+    plateau_p.add_argument(
+        "--output_jsonl",
+        type=str,
+        default=None,
+        help="Optional explicit JSONL path (defaults to output_dir/plateau_diagnostic.jsonl).",
+    )
+    plateau_p.add_argument(
+        "--interleave",
+        dest="interleave",
+        action="store_true",
+        default=True,
+        help="Interleave submissions across families (default: True).",
+    )
+    plateau_p.add_argument(
+        "--no-interleave",
+        dest="interleave",
+        action="store_false",
+        help="Disable interleaving (submit all jobs for one family before the next).",
+    )
+    plateau_p.add_argument("--base_seed", type=int, default=1234, help="Base seed controlling randomness.")
+    plateau_p.add_argument(
+        "--embed_strategy",
+        type=str,
+        default="random",
+        help="Embedding strategy tag (metadata only; use per-device tooling as needed).",
+    )
+    plateau_p.add_argument(
+        "--summary_csv",
+        type=str,
+        default=None,
+        help="Optional CSV path for plateau summary (defaults to output_dir/plateau_summary.csv).",
+    )
+    plateau_p.add_argument(
+        "--delta_csv",
+        type=str,
+        default=None,
+        help="Optional CSV path for plateau delta summary (defaults to output_dir/plateau_delta_summary.csv).",
+    )
+    plateau_p.add_argument(
+        "--distinct_csv",
+        type=str,
+        default=None,
+        help="Optional CSV path for plateau compiled distinctness (defaults to output_dir/plateau_distinctness.csv).",
+    )
+    plateau_p.add_argument(
+        "--analyze_after",
+        action="store_true",
+        help="After running, print plateau summary and write CSVs.",
+    )
+    plateau_p.add_argument(
+        "--self_test",
+        action="store_true",
+        help="Run a local plateau self-test (n_qubits=8, depths=0,1,2, seeds=3, shots=200) and summarize.",
+    )
+
+    plateau_analyze_p = subparsers.add_parser(
+        "plateau_analyze", help="Analyze plateau diagnostic JSONL and export summary/distinctness CSVs."
+    )
+    plateau_analyze_p.add_argument("--input", required=True, help="Path to JSONL produced by plateau_diagnostic.")
+    plateau_analyze_p.add_argument(
+        "--csv_out",
+        default="results/plateau_summary.csv",
+        help="Output CSV for mean/stderr vs depth.",
+    )
+    plateau_analyze_p.add_argument(
+        "--delta_csv",
+        default="results/plateau_delta_summary.csv",
+        help="Output CSV for depth0-depth1 and depth1-depth2 deltas.",
+    )
+    plateau_analyze_p.add_argument(
+        "--distinct_csv",
+        default="results/plateau_distinctness_summary.csv",
+        help="Output CSV for compiled distinctness table.",
+    )
+    plateau_analyze_p.add_argument(
+        "--depths",
+        type=str,
+        default="0,1,2",
+        help='Comma-separated depths to include (default "0,1,2").',
+    )
+
     return parser.parse_args()
 
 
@@ -581,7 +1067,7 @@ def main() -> None:
             output_jsonl = args.output_jsonl or os.path.join(args.output_dir, "spectral_gap_loschmidt_self_test.jsonl")
             print("Running self-test with n_qubits=8, depths=2,4, shots=200 on local simulator.")
         else:
-            depths = [int(d) for d in args.depths.split(",") if d.strip()]
+            depths = parse_depths_arg(args.depths)
             n_qubits = args.n_qubits
             shots = args.shots
             output_jsonl = args.output_jsonl or os.path.join(args.output_dir, "spectral_gap_loschmidt.jsonl")
@@ -615,6 +1101,72 @@ def main() -> None:
         )
         print(f"Wrote summary to {args.csv_out}")
         print(f"Wrote crossover fits to {args.crossover_csv}")
+
+    elif args.command == "plateau_diagnostic":
+        device = LocalSimulator() if args.device == "local" else AwsDevice(args.device)
+        if args.self_test:
+            depths = [0, 1, 2]
+            n_qubits = 8
+            shots = 200
+            n_seeds = 3
+            output_jsonl = args.output_jsonl or os.path.join(args.output_dir, "plateau_diagnostic_self_test.jsonl")
+            summary_csv = args.summary_csv or os.path.join(args.output_dir, "plateau_summary_self_test.csv")
+            delta_csv = args.delta_csv or os.path.join(args.output_dir, "plateau_delta_summary_self_test.csv")
+            distinct_csv = args.distinct_csv or os.path.join(args.output_dir, "plateau_distinctness_self_test.csv")
+            print("Running plateau self-test with n_qubits=8, depths=0,1,2, seeds=3, shots=200 on local simulator.")
+        else:
+            depths = parse_depths_arg(args.depths)
+            n_qubits = args.n_qubits
+            shots = args.shots
+            n_seeds = args.seeds
+            output_jsonl = args.output_jsonl or os.path.join(args.output_dir, "plateau_diagnostic.jsonl")
+            summary_csv = args.summary_csv or os.path.join(args.output_dir, "plateau_summary.csv")
+            delta_csv = args.delta_csv or os.path.join(args.output_dir, "plateau_delta_summary.csv")
+            distinct_csv = args.distinct_csv or os.path.join(args.output_dir, "plateau_distinctness.csv")
+
+        require_even_qubits(n_qubits)
+        families = [f.strip() for f in args.families.split(",") if f.strip()]
+        plateau_sweep(
+            device=device,
+            families=families,
+            depths=depths,
+            n_seeds=n_seeds,
+            n_qubits=n_qubits,
+            shots=shots,
+            output_jsonl=output_jsonl,
+            interleave=args.interleave,
+            base_seed=args.base_seed,
+            embed_strategy=args.embed_strategy,
+        )
+
+        if args.analyze_after or args.self_test:
+            results = load_jsonl(output_jsonl)
+            summary_rows, delta_rows, distinct_rows = plateau_summaries(results, depths)
+            write_csv(summary_csv, summary_rows, ["family", "depth", "mean_p_return", "stderr_p_return", "n"])
+            write_csv(delta_csv, delta_rows, ["family", "delta01", "delta12"])
+            write_csv(
+                distinct_csv,
+                distinct_rows,
+                ["family", "depth", "median_compiled_depth", "median_compiled_2q", "unique_compiled_ir_hash", "n"],
+            )
+            print_plateau_summary(summary_rows, delta_rows, distinct_rows)
+            print(f"\nWrote plateau summaries to {summary_csv}, {delta_csv}, and {distinct_csv}")
+
+    elif args.command == "plateau_analyze":
+        results = load_jsonl(args.input)
+        depths = parse_depths_arg(args.depths)
+        summary_rows, delta_rows, distinct_rows = plateau_summaries(results, depths)
+        write_csv(args.csv_out, summary_rows, ["family", "depth", "mean_p_return", "stderr_p_return", "n"])
+        write_csv(args.delta_csv, delta_rows, ["family", "delta01", "delta12"])
+        write_csv(
+            args.distinct_csv,
+            distinct_rows,
+            ["family", "depth", "median_compiled_depth", "median_compiled_2q", "unique_compiled_ir_hash", "n"],
+        )
+        print_plateau_summary(summary_rows, delta_rows, distinct_rows)
+        print(f"Wrote plateau summary to {args.csv_out}")
+        print(f"Wrote plateau deltas to {args.delta_csv}")
+        print(f"Wrote plateau distinctness to {args.distinct_csv}")
     else:
         raise ValueError(f"Unknown command: {args.command}")
 
