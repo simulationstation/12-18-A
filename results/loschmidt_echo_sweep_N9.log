@@ -902,3 +902,907 @@
 ============================================================
 [2025-12-18 17:48:00] LOSCHMIDT ECHO SWEEP COMPLETE in 14.6 minutes
 [2025-12-18 17:48:00] Results saved to results/loschmidt_echo_sweep_N9.csv
+[2025-12-18 18:41:29] ============================================================
+[2025-12-18 18:41:29] AWS Braket Experiment Runner
+[2025-12-18 18:41:29] ============================================================
+[2025-12-18 18:41:29] Device: arn:aws:braket:us-west-1::device/qpu/rigetti/Ankaa-3
+[2025-12-18 18:41:29] Subset size N: 9
+[2025-12-18 18:41:29] Num subsets: 12
+[2025-12-18 18:41:29] Experiment: loschmidt_echo
+[2025-12-18 18:41:29] Depths: [5, 10, 20, 30]
+[2025-12-18 18:41:29] K (instances per depth): 5
+[2025-12-18 18:41:29] Fit eps: 0.001
+[2025-12-18 18:41:29] Shots: 1000
+[2025-12-18 18:41:29] Seed: 42
+[2025-12-18 18:41:29] Output CSV: results/loschmidt_echo_sweep_N9.csv
+[2025-12-18 18:41:29] Alpha CSV: results/loschmidt_echo_alpha_N9.csv
+[2025-12-18 18:41:29] Resume: True
+[2025-12-18 18:41:29] Simulator: False
+[2025-12-18 18:41:29] ============================================================
+[2025-12-18 18:41:30] Device: Ankaa-3, Status: ONLINE
+[2025-12-18 18:41:30] Graph: 80 nodes, 136 edges
+[2025-12-18 18:41:30] Generated 12 subsets
+[2025-12-18 18:41:30] 
+============================================================
+[2025-12-18 18:41:30] STARTING LOSCHMIDT ECHO SWEEP
+[2025-12-18 18:41:30] ============================================================
+[2025-12-18 18:41:30] 
+[1/12] Subset 0 (elapsed: 0.0 min)
+[2025-12-18 18:41:30]   Qubits: (0, 7, 8, 14, 15, 16, 21, 22, 28)
+[2025-12-18 18:41:30]   lambda2=0.2929, C=2.6360
+[2025-12-18 18:41:30]   Depth 5 (1/4): running 5 instances
+[2025-12-18 18:41:30]     Instance 1/5
+[2025-12-18 18:41:33]         P_return=0.7760, GHZ witness=0.7760
+[2025-12-18 18:41:33]       Running mean P_return=0.7760
+[2025-12-18 18:41:33]     Instance 2/5
+[2025-12-18 18:41:35]         P_return=0.7660, GHZ witness=0.7660
+[2025-12-18 18:41:35]       Running mean P_return=0.7710
+[2025-12-18 18:41:35]     Instance 3/5
+[2025-12-18 18:41:37]         P_return=0.7900, GHZ witness=0.7900
+[2025-12-18 18:41:37]       Running mean P_return=0.7773
+[2025-12-18 18:41:37]     Instance 4/5
+[2025-12-18 18:41:39]         P_return=0.7640, GHZ witness=0.7640
+[2025-12-18 18:41:39]       Running mean P_return=0.7740
+[2025-12-18 18:41:39]     Instance 5/5
+[2025-12-18 18:41:42]         P_return=0.7810, GHZ witness=0.7810
+[2025-12-18 18:41:42]       Running mean P_return=0.7754
+[2025-12-18 18:41:42]   Saved depth 5 result (mean_P_return=0.7754)
+[2025-12-18 18:41:42]   Depth 10 (2/4): running 5 instances
+[2025-12-18 18:41:42]     Instance 1/5
+[2025-12-18 18:41:44]         P_return=0.7970, GHZ witness=0.7970
+[2025-12-18 18:41:44]       Running mean P_return=0.7970
+[2025-12-18 18:41:44]     Instance 2/5
+[2025-12-18 18:41:47]         P_return=0.7860, GHZ witness=0.7860
+[2025-12-18 18:41:47]       Running mean P_return=0.7915
+[2025-12-18 18:41:47]     Instance 3/5
+[2025-12-18 18:41:49]         P_return=0.8030, GHZ witness=0.8030
+[2025-12-18 18:41:49]       Running mean P_return=0.7953
+[2025-12-18 18:41:49]     Instance 4/5
+[2025-12-18 18:41:52]         P_return=0.7960, GHZ witness=0.7960
+[2025-12-18 18:41:52]       Running mean P_return=0.7955
+[2025-12-18 18:41:52]     Instance 5/5
+[2025-12-18 18:41:55]         P_return=0.7720, GHZ witness=0.7720
+[2025-12-18 18:41:55]       Running mean P_return=0.7908
+[2025-12-18 18:41:55]   Saved depth 10 result (mean_P_return=0.7908)
+[2025-12-18 18:41:55]   Depth 20 (3/4): running 5 instances
+[2025-12-18 18:41:55]     Instance 1/5
+[2025-12-18 18:41:57]         P_return=0.7780, GHZ witness=0.7780
+[2025-12-18 18:41:57]       Running mean P_return=0.7780
+[2025-12-18 18:41:57]     Instance 2/5
+[2025-12-18 18:42:00]         P_return=0.7900, GHZ witness=0.7900
+[2025-12-18 18:42:00]       Running mean P_return=0.7840
+[2025-12-18 18:42:00]     Instance 3/5
+[2025-12-18 18:42:01]         P_return=0.8030, GHZ witness=0.8030
+[2025-12-18 18:42:01]       Running mean P_return=0.7903
+[2025-12-18 18:42:01]     Instance 4/5
+[2025-12-18 18:42:04]         P_return=0.8070, GHZ witness=0.8070
+[2025-12-18 18:42:04]       Running mean P_return=0.7945
+[2025-12-18 18:42:04]     Instance 5/5
+[2025-12-18 18:42:06]         P_return=0.7810, GHZ witness=0.7810
+[2025-12-18 18:42:06]       Running mean P_return=0.7918
+[2025-12-18 18:42:06]   Saved depth 20 result (mean_P_return=0.7918)
+[2025-12-18 18:42:06]   Depth 30 (4/4): running 5 instances
+[2025-12-18 18:42:06]     Instance 1/5
+[2025-12-18 18:42:09]         P_return=0.7660, GHZ witness=0.7660
+[2025-12-18 18:42:09]       Running mean P_return=0.7660
+[2025-12-18 18:42:09]     Instance 2/5
+[2025-12-18 18:42:12]         P_return=0.7980, GHZ witness=0.7980
+[2025-12-18 18:42:12]       Running mean P_return=0.7820
+[2025-12-18 18:42:12]     Instance 3/5
+[2025-12-18 18:42:14]         P_return=0.7800, GHZ witness=0.7800
+[2025-12-18 18:42:14]       Running mean P_return=0.7813
+[2025-12-18 18:42:14]     Instance 4/5
+[2025-12-18 18:42:17]         P_return=0.7760, GHZ witness=0.7760
+[2025-12-18 18:42:17]       Running mean P_return=0.7800
+[2025-12-18 18:42:17]     Instance 5/5
+[2025-12-18 18:42:20]         P_return=0.7840, GHZ witness=0.7840
+[2025-12-18 18:42:20]       Running mean P_return=0.7808
+[2025-12-18 18:42:20]   Saved depth 30 result (mean_P_return=0.7808)
+[2025-12-18 18:42:20]   Alpha fit saved (alpha=-0.0001, points=4)
+[2025-12-18 18:42:20] 
+[2/12] Subset 1 (elapsed: 0.8 min)
+[2025-12-18 18:42:20]   Qubits: (63, 64, 70, 71, 72, 73, 77, 78, 79)
+[2025-12-18 18:42:20]   lambda2=0.2860, C=2.5740
+[2025-12-18 18:42:20]   Depth 5 (1/4): running 5 instances
+[2025-12-18 18:42:20]     Instance 1/5
+[2025-12-18 18:42:23]         P_return=0.5490, GHZ witness=0.5490
+[2025-12-18 18:42:23]       Running mean P_return=0.5490
+[2025-12-18 18:42:23]     Instance 2/5
+[2025-12-18 18:42:25]         P_return=0.5750, GHZ witness=0.5750
+[2025-12-18 18:42:25]       Running mean P_return=0.5620
+[2025-12-18 18:42:25]     Instance 3/5
+[2025-12-18 18:42:27]         P_return=0.5690, GHZ witness=0.5690
+[2025-12-18 18:42:27]       Running mean P_return=0.5643
+[2025-12-18 18:42:27]     Instance 4/5
+[2025-12-18 18:42:30]         P_return=0.5450, GHZ witness=0.5450
+[2025-12-18 18:42:30]       Running mean P_return=0.5595
+[2025-12-18 18:42:30]     Instance 5/5
+[2025-12-18 18:42:30]         P_return=0.5730, GHZ witness=0.5730
+[2025-12-18 18:42:30]       Running mean P_return=0.5622
+[2025-12-18 18:42:30]   Saved depth 5 result (mean_P_return=0.5622)
+[2025-12-18 18:42:30]   Depth 10 (2/4): running 5 instances
+[2025-12-18 18:42:30]     Instance 1/5
+[2025-12-18 18:42:33]         P_return=0.5570, GHZ witness=0.5570
+[2025-12-18 18:42:33]       Running mean P_return=0.5570
+[2025-12-18 18:42:33]     Instance 2/5
+[2025-12-18 18:42:35]         P_return=0.5760, GHZ witness=0.5760
+[2025-12-18 18:42:35]       Running mean P_return=0.5665
+[2025-12-18 18:42:35]     Instance 3/5
+[2025-12-18 18:42:38]         P_return=0.5360, GHZ witness=0.5360
+[2025-12-18 18:42:38]       Running mean P_return=0.5563
+[2025-12-18 18:42:38]     Instance 4/5
+[2025-12-18 18:42:40]         P_return=0.5490, GHZ witness=0.5490
+[2025-12-18 18:42:40]       Running mean P_return=0.5545
+[2025-12-18 18:42:40]     Instance 5/5
+[2025-12-18 18:42:42]         P_return=0.5690, GHZ witness=0.5690
+[2025-12-18 18:42:42]       Running mean P_return=0.5574
+[2025-12-18 18:42:42]   Saved depth 10 result (mean_P_return=0.5574)
+[2025-12-18 18:42:42]   Depth 20 (3/4): running 5 instances
+[2025-12-18 18:42:42]     Instance 1/5
+[2025-12-18 18:42:45]         P_return=0.5620, GHZ witness=0.5620
+[2025-12-18 18:42:45]       Running mean P_return=0.5620
+[2025-12-18 18:42:45]     Instance 2/5
+[2025-12-18 18:42:48]         P_return=0.5360, GHZ witness=0.5360
+[2025-12-18 18:42:48]       Running mean P_return=0.5490
+[2025-12-18 18:42:48]     Instance 3/5
+[2025-12-18 18:42:50]         P_return=0.5920, GHZ witness=0.5920
+[2025-12-18 18:42:50]       Running mean P_return=0.5633
+[2025-12-18 18:42:50]     Instance 4/5
+[2025-12-18 18:42:53]         P_return=0.5820, GHZ witness=0.5820
+[2025-12-18 18:42:53]       Running mean P_return=0.5680
+[2025-12-18 18:42:53]     Instance 5/5
+[2025-12-18 18:42:56]         P_return=0.5680, GHZ witness=0.5680
+[2025-12-18 18:42:56]       Running mean P_return=0.5680
+[2025-12-18 18:42:56]   Saved depth 20 result (mean_P_return=0.5680)
+[2025-12-18 18:42:56]   Depth 30 (4/4): running 5 instances
+[2025-12-18 18:42:56]     Instance 1/5
+[2025-12-18 18:42:58]         P_return=0.5650, GHZ witness=0.5650
+[2025-12-18 18:42:58]       Running mean P_return=0.5650
+[2025-12-18 18:42:58]     Instance 2/5
+[2025-12-18 18:43:01]         P_return=0.5400, GHZ witness=0.5400
+[2025-12-18 18:43:01]       Running mean P_return=0.5525
+[2025-12-18 18:43:01]     Instance 3/5
+[2025-12-18 18:43:01]         P_return=0.5420, GHZ witness=0.5420
+[2025-12-18 18:43:01]       Running mean P_return=0.5490
+[2025-12-18 18:43:01]     Instance 4/5
+[2025-12-18 18:43:05]         P_return=0.5440, GHZ witness=0.5440
+[2025-12-18 18:43:05]       Running mean P_return=0.5477
+[2025-12-18 18:43:05]     Instance 5/5
+[2025-12-18 18:43:07]         P_return=0.5720, GHZ witness=0.5720
+[2025-12-18 18:43:07]       Running mean P_return=0.5526
+[2025-12-18 18:43:07]   Saved depth 30 result (mean_P_return=0.5526)
+[2025-12-18 18:43:07]   Alpha fit saved (alpha=0.0004, points=4)
+[2025-12-18 18:43:07] 
+[3/12] Subset 2 (elapsed: 1.6 min)
+[2025-12-18 18:43:07]   Qubits: (13, 18, 19, 20, 24, 25, 26, 27, 33)
+[2025-12-18 18:43:07]   lambda2=0.2857, C=2.5715
+[2025-12-18 18:43:07]   Depth 5 (1/4): running 5 instances
+[2025-12-18 18:43:07]     Instance 1/5
+[2025-12-18 18:43:10]         P_return=0.8930, GHZ witness=0.8930
+[2025-12-18 18:43:10]       Running mean P_return=0.8930
+[2025-12-18 18:43:10]     Instance 2/5
+[2025-12-18 18:43:16]         P_return=0.9120, GHZ witness=0.9120
+[2025-12-18 18:43:16]       Running mean P_return=0.9025
+[2025-12-18 18:43:16]     Instance 3/5
+[2025-12-18 18:43:18]         P_return=0.8870, GHZ witness=0.8870
+[2025-12-18 18:43:18]       Running mean P_return=0.8973
+[2025-12-18 18:43:18]     Instance 4/5
+[2025-12-18 18:43:20]         P_return=0.8890, GHZ witness=0.8890
+[2025-12-18 18:43:20]       Running mean P_return=0.8953
+[2025-12-18 18:43:20]     Instance 5/5
+[2025-12-18 18:43:23]         P_return=0.8850, GHZ witness=0.8850
+[2025-12-18 18:43:23]       Running mean P_return=0.8932
+[2025-12-18 18:43:23]   Saved depth 5 result (mean_P_return=0.8932)
+[2025-12-18 18:43:23]   Depth 10 (2/4): running 5 instances
+[2025-12-18 18:43:23]     Instance 1/5
+[2025-12-18 18:43:26]         P_return=0.8750, GHZ witness=0.8750
+[2025-12-18 18:43:26]       Running mean P_return=0.8750
+[2025-12-18 18:43:26]     Instance 2/5
+[2025-12-18 18:43:29]         P_return=0.8810, GHZ witness=0.8810
+[2025-12-18 18:43:29]       Running mean P_return=0.8780
+[2025-12-18 18:43:29]     Instance 3/5
+[2025-12-18 18:43:31]         P_return=0.9000, GHZ witness=0.9000
+[2025-12-18 18:43:31]       Running mean P_return=0.8853
+[2025-12-18 18:43:31]     Instance 4/5
+[2025-12-18 18:43:32]         P_return=0.8950, GHZ witness=0.8950
+[2025-12-18 18:43:32]       Running mean P_return=0.8878
+[2025-12-18 18:43:32]     Instance 5/5
+[2025-12-18 18:43:34]         P_return=0.9110, GHZ witness=0.9110
+[2025-12-18 18:43:34]       Running mean P_return=0.8924
+[2025-12-18 18:43:34]   Saved depth 10 result (mean_P_return=0.8924)
+[2025-12-18 18:43:34]   Depth 20 (3/4): running 5 instances
+[2025-12-18 18:43:34]     Instance 1/5
+[2025-12-18 18:43:37]         P_return=0.9010, GHZ witness=0.9010
+[2025-12-18 18:43:37]       Running mean P_return=0.9010
+[2025-12-18 18:43:37]     Instance 2/5
+[2025-12-18 18:43:39]         P_return=0.8890, GHZ witness=0.8890
+[2025-12-18 18:43:39]       Running mean P_return=0.8950
+[2025-12-18 18:43:39]     Instance 3/5
+[2025-12-18 18:43:42]         P_return=0.8920, GHZ witness=0.8920
+[2025-12-18 18:43:42]       Running mean P_return=0.8940
+[2025-12-18 18:43:42]     Instance 4/5
+[2025-12-18 18:43:45]         P_return=0.8930, GHZ witness=0.8930
+[2025-12-18 18:43:45]       Running mean P_return=0.8938
+[2025-12-18 18:43:45]     Instance 5/5
+[2025-12-18 18:43:47]         P_return=0.8890, GHZ witness=0.8890
+[2025-12-18 18:43:47]       Running mean P_return=0.8928
+[2025-12-18 18:43:47]   Saved depth 20 result (mean_P_return=0.8928)
+[2025-12-18 18:43:47]   Depth 30 (4/4): running 5 instances
+[2025-12-18 18:43:47]     Instance 1/5
+[2025-12-18 18:43:50]         P_return=0.8810, GHZ witness=0.8810
+[2025-12-18 18:43:50]       Running mean P_return=0.8810
+[2025-12-18 18:43:50]     Instance 2/5
+[2025-12-18 18:43:52]         P_return=0.8830, GHZ witness=0.8830
+[2025-12-18 18:43:52]       Running mean P_return=0.8820
+[2025-12-18 18:43:52]     Instance 3/5
+[2025-12-18 18:43:55]         P_return=0.8970, GHZ witness=0.8970
+[2025-12-18 18:43:55]       Running mean P_return=0.8870
+[2025-12-18 18:43:55]     Instance 4/5
+[2025-12-18 18:43:58]         P_return=0.8990, GHZ witness=0.8990
+[2025-12-18 18:43:58]       Running mean P_return=0.8900
+[2025-12-18 18:43:58]     Instance 5/5
+[2025-12-18 18:44:00]         P_return=0.8900, GHZ witness=0.8900
+[2025-12-18 18:44:00]       Running mean P_return=0.8900
+[2025-12-18 18:44:00]   Saved depth 30 result (mean_P_return=0.8900)
+[2025-12-18 18:44:00]   Alpha fit saved (alpha=0.0001, points=4)
+[2025-12-18 18:44:00] 
+[4/12] Subset 3 (elapsed: 2.5 min)
+[2025-12-18 18:44:00]   Qubits: (36, 37, 38, 44, 45, 50, 51, 52, 58)
+[2025-12-18 18:44:00]   lambda2=0.2461, C=2.2146
+[2025-12-18 18:44:00]   Depth 5 (1/4): running 5 instances
+[2025-12-18 18:44:00]     Instance 1/5
+[2025-12-18 18:44:01]         P_return=0.7350, GHZ witness=0.7350
+[2025-12-18 18:44:01]       Running mean P_return=0.7350
+[2025-12-18 18:44:01]     Instance 2/5
+[2025-12-18 18:44:04]         P_return=0.7250, GHZ witness=0.7250
+[2025-12-18 18:44:04]       Running mean P_return=0.7300
+[2025-12-18 18:44:04]     Instance 3/5
+[2025-12-18 18:44:06]         P_return=0.7450, GHZ witness=0.7450
+[2025-12-18 18:44:06]       Running mean P_return=0.7350
+[2025-12-18 18:44:06]     Instance 4/5
+[2025-12-18 18:44:08]         P_return=0.7610, GHZ witness=0.7610
+[2025-12-18 18:44:08]       Running mean P_return=0.7415
+[2025-12-18 18:44:08]     Instance 5/5
+[2025-12-18 18:44:11]         P_return=0.7320, GHZ witness=0.7320
+[2025-12-18 18:44:11]       Running mean P_return=0.7396
+[2025-12-18 18:44:11]   Saved depth 5 result (mean_P_return=0.7396)
+[2025-12-18 18:44:11]   Depth 10 (2/4): running 5 instances
+[2025-12-18 18:44:11]     Instance 1/5
+[2025-12-18 18:44:13]         P_return=0.7670, GHZ witness=0.7670
+[2025-12-18 18:44:13]       Running mean P_return=0.7670
+[2025-12-18 18:44:13]     Instance 2/5
+[2025-12-18 18:44:16]         P_return=0.7610, GHZ witness=0.7610
+[2025-12-18 18:44:16]       Running mean P_return=0.7640
+[2025-12-18 18:44:16]     Instance 3/5
+[2025-12-18 18:44:18]         P_return=0.7180, GHZ witness=0.7180
+[2025-12-18 18:44:18]       Running mean P_return=0.7487
+[2025-12-18 18:44:18]     Instance 4/5
+[2025-12-18 18:44:21]         P_return=0.7420, GHZ witness=0.7420
+[2025-12-18 18:44:21]       Running mean P_return=0.7470
+[2025-12-18 18:44:21]     Instance 5/5
+[2025-12-18 18:44:25]         P_return=0.7240, GHZ witness=0.7240
+[2025-12-18 18:44:25]       Running mean P_return=0.7424
+[2025-12-18 18:44:25]   Saved depth 10 result (mean_P_return=0.7424)
+[2025-12-18 18:44:25]   Depth 20 (3/4): running 5 instances
+[2025-12-18 18:44:25]     Instance 1/5
+[2025-12-18 18:44:27]         P_return=0.7310, GHZ witness=0.7310
+[2025-12-18 18:44:27]       Running mean P_return=0.7310
+[2025-12-18 18:44:27]     Instance 2/5
+[2025-12-18 18:44:30]         P_return=0.7400, GHZ witness=0.7400
+[2025-12-18 18:44:30]       Running mean P_return=0.7355
+[2025-12-18 18:44:30]     Instance 3/5
+[2025-12-18 18:44:32]         P_return=0.7340, GHZ witness=0.7340
+[2025-12-18 18:44:32]       Running mean P_return=0.7350
+[2025-12-18 18:44:32]     Instance 4/5
+[2025-12-18 18:44:33]         P_return=0.7210, GHZ witness=0.7210
+[2025-12-18 18:44:33]       Running mean P_return=0.7315
+[2025-12-18 18:44:33]     Instance 5/5
+[2025-12-18 18:44:35]         P_return=0.7320, GHZ witness=0.7320
+[2025-12-18 18:44:35]       Running mean P_return=0.7316
+[2025-12-18 18:44:35]   Saved depth 20 result (mean_P_return=0.7316)
+[2025-12-18 18:44:35]   Depth 30 (4/4): running 5 instances
+[2025-12-18 18:44:35]     Instance 1/5
+[2025-12-18 18:44:38]         P_return=0.7390, GHZ witness=0.7390
+[2025-12-18 18:44:38]       Running mean P_return=0.7390
+[2025-12-18 18:44:38]     Instance 2/5
+[2025-12-18 18:44:41]         P_return=0.7510, GHZ witness=0.7510
+[2025-12-18 18:44:41]       Running mean P_return=0.7450
+[2025-12-18 18:44:41]     Instance 3/5
+[2025-12-18 18:44:43]         P_return=0.7160, GHZ witness=0.7160
+[2025-12-18 18:44:43]       Running mean P_return=0.7353
+[2025-12-18 18:44:43]     Instance 4/5
+[2025-12-18 18:44:46]         P_return=0.7390, GHZ witness=0.7390
+[2025-12-18 18:44:46]       Running mean P_return=0.7362
+[2025-12-18 18:44:46]     Instance 5/5
+[2025-12-18 18:44:49]         P_return=0.7380, GHZ witness=0.7380
+[2025-12-18 18:44:49]       Running mean P_return=0.7366
+[2025-12-18 18:44:49]   Saved depth 30 result (mean_P_return=0.7366)
+[2025-12-18 18:44:49]   Alpha fit saved (alpha=0.0003, points=4)
+[2025-12-18 18:44:49] 
+[5/12] Subset 4 (elapsed: 3.3 min)
+[2025-12-18 18:44:49]   Qubits: (1, 2, 3, 4, 5, 9, 10, 11, 17)
+[2025-12-18 18:44:49]   lambda2=0.2929, C=2.6360
+[2025-12-18 18:44:49]   Depth 5 (1/4): running 5 instances
+[2025-12-18 18:44:49]     Instance 1/5
+[2025-12-18 18:44:51]         P_return=0.8700, GHZ witness=0.8700
+[2025-12-18 18:44:51]       Running mean P_return=0.8700
+[2025-12-18 18:44:51]     Instance 2/5
+[2025-12-18 18:44:54]         P_return=0.8610, GHZ witness=0.8610
+[2025-12-18 18:44:54]       Running mean P_return=0.8655
+[2025-12-18 18:44:54]     Instance 3/5
+[2025-12-18 18:44:56]         P_return=0.8610, GHZ witness=0.8610
+[2025-12-18 18:44:56]       Running mean P_return=0.8640
+[2025-12-18 18:44:56]     Instance 4/5
+[2025-12-18 18:44:59]         P_return=0.8590, GHZ witness=0.8590
+[2025-12-18 18:44:59]       Running mean P_return=0.8627
+[2025-12-18 18:44:59]     Instance 5/5
+[2025-12-18 18:45:01]         P_return=0.8810, GHZ witness=0.8810
+[2025-12-18 18:45:01]       Running mean P_return=0.8664
+[2025-12-18 18:45:01]   Saved depth 5 result (mean_P_return=0.8664)
+[2025-12-18 18:45:01]   Depth 10 (2/4): running 5 instances
+[2025-12-18 18:45:01]     Instance 1/5
+[2025-12-18 18:45:01]         P_return=0.8640, GHZ witness=0.8640
+[2025-12-18 18:45:01]       Running mean P_return=0.8640
+[2025-12-18 18:45:01]     Instance 2/5
+[2025-12-18 18:45:04]         P_return=0.8790, GHZ witness=0.8790
+[2025-12-18 18:45:04]       Running mean P_return=0.8715
+[2025-12-18 18:45:04]     Instance 3/5
+[2025-12-18 18:45:07]         P_return=0.8680, GHZ witness=0.8680
+[2025-12-18 18:45:07]       Running mean P_return=0.8703
+[2025-12-18 18:45:07]     Instance 4/5
+[2025-12-18 18:45:10]         P_return=0.8690, GHZ witness=0.8690
+[2025-12-18 18:45:10]       Running mean P_return=0.8700
+[2025-12-18 18:45:10]     Instance 5/5
+[2025-12-18 18:45:12]         P_return=0.8740, GHZ witness=0.8740
+[2025-12-18 18:45:12]       Running mean P_return=0.8708
+[2025-12-18 18:45:12]   Saved depth 10 result (mean_P_return=0.8708)
+[2025-12-18 18:45:12]   Depth 20 (3/4): running 5 instances
+[2025-12-18 18:45:12]     Instance 1/5
+[2025-12-18 18:45:14]         P_return=0.8510, GHZ witness=0.8510
+[2025-12-18 18:45:14]       Running mean P_return=0.8510
+[2025-12-18 18:45:14]     Instance 2/5
+[2025-12-18 18:45:17]         P_return=0.8760, GHZ witness=0.8760
+[2025-12-18 18:45:17]       Running mean P_return=0.8635
+[2025-12-18 18:45:17]     Instance 3/5
+[2025-12-18 18:45:19]         P_return=0.8740, GHZ witness=0.8740
+[2025-12-18 18:45:19]       Running mean P_return=0.8670
+[2025-12-18 18:45:19]     Instance 4/5
+[2025-12-18 18:45:22]         P_return=0.8730, GHZ witness=0.8730
+[2025-12-18 18:45:22]       Running mean P_return=0.8685
+[2025-12-18 18:45:22]     Instance 5/5
+[2025-12-18 18:45:25]         P_return=0.8860, GHZ witness=0.8860
+[2025-12-18 18:45:25]       Running mean P_return=0.8720
+[2025-12-18 18:45:25]   Saved depth 20 result (mean_P_return=0.8720)
+[2025-12-18 18:45:25]   Depth 30 (4/4): running 5 instances
+[2025-12-18 18:45:25]     Instance 1/5
+[2025-12-18 18:45:28]         P_return=0.8620, GHZ witness=0.8620
+[2025-12-18 18:45:28]       Running mean P_return=0.8620
+[2025-12-18 18:45:28]     Instance 2/5
+[2025-12-18 18:45:30]         P_return=0.8890, GHZ witness=0.8890
+[2025-12-18 18:45:30]       Running mean P_return=0.8755
+[2025-12-18 18:45:30]     Instance 3/5
+[2025-12-18 18:45:33]         P_return=0.8960, GHZ witness=0.8960
+[2025-12-18 18:45:33]       Running mean P_return=0.8823
+[2025-12-18 18:45:33]     Instance 4/5
+[2025-12-18 18:45:33]         P_return=0.8640, GHZ witness=0.8640
+[2025-12-18 18:45:33]       Running mean P_return=0.8777
+[2025-12-18 18:45:33]     Instance 5/5
+[2025-12-18 18:45:37]         P_return=0.8770, GHZ witness=0.8770
+[2025-12-18 18:45:37]       Running mean P_return=0.8776
+[2025-12-18 18:45:37]   Saved depth 30 result (mean_P_return=0.8776)
+[2025-12-18 18:45:37]   Alpha fit saved (alpha=-0.0005, points=4)
+[2025-12-18 18:45:37] 
+[6/12] Subset 5 (elapsed: 4.1 min)
+[2025-12-18 18:45:37]   Qubits: (66, 67, 72, 73, 74, 75, 79, 80, 81)
+[2025-12-18 18:45:37]   lambda2=0.2929, C=2.6360
+[2025-12-18 18:45:37]   Depth 5 (1/4): running 5 instances
+[2025-12-18 18:45:37]     Instance 1/5
+[2025-12-18 18:45:40]         P_return=0.5400, GHZ witness=0.5400
+[2025-12-18 18:45:40]       Running mean P_return=0.5400
+[2025-12-18 18:45:40]     Instance 2/5
+[2025-12-18 18:45:42]         P_return=0.5650, GHZ witness=0.5650
+[2025-12-18 18:45:42]       Running mean P_return=0.5525
+[2025-12-18 18:45:42]     Instance 3/5
+[2025-12-18 18:45:44]         P_return=0.5530, GHZ witness=0.5530
+[2025-12-18 18:45:44]       Running mean P_return=0.5527
+[2025-12-18 18:45:44]     Instance 4/5
+[2025-12-18 18:45:46]         P_return=0.5750, GHZ witness=0.5750
+[2025-12-18 18:45:46]       Running mean P_return=0.5582
+[2025-12-18 18:45:46]     Instance 5/5
+[2025-12-18 18:45:49]         P_return=0.5720, GHZ witness=0.5720
+[2025-12-18 18:45:49]       Running mean P_return=0.5610
+[2025-12-18 18:45:49]   Saved depth 5 result (mean_P_return=0.5610)
+[2025-12-18 18:45:49]   Depth 10 (2/4): running 5 instances
+[2025-12-18 18:45:49]     Instance 1/5
+[2025-12-18 18:45:51]         P_return=0.5680, GHZ witness=0.5680
+[2025-12-18 18:45:51]       Running mean P_return=0.5680
+[2025-12-18 18:45:51]     Instance 2/5
+[2025-12-18 18:45:54]         P_return=0.5170, GHZ witness=0.5170
+[2025-12-18 18:45:54]       Running mean P_return=0.5425
+[2025-12-18 18:45:54]     Instance 3/5
+[2025-12-18 18:45:57]         P_return=0.5460, GHZ witness=0.5460
+[2025-12-18 18:45:57]       Running mean P_return=0.5437
+[2025-12-18 18:45:57]     Instance 4/5
+[2025-12-18 18:45:59]         P_return=0.5280, GHZ witness=0.5280
+[2025-12-18 18:45:59]       Running mean P_return=0.5397
+[2025-12-18 18:45:59]     Instance 5/5
+[2025-12-18 18:46:02]         P_return=0.5530, GHZ witness=0.5530
+[2025-12-18 18:46:02]       Running mean P_return=0.5424
+[2025-12-18 18:46:02]   Saved depth 10 result (mean_P_return=0.5424)
+[2025-12-18 18:46:02]   Depth 20 (3/4): running 5 instances
+[2025-12-18 18:46:02]     Instance 1/5
+[2025-12-18 18:46:03]         P_return=0.5580, GHZ witness=0.5580
+[2025-12-18 18:46:03]       Running mean P_return=0.5580
+[2025-12-18 18:46:03]     Instance 2/5
+[2025-12-18 18:46:06]         P_return=0.5790, GHZ witness=0.5790
+[2025-12-18 18:46:06]       Running mean P_return=0.5685
+[2025-12-18 18:46:06]     Instance 3/5
+[2025-12-18 18:46:08]         P_return=0.5410, GHZ witness=0.5410
+[2025-12-18 18:46:08]       Running mean P_return=0.5593
+[2025-12-18 18:46:08]     Instance 4/5
+[2025-12-18 18:46:11]         P_return=0.5920, GHZ witness=0.5920
+[2025-12-18 18:46:11]       Running mean P_return=0.5675
+[2025-12-18 18:46:11]     Instance 5/5
+[2025-12-18 18:46:13]         P_return=0.5260, GHZ witness=0.5260
+[2025-12-18 18:46:13]       Running mean P_return=0.5592
+[2025-12-18 18:46:13]   Saved depth 20 result (mean_P_return=0.5592)
+[2025-12-18 18:46:13]   Depth 30 (4/4): running 5 instances
+[2025-12-18 18:46:13]     Instance 1/5
+[2025-12-18 18:46:17]         P_return=0.5430, GHZ witness=0.5430
+[2025-12-18 18:46:17]       Running mean P_return=0.5430
+[2025-12-18 18:46:17]     Instance 2/5
+[2025-12-18 18:46:19]         P_return=0.5230, GHZ witness=0.5230
+[2025-12-18 18:46:19]       Running mean P_return=0.5330
+[2025-12-18 18:46:19]     Instance 3/5
+[2025-12-18 18:46:22]         P_return=0.5800, GHZ witness=0.5800
+[2025-12-18 18:46:22]       Running mean P_return=0.5487
+[2025-12-18 18:46:22]     Instance 4/5
+[2025-12-18 18:46:25]         P_return=0.5810, GHZ witness=0.5810
+[2025-12-18 18:46:25]       Running mean P_return=0.5567
+[2025-12-18 18:46:25]     Instance 5/5
+[2025-12-18 18:46:27]         P_return=0.5710, GHZ witness=0.5710
+[2025-12-18 18:46:27]       Running mean P_return=0.5596
+[2025-12-18 18:46:27]   Saved depth 30 result (mean_P_return=0.5596)
+[2025-12-18 18:46:27]   Alpha fit saved (alpha=-0.0004, points=4)
+[2025-12-18 18:46:27] 
+[7/12] Subset 6 (elapsed: 5.0 min)
+[2025-12-18 18:46:27]   Qubits: (30, 31, 32, 36, 37, 38, 39, 44, 45)
+[2025-12-18 18:46:27]   lambda2=0.3227, C=2.9045
+[2025-12-18 18:46:27]   Depth 5 (1/4): running 5 instances
+[2025-12-18 18:46:27]     Instance 1/5
+[2025-12-18 18:46:30]         P_return=0.7760, GHZ witness=0.7760
+[2025-12-18 18:46:30]       Running mean P_return=0.7760
+[2025-12-18 18:46:30]     Instance 2/5
+[2025-12-18 18:46:32]         P_return=0.7480, GHZ witness=0.7480
+[2025-12-18 18:46:32]       Running mean P_return=0.7620
+[2025-12-18 18:46:32]     Instance 3/5
+[2025-12-18 18:46:32]         P_return=0.7700, GHZ witness=0.7700
+[2025-12-18 18:46:32]       Running mean P_return=0.7647
+[2025-12-18 18:46:32]     Instance 4/5
+[2025-12-18 18:46:34]         P_return=0.7850, GHZ witness=0.7850
+[2025-12-18 18:46:34]       Running mean P_return=0.7698
+[2025-12-18 18:46:34]     Instance 5/5
+[2025-12-18 18:46:36]         P_return=0.7820, GHZ witness=0.7820
+[2025-12-18 18:46:36]       Running mean P_return=0.7722
+[2025-12-18 18:46:36]   Saved depth 5 result (mean_P_return=0.7722)
+[2025-12-18 18:46:36]   Depth 10 (2/4): running 5 instances
+[2025-12-18 18:46:36]     Instance 1/5
+[2025-12-18 18:46:39]         P_return=0.7690, GHZ witness=0.7690
+[2025-12-18 18:46:39]       Running mean P_return=0.7690
+[2025-12-18 18:46:39]     Instance 2/5
+[2025-12-18 18:46:42]         P_return=0.7870, GHZ witness=0.7870
+[2025-12-18 18:46:42]       Running mean P_return=0.7780
+[2025-12-18 18:46:42]     Instance 3/5
+[2025-12-18 18:46:44]         P_return=0.7700, GHZ witness=0.7700
+[2025-12-18 18:46:44]       Running mean P_return=0.7753
+[2025-12-18 18:46:44]     Instance 4/5
+[2025-12-18 18:46:47]         P_return=0.7590, GHZ witness=0.7590
+[2025-12-18 18:46:47]       Running mean P_return=0.7712
+[2025-12-18 18:46:47]     Instance 5/5
+[2025-12-18 18:46:50]         P_return=0.7530, GHZ witness=0.7530
+[2025-12-18 18:46:50]       Running mean P_return=0.7676
+[2025-12-18 18:46:50]   Saved depth 10 result (mean_P_return=0.7676)
+[2025-12-18 18:46:50]   Depth 20 (3/4): running 5 instances
+[2025-12-18 18:46:50]     Instance 1/5
+[2025-12-18 18:46:52]         P_return=0.7870, GHZ witness=0.7870
+[2025-12-18 18:46:52]       Running mean P_return=0.7870
+[2025-12-18 18:46:52]     Instance 2/5
+[2025-12-18 18:46:55]         P_return=0.7730, GHZ witness=0.7730
+[2025-12-18 18:46:55]       Running mean P_return=0.7800
+[2025-12-18 18:46:55]     Instance 3/5
+[2025-12-18 18:46:57]         P_return=0.7730, GHZ witness=0.7730
+[2025-12-18 18:46:57]       Running mean P_return=0.7777
+[2025-12-18 18:46:57]     Instance 4/5
+[2025-12-18 18:47:01]         P_return=0.7700, GHZ witness=0.7700
+[2025-12-18 18:47:01]       Running mean P_return=0.7758
+[2025-12-18 18:47:01]     Instance 5/5
+[2025-12-18 18:47:03]         P_return=0.7810, GHZ witness=0.7810
+[2025-12-18 18:47:03]       Running mean P_return=0.7768
+[2025-12-18 18:47:03]   Saved depth 20 result (mean_P_return=0.7768)
+[2025-12-18 18:47:03]   Depth 30 (4/4): running 5 instances
+[2025-12-18 18:47:03]     Instance 1/5
+[2025-12-18 18:47:03]         P_return=0.7950, GHZ witness=0.7950
+[2025-12-18 18:47:03]       Running mean P_return=0.7950
+[2025-12-18 18:47:03]     Instance 2/5
+[2025-12-18 18:47:06]         P_return=0.7860, GHZ witness=0.7860
+[2025-12-18 18:47:06]       Running mean P_return=0.7905
+[2025-12-18 18:47:06]     Instance 3/5
+[2025-12-18 18:47:09]         P_return=0.7770, GHZ witness=0.7770
+[2025-12-18 18:47:09]       Running mean P_return=0.7860
+[2025-12-18 18:47:09]     Instance 4/5
+[2025-12-18 18:47:11]         P_return=0.7770, GHZ witness=0.7770
+[2025-12-18 18:47:11]       Running mean P_return=0.7838
+[2025-12-18 18:47:11]     Instance 5/5
+[2025-12-18 18:47:13]         P_return=0.7920, GHZ witness=0.7920
+[2025-12-18 18:47:13]       Running mean P_return=0.7854
+[2025-12-18 18:47:13]   Saved depth 30 result (mean_P_return=0.7854)
+[2025-12-18 18:47:13]   Alpha fit saved (alpha=-0.0008, points=4)
+[2025-12-18 18:47:13] 
+[8/12] Subset 7 (elapsed: 5.7 min)
+[2025-12-18 18:47:13]   Qubits: (21, 22, 28, 29, 30, 35, 36, 37, 43)
+[2025-12-18 18:47:13]   lambda2=0.3227, C=2.9045
+[2025-12-18 18:47:13]   Depth 5 (1/4): running 5 instances
+[2025-12-18 18:47:13]     Instance 1/5
+[2025-12-18 18:47:16]         P_return=0.8690, GHZ witness=0.8690
+[2025-12-18 18:47:16]       Running mean P_return=0.8690
+[2025-12-18 18:47:16]     Instance 2/5
+[2025-12-18 18:47:20]         P_return=0.8750, GHZ witness=0.8750
+[2025-12-18 18:47:20]       Running mean P_return=0.8720
+[2025-12-18 18:47:20]     Instance 3/5
+[2025-12-18 18:47:22]         P_return=0.8610, GHZ witness=0.8610
+[2025-12-18 18:47:22]       Running mean P_return=0.8683
+[2025-12-18 18:47:22]     Instance 4/5
+[2025-12-18 18:47:25]         P_return=0.8610, GHZ witness=0.8610
+[2025-12-18 18:47:25]       Running mean P_return=0.8665
+[2025-12-18 18:47:25]     Instance 5/5
+[2025-12-18 18:47:27]         P_return=0.8830, GHZ witness=0.8830
+[2025-12-18 18:47:27]       Running mean P_return=0.8698
+[2025-12-18 18:47:27]   Saved depth 5 result (mean_P_return=0.8698)
+[2025-12-18 18:47:27]   Depth 10 (2/4): running 5 instances
+[2025-12-18 18:47:27]     Instance 1/5
+[2025-12-18 18:47:30]         P_return=0.8850, GHZ witness=0.8850
+[2025-12-18 18:47:30]       Running mean P_return=0.8850
+[2025-12-18 18:47:30]     Instance 2/5
+[2025-12-18 18:47:32]         P_return=0.8680, GHZ witness=0.8680
+[2025-12-18 18:47:32]       Running mean P_return=0.8765
+[2025-12-18 18:47:32]     Instance 3/5
+[2025-12-18 18:47:32]         P_return=0.8640, GHZ witness=0.8640
+[2025-12-18 18:47:32]       Running mean P_return=0.8723
+[2025-12-18 18:47:32]     Instance 4/5
+[2025-12-18 18:47:35]         P_return=0.8580, GHZ witness=0.8580
+[2025-12-18 18:47:35]       Running mean P_return=0.8688
+[2025-12-18 18:47:35]     Instance 5/5
+[2025-12-18 18:47:37]         P_return=0.8560, GHZ witness=0.8560
+[2025-12-18 18:47:37]       Running mean P_return=0.8662
+[2025-12-18 18:47:37]   Saved depth 10 result (mean_P_return=0.8662)
+[2025-12-18 18:47:37]   Depth 20 (3/4): running 5 instances
+[2025-12-18 18:47:37]     Instance 1/5
+[2025-12-18 18:47:40]         P_return=0.8630, GHZ witness=0.8630
+[2025-12-18 18:47:40]       Running mean P_return=0.8630
+[2025-12-18 18:47:40]     Instance 2/5
+[2025-12-18 18:47:43]         P_return=0.8530, GHZ witness=0.8530
+[2025-12-18 18:47:43]       Running mean P_return=0.8580
+[2025-12-18 18:47:43]     Instance 3/5
+[2025-12-18 18:47:46]         P_return=0.8640, GHZ witness=0.8640
+[2025-12-18 18:47:46]       Running mean P_return=0.8600
+[2025-12-18 18:47:46]     Instance 4/5
+[2025-12-18 18:47:49]         P_return=0.8680, GHZ witness=0.8680
+[2025-12-18 18:47:49]       Running mean P_return=0.8620
+[2025-12-18 18:47:49]     Instance 5/5
+[2025-12-18 18:47:51]         P_return=0.8900, GHZ witness=0.8900
+[2025-12-18 18:47:51]       Running mean P_return=0.8676
+[2025-12-18 18:47:51]   Saved depth 20 result (mean_P_return=0.8676)
+[2025-12-18 18:47:51]   Depth 30 (4/4): running 5 instances
+[2025-12-18 18:47:51]     Instance 1/5
+[2025-12-18 18:47:54]         P_return=0.8650, GHZ witness=0.8650
+[2025-12-18 18:47:54]       Running mean P_return=0.8650
+[2025-12-18 18:47:54]     Instance 2/5
+[2025-12-18 18:47:57]         P_return=0.8660, GHZ witness=0.8660
+[2025-12-18 18:47:57]       Running mean P_return=0.8655
+[2025-12-18 18:47:57]     Instance 3/5
+[2025-12-18 18:47:59]         P_return=0.8750, GHZ witness=0.8750
+[2025-12-18 18:47:59]       Running mean P_return=0.8687
+[2025-12-18 18:47:59]     Instance 4/5
+[2025-12-18 18:48:02]         P_return=0.8800, GHZ witness=0.8800
+[2025-12-18 18:48:02]       Running mean P_return=0.8715
+[2025-12-18 18:48:02]     Instance 5/5
+[2025-12-18 18:48:03]         P_return=0.8670, GHZ witness=0.8670
+[2025-12-18 18:48:03]       Running mean P_return=0.8706
+[2025-12-18 18:48:03]   Saved depth 30 result (mean_P_return=0.8706)
+[2025-12-18 18:48:03]   Alpha fit saved (alpha=-0.0001, points=4)
+[2025-12-18 18:48:03] 
+[9/12] Subset 8 (elapsed: 6.5 min)
+[2025-12-18 18:48:03]   Qubits: (26, 32, 33, 34, 38, 39, 40, 41, 47)
+[2025-12-18 18:48:03]   lambda2=0.3503, C=3.1526
+[2025-12-18 18:48:03]   Depth 5 (1/4): running 5 instances
+[2025-12-18 18:48:03]     Instance 1/5
+[2025-12-18 18:48:05]         P_return=0.8570, GHZ witness=0.8570
+[2025-12-18 18:48:05]       Running mean P_return=0.8570
+[2025-12-18 18:48:05]     Instance 2/5
+[2025-12-18 18:48:07]         P_return=0.8430, GHZ witness=0.8430
+[2025-12-18 18:48:07]       Running mean P_return=0.8500
+[2025-12-18 18:48:07]     Instance 3/5
+[2025-12-18 18:48:10]         P_return=0.8580, GHZ witness=0.8580
+[2025-12-18 18:48:10]       Running mean P_return=0.8527
+[2025-12-18 18:48:10]     Instance 4/5
+[2025-12-18 18:48:12]         P_return=0.8420, GHZ witness=0.8420
+[2025-12-18 18:48:12]       Running mean P_return=0.8500
+[2025-12-18 18:48:12]     Instance 5/5
+[2025-12-18 18:48:15]         P_return=0.8640, GHZ witness=0.8640
+[2025-12-18 18:48:15]       Running mean P_return=0.8528
+[2025-12-18 18:48:15]   Saved depth 5 result (mean_P_return=0.8528)
+[2025-12-18 18:48:15]   Depth 10 (2/4): running 5 instances
+[2025-12-18 18:48:15]     Instance 1/5
+[2025-12-18 18:48:18]         P_return=0.8570, GHZ witness=0.8570
+[2025-12-18 18:48:18]       Running mean P_return=0.8570
+[2025-12-18 18:48:18]     Instance 2/5
+[2025-12-18 18:48:21]         P_return=0.8750, GHZ witness=0.8750
+[2025-12-18 18:48:21]       Running mean P_return=0.8660
+[2025-12-18 18:48:21]     Instance 3/5
+[2025-12-18 18:48:24]         P_return=0.8460, GHZ witness=0.8460
+[2025-12-18 18:48:24]       Running mean P_return=0.8593
+[2025-12-18 18:48:24]     Instance 4/5
+[2025-12-18 18:48:26]         P_return=0.8620, GHZ witness=0.8620
+[2025-12-18 18:48:26]       Running mean P_return=0.8600
+[2025-12-18 18:48:26]     Instance 5/5
+[2025-12-18 18:48:29]         P_return=0.8550, GHZ witness=0.8550
+[2025-12-18 18:48:29]       Running mean P_return=0.8590
+[2025-12-18 18:48:29]   Saved depth 10 result (mean_P_return=0.8590)
+[2025-12-18 18:48:29]   Depth 20 (3/4): running 5 instances
+[2025-12-18 18:48:29]     Instance 1/5
+[2025-12-18 18:48:31]         P_return=0.8640, GHZ witness=0.8640
+[2025-12-18 18:48:31]       Running mean P_return=0.8640
+[2025-12-18 18:48:31]     Instance 2/5
+[2025-12-18 18:48:34]         P_return=0.8440, GHZ witness=0.8440
+[2025-12-18 18:48:34]       Running mean P_return=0.8540
+[2025-12-18 18:48:34]     Instance 3/5
+[2025-12-18 18:48:34]         P_return=0.8580, GHZ witness=0.8580
+[2025-12-18 18:48:34]       Running mean P_return=0.8553
+[2025-12-18 18:48:34]     Instance 4/5
+[2025-12-18 18:48:37]         P_return=0.8500, GHZ witness=0.8500
+[2025-12-18 18:48:37]       Running mean P_return=0.8540
+[2025-12-18 18:48:37]     Instance 5/5
+[2025-12-18 18:48:40]         P_return=0.8440, GHZ witness=0.8440
+[2025-12-18 18:48:40]       Running mean P_return=0.8520
+[2025-12-18 18:48:40]   Saved depth 20 result (mean_P_return=0.8520)
+[2025-12-18 18:48:40]   Depth 30 (4/4): running 5 instances
+[2025-12-18 18:48:40]     Instance 1/5
+[2025-12-18 18:48:43]         P_return=0.8480, GHZ witness=0.8480
+[2025-12-18 18:48:43]       Running mean P_return=0.8480
+[2025-12-18 18:48:43]     Instance 2/5
+[2025-12-18 18:48:45]         P_return=0.8640, GHZ witness=0.8640
+[2025-12-18 18:48:45]       Running mean P_return=0.8560
+[2025-12-18 18:48:45]     Instance 3/5
+[2025-12-18 18:48:48]         P_return=0.8490, GHZ witness=0.8490
+[2025-12-18 18:48:48]       Running mean P_return=0.8537
+[2025-12-18 18:48:48]     Instance 4/5
+[2025-12-18 18:48:50]         P_return=0.8520, GHZ witness=0.8520
+[2025-12-18 18:48:50]       Running mean P_return=0.8532
+[2025-12-18 18:48:50]     Instance 5/5
+[2025-12-18 18:48:53]         P_return=0.8440, GHZ witness=0.8440
+[2025-12-18 18:48:53]       Running mean P_return=0.8514
+[2025-12-18 18:48:53]   Saved depth 30 result (mean_P_return=0.8514)
+[2025-12-18 18:48:53]   Alpha fit saved (alpha=0.0002, points=4)
+[2025-12-18 18:48:53] 
+[10/12] Subset 9 (elapsed: 7.4 min)
+[2025-12-18 18:48:53]   Qubits: (47, 53, 54, 55, 60, 61, 62, 68, 69)
+[2025-12-18 18:48:53]   lambda2=0.3227, C=2.9045
+[2025-12-18 18:48:53]   Depth 5 (1/4): running 5 instances
+[2025-12-18 18:48:53]     Instance 1/5
+[2025-12-18 18:48:56]         P_return=0.3930, GHZ witness=0.3930
+[2025-12-18 18:48:56]       Running mean P_return=0.3930
+[2025-12-18 18:48:56]     Instance 2/5
+[2025-12-18 18:48:59]         P_return=0.3910, GHZ witness=0.3910
+[2025-12-18 18:48:59]       Running mean P_return=0.3920
+[2025-12-18 18:48:59]     Instance 3/5
+[2025-12-18 18:49:02]         P_return=0.4000, GHZ witness=0.4000
+[2025-12-18 18:49:02]       Running mean P_return=0.3947
+[2025-12-18 18:49:02]     Instance 4/5
+[2025-12-18 18:49:04]         P_return=0.3490, GHZ witness=0.3490
+[2025-12-18 18:49:04]       Running mean P_return=0.3833
+[2025-12-18 18:49:04]     Instance 5/5
+[2025-12-18 18:49:04]         P_return=0.3590, GHZ witness=0.3590
+[2025-12-18 18:49:04]       Running mean P_return=0.3784
+[2025-12-18 18:49:04]   Saved depth 5 result (mean_P_return=0.3784)
+[2025-12-18 18:49:04]   Depth 10 (2/4): running 5 instances
+[2025-12-18 18:49:04]     Instance 1/5
+[2025-12-18 18:49:07]         P_return=0.3650, GHZ witness=0.3650
+[2025-12-18 18:49:07]       Running mean P_return=0.3650
+[2025-12-18 18:49:07]     Instance 2/5
+[2025-12-18 18:49:09]         P_return=0.3880, GHZ witness=0.3880
+[2025-12-18 18:49:09]       Running mean P_return=0.3765
+[2025-12-18 18:49:09]     Instance 3/5
+[2025-12-18 18:49:12]         P_return=0.3610, GHZ witness=0.3610
+[2025-12-18 18:49:12]       Running mean P_return=0.3713
+[2025-12-18 18:49:12]     Instance 4/5
+[2025-12-18 18:49:14]         P_return=0.4150, GHZ witness=0.4150
+[2025-12-18 18:49:14]       Running mean P_return=0.3822
+[2025-12-18 18:49:14]     Instance 5/5
+[2025-12-18 18:49:17]         P_return=0.3630, GHZ witness=0.3630
+[2025-12-18 18:49:17]       Running mean P_return=0.3784
+[2025-12-18 18:49:17]   Saved depth 10 result (mean_P_return=0.3784)
+[2025-12-18 18:49:17]   Depth 20 (3/4): running 5 instances
+[2025-12-18 18:49:17]     Instance 1/5
+[2025-12-18 18:49:19]         P_return=0.3820, GHZ witness=0.3820
+[2025-12-18 18:49:19]       Running mean P_return=0.3820
+[2025-12-18 18:49:19]     Instance 2/5
+[2025-12-18 18:49:23]         P_return=0.3700, GHZ witness=0.3700
+[2025-12-18 18:49:23]       Running mean P_return=0.3760
+[2025-12-18 18:49:23]     Instance 3/5
+[2025-12-18 18:49:25]         P_return=0.3820, GHZ witness=0.3820
+[2025-12-18 18:49:25]       Running mean P_return=0.3780
+[2025-12-18 18:49:25]     Instance 4/5
+[2025-12-18 18:49:28]         P_return=0.3840, GHZ witness=0.3840
+[2025-12-18 18:49:28]       Running mean P_return=0.3795
+[2025-12-18 18:49:28]     Instance 5/5
+[2025-12-18 18:49:31]         P_return=0.3980, GHZ witness=0.3980
+[2025-12-18 18:49:31]       Running mean P_return=0.3832
+[2025-12-18 18:49:31]   Saved depth 20 result (mean_P_return=0.3832)
+[2025-12-18 18:49:31]   Depth 30 (4/4): running 5 instances
+[2025-12-18 18:49:31]     Instance 1/5
+[2025-12-18 18:49:33]         P_return=0.3490, GHZ witness=0.3490
+[2025-12-18 18:49:33]       Running mean P_return=0.3490
+[2025-12-18 18:49:33]     Instance 2/5
+[2025-12-18 18:49:34]         P_return=0.4020, GHZ witness=0.4020
+[2025-12-18 18:49:34]       Running mean P_return=0.3755
+[2025-12-18 18:49:34]     Instance 3/5
+[2025-12-18 18:49:37]         P_return=0.3840, GHZ witness=0.3840
+[2025-12-18 18:49:37]       Running mean P_return=0.3783
+[2025-12-18 18:49:37]     Instance 4/5
+[2025-12-18 18:49:39]         P_return=0.3680, GHZ witness=0.3680
+[2025-12-18 18:49:39]       Running mean P_return=0.3758
+[2025-12-18 18:49:39]     Instance 5/5
+[2025-12-18 18:49:42]         P_return=0.3810, GHZ witness=0.3810
+[2025-12-18 18:49:42]       Running mean P_return=0.3768
+[2025-12-18 18:49:42]   Saved depth 30 result (mean_P_return=0.3768)
+[2025-12-18 18:49:42]   Alpha fit saved (alpha=0.0000, points=4)
+[2025-12-18 18:49:42] 
+[11/12] Subset 10 (elapsed: 8.2 min)
+[2025-12-18 18:49:42]   Qubits: (55, 61, 62, 67, 68, 69, 74, 75, 76)
+[2025-12-18 18:49:42]   lambda2=0.2671, C=2.4042
+[2025-12-18 18:49:42]   Depth 5 (1/4): running 5 instances
+[2025-12-18 18:49:42]     Instance 1/5
+[2025-12-18 18:49:44]         P_return=0.6600, GHZ witness=0.6600
+[2025-12-18 18:49:44]       Running mean P_return=0.6600
+[2025-12-18 18:49:44]     Instance 2/5
+[2025-12-18 18:49:47]         P_return=0.6570, GHZ witness=0.6570
+[2025-12-18 18:49:47]       Running mean P_return=0.6585
+[2025-12-18 18:49:47]     Instance 3/5
+[2025-12-18 18:49:49]         P_return=0.6600, GHZ witness=0.6600
+[2025-12-18 18:49:49]       Running mean P_return=0.6590
+[2025-12-18 18:49:49]     Instance 4/5
+[2025-12-18 18:49:51]         P_return=0.6770, GHZ witness=0.6770
+[2025-12-18 18:49:51]       Running mean P_return=0.6635
+[2025-12-18 18:49:51]     Instance 5/5
+[2025-12-18 18:49:54]         P_return=0.6480, GHZ witness=0.6480
+[2025-12-18 18:49:54]       Running mean P_return=0.6604
+[2025-12-18 18:49:54]   Saved depth 5 result (mean_P_return=0.6604)
+[2025-12-18 18:49:54]   Depth 10 (2/4): running 5 instances
+[2025-12-18 18:49:54]     Instance 1/5
+[2025-12-18 18:49:56]         P_return=0.6770, GHZ witness=0.6770
+[2025-12-18 18:49:56]       Running mean P_return=0.6770
+[2025-12-18 18:49:56]     Instance 2/5
+[2025-12-18 18:49:59]         P_return=0.6700, GHZ witness=0.6700
+[2025-12-18 18:49:59]       Running mean P_return=0.6735
+[2025-12-18 18:49:59]     Instance 3/5
+[2025-12-18 18:50:01]         P_return=0.6730, GHZ witness=0.6730
+[2025-12-18 18:50:01]       Running mean P_return=0.6733
+[2025-12-18 18:50:01]     Instance 4/5
+[2025-12-18 18:50:04]         P_return=0.6560, GHZ witness=0.6560
+[2025-12-18 18:50:04]       Running mean P_return=0.6690
+[2025-12-18 18:50:04]     Instance 5/5
+[2025-12-18 18:50:04]         P_return=0.6630, GHZ witness=0.6630
+[2025-12-18 18:50:04]       Running mean P_return=0.6678
+[2025-12-18 18:50:04]   Saved depth 10 result (mean_P_return=0.6678)
+[2025-12-18 18:50:04]   Depth 20 (3/4): running 5 instances
+[2025-12-18 18:50:04]     Instance 1/5
+[2025-12-18 18:50:07]         P_return=0.6730, GHZ witness=0.6730
+[2025-12-18 18:50:07]       Running mean P_return=0.6730
+[2025-12-18 18:50:07]     Instance 2/5
+[2025-12-18 18:50:09]         P_return=0.6670, GHZ witness=0.6670
+[2025-12-18 18:50:09]       Running mean P_return=0.6700
+[2025-12-18 18:50:09]     Instance 3/5
+[2025-12-18 18:50:12]         P_return=0.6500, GHZ witness=0.6500
+[2025-12-18 18:50:12]       Running mean P_return=0.6633
+[2025-12-18 18:50:12]     Instance 4/5
+[2025-12-18 18:50:15]         P_return=0.6530, GHZ witness=0.6530
+[2025-12-18 18:50:15]       Running mean P_return=0.6608
+[2025-12-18 18:50:15]     Instance 5/5
+[2025-12-18 18:50:17]         P_return=0.6350, GHZ witness=0.6350
+[2025-12-18 18:50:17]       Running mean P_return=0.6556
+[2025-12-18 18:50:17]   Saved depth 20 result (mean_P_return=0.6556)
+[2025-12-18 18:50:17]   Depth 30 (4/4): running 5 instances
+[2025-12-18 18:50:17]     Instance 1/5
+[2025-12-18 18:50:20]         P_return=0.6780, GHZ witness=0.6780
+[2025-12-18 18:50:20]       Running mean P_return=0.6780
+[2025-12-18 18:50:20]     Instance 2/5
+[2025-12-18 18:50:23]         P_return=0.6790, GHZ witness=0.6790
+[2025-12-18 18:50:23]       Running mean P_return=0.6785
+[2025-12-18 18:50:23]     Instance 3/5
+[2025-12-18 18:50:26]         P_return=0.6550, GHZ witness=0.6550
+[2025-12-18 18:50:26]       Running mean P_return=0.6707
+[2025-12-18 18:50:26]     Instance 4/5
+[2025-12-18 18:50:29]         P_return=0.6700, GHZ witness=0.6700
+[2025-12-18 18:50:29]       Running mean P_return=0.6705
+[2025-12-18 18:50:29]     Instance 5/5
+[2025-12-18 18:50:32]         P_return=0.6910, GHZ witness=0.6910
+[2025-12-18 18:50:32]       Running mean P_return=0.6746
+[2025-12-18 18:50:32]   Saved depth 30 result (mean_P_return=0.6746)
+[2025-12-18 18:50:32]   Alpha fit saved (alpha=-0.0005, points=4)
+[2025-12-18 18:50:32] 
+[12/12] Subset 11 (elapsed: 9.0 min)
+[2025-12-18 18:50:32]   Qubits: (4, 5, 6, 11, 12, 13, 19, 20, 27)
+[2025-12-18 18:50:32]   lambda2=0.2671, C=2.4042
+[2025-12-18 18:50:32]   Depth 5 (1/4): running 5 instances
+[2025-12-18 18:50:32]     Instance 1/5
+[2025-12-18 18:50:34]         P_return=0.8790, GHZ witness=0.8790
+[2025-12-18 18:50:34]       Running mean P_return=0.8790
+[2025-12-18 18:50:34]     Instance 2/5
+[2025-12-18 18:50:36]         P_return=0.8870, GHZ witness=0.8870
+[2025-12-18 18:50:36]       Running mean P_return=0.8830
+[2025-12-18 18:50:36]     Instance 3/5
+[2025-12-18 18:50:38]         P_return=0.9110, GHZ witness=0.9110
+[2025-12-18 18:50:38]       Running mean P_return=0.8923
+[2025-12-18 18:50:38]     Instance 4/5
+[2025-12-18 18:50:40]         P_return=0.9000, GHZ witness=0.9000
+[2025-12-18 18:50:40]       Running mean P_return=0.8942
+[2025-12-18 18:50:40]     Instance 5/5
+[2025-12-18 18:50:43]         P_return=0.8910, GHZ witness=0.8910
+[2025-12-18 18:50:43]       Running mean P_return=0.8936
+[2025-12-18 18:50:43]   Saved depth 5 result (mean_P_return=0.8936)
+[2025-12-18 18:50:43]   Depth 10 (2/4): running 5 instances
+[2025-12-18 18:50:43]     Instance 1/5
+[2025-12-18 18:50:45]         P_return=0.8950, GHZ witness=0.8950
+[2025-12-18 18:50:45]       Running mean P_return=0.8950
+[2025-12-18 18:50:45]     Instance 2/5
+[2025-12-18 18:50:48]         P_return=0.8940, GHZ witness=0.8940
+[2025-12-18 18:50:48]       Running mean P_return=0.8945
+[2025-12-18 18:50:48]     Instance 3/5
+[2025-12-18 18:50:50]         P_return=0.8900, GHZ witness=0.8900
+[2025-12-18 18:50:50]       Running mean P_return=0.8930
+[2025-12-18 18:50:50]     Instance 4/5
+[2025-12-18 18:50:53]         P_return=0.9040, GHZ witness=0.9040
+[2025-12-18 18:50:53]       Running mean P_return=0.8958
+[2025-12-18 18:50:53]     Instance 5/5
+[2025-12-18 18:50:56]         P_return=0.9050, GHZ witness=0.9050
+[2025-12-18 18:50:56]       Running mean P_return=0.8976
+[2025-12-18 18:50:56]   Saved depth 10 result (mean_P_return=0.8976)
+[2025-12-18 18:50:56]   Depth 20 (3/4): running 5 instances
+[2025-12-18 18:50:56]     Instance 1/5
+[2025-12-18 18:50:58]         P_return=0.8920, GHZ witness=0.8920
+[2025-12-18 18:50:58]       Running mean P_return=0.8920
+[2025-12-18 18:50:58]     Instance 2/5
+[2025-12-18 18:51:01]         P_return=0.8920, GHZ witness=0.8920
+[2025-12-18 18:51:01]       Running mean P_return=0.8920
+[2025-12-18 18:51:01]     Instance 3/5
+[2025-12-18 18:51:04]         P_return=0.8910, GHZ witness=0.8910
+[2025-12-18 18:51:04]       Running mean P_return=0.8917
+[2025-12-18 18:51:04]     Instance 4/5
+[2025-12-18 18:51:04]         P_return=0.9000, GHZ witness=0.9000
+[2025-12-18 18:51:04]       Running mean P_return=0.8937
+[2025-12-18 18:51:04]     Instance 5/5
+[2025-12-18 18:51:07]         P_return=0.9090, GHZ witness=0.9090
+[2025-12-18 18:51:07]       Running mean P_return=0.8968
+[2025-12-18 18:51:07]   Saved depth 20 result (mean_P_return=0.8968)
+[2025-12-18 18:51:07]   Depth 30 (4/4): running 5 instances
+[2025-12-18 18:51:07]     Instance 1/5
+[2025-12-18 18:51:11]         P_return=0.8980, GHZ witness=0.8980
+[2025-12-18 18:51:11]       Running mean P_return=0.8980
+[2025-12-18 18:51:11]     Instance 2/5
+[2025-12-18 18:51:14]         P_return=0.8950, GHZ witness=0.8950
+[2025-12-18 18:51:14]       Running mean P_return=0.8965
+[2025-12-18 18:51:14]     Instance 3/5
+[2025-12-18 18:51:17]         P_return=0.8840, GHZ witness=0.8840
+[2025-12-18 18:51:17]       Running mean P_return=0.8923
+[2025-12-18 18:51:17]     Instance 4/5
+[2025-12-18 18:51:20]         P_return=0.8830, GHZ witness=0.8830
+[2025-12-18 18:51:20]       Running mean P_return=0.8900
+[2025-12-18 18:51:20]     Instance 5/5
+[2025-12-18 18:51:22]         P_return=0.8870, GHZ witness=0.8870
+[2025-12-18 18:51:22]       Running mean P_return=0.8894
+[2025-12-18 18:51:22]   Saved depth 30 result (mean_P_return=0.8894)
+[2025-12-18 18:51:22]   Alpha fit saved (alpha=0.0002, points=4)
+[2025-12-18 18:51:22] 
+============================================================
+[2025-12-18 18:51:22] LOSCHMIDT ECHO SWEEP COMPLETE in 9.9 minutes
+[2025-12-18 18:51:22] Results saved to results/loschmidt_echo_sweep_N9.csv

@@ -47,3 +47,88 @@
 ============================================================
 [2025-12-18 17:18:57] LOSCHMIDT ECHO SWEEP COMPLETE in 0.2 minutes
 [2025-12-18 17:18:57] Results saved to results/loschmidt_echo_test.csv
+[2025-12-18 18:29:41] ============================================================
+[2025-12-18 18:29:41] AWS Braket Experiment Runner
+[2025-12-18 18:29:41] ============================================================
+[2025-12-18 18:29:41] Device: arn:aws:braket:us-west-1::device/qpu/rigetti/Ankaa-3
+[2025-12-18 18:29:41] Subset size N: 7
+[2025-12-18 18:29:41] Num subsets: 1
+[2025-12-18 18:29:41] Experiment: loschmidt_echo
+[2025-12-18 18:29:41] Depths: [5, 10]
+[2025-12-18 18:29:41] K (instances per depth): 2
+[2025-12-18 18:29:41] Fit eps: 0.001
+[2025-12-18 18:29:41] Shots: 500
+[2025-12-18 18:29:41] Seed: 42
+[2025-12-18 18:29:41] Output CSV: results/loschmidt_echo_test.csv
+[2025-12-18 18:29:41] Alpha CSV: results/loschmidt_echo_alpha.csv
+[2025-12-18 18:29:41] Resume: True
+[2025-12-18 18:29:41] Simulator: False
+[2025-12-18 18:29:41] ============================================================
+[2025-12-18 18:29:43] Device: Ankaa-3, Status: ONLINE
+[2025-12-18 18:29:43] Graph: 80 nodes, 136 edges
+[2025-12-18 18:29:43] Generated 1 subsets
+[2025-12-18 18:29:43] 
+============================================================
+[2025-12-18 18:29:43] STARTING LOSCHMIDT ECHO SWEEP
+[2025-12-18 18:29:43] ============================================================
+[2025-12-18 18:29:43] Resuming: 2 depth points already completed
+[2025-12-18 18:29:43] 
+[1/1] Subset 0 (elapsed: 0.0 min)
+[2025-12-18 18:29:43]   Qubits: (7, 14, 15, 16, 21, 22, 28)
+[2025-12-18 18:29:43]   lambda2=0.4226, C=2.9585
+[2025-12-18 18:29:43]   Depth 5 already completed, skipping
+[2025-12-18 18:29:43]   Depth 10 already completed, skipping
+[2025-12-18 18:29:43]   Alpha fit already exists, skipping fit
+[2025-12-18 18:29:43] 
+============================================================
+[2025-12-18 18:29:43] LOSCHMIDT ECHO SWEEP COMPLETE in 0.0 minutes
+[2025-12-18 18:29:43] Results saved to results/loschmidt_echo_test.csv
+[2025-12-18 18:29:53] ============================================================
+[2025-12-18 18:29:53] AWS Braket Experiment Runner
+[2025-12-18 18:29:53] ============================================================
+[2025-12-18 18:29:53] Device: arn:aws:braket:us-west-1::device/qpu/rigetti/Ankaa-3
+[2025-12-18 18:29:53] Subset size N: 7
+[2025-12-18 18:29:53] Num subsets: 1
+[2025-12-18 18:29:53] Experiment: loschmidt_echo
+[2025-12-18 18:29:53] Depths: [5, 10]
+[2025-12-18 18:29:53] K (instances per depth): 2
+[2025-12-18 18:29:53] Fit eps: 0.001
+[2025-12-18 18:29:53] Shots: 500
+[2025-12-18 18:29:53] Seed: 42
+[2025-12-18 18:29:53] Output CSV: results/loschmidt_echo_test.csv
+[2025-12-18 18:29:53] Alpha CSV: results/loschmidt_echo_alpha.csv
+[2025-12-18 18:29:53] Resume: True
+[2025-12-18 18:29:53] Simulator: False
+[2025-12-18 18:29:53] ============================================================
+[2025-12-18 18:29:55] Device: Ankaa-3, Status: ONLINE
+[2025-12-18 18:29:55] Graph: 80 nodes, 136 edges
+[2025-12-18 18:29:55] Generated 1 subsets
+[2025-12-18 18:29:55] 
+============================================================
+[2025-12-18 18:29:55] STARTING LOSCHMIDT ECHO SWEEP
+[2025-12-18 18:29:55] ============================================================
+[2025-12-18 18:29:55] 
+[1/1] Subset 0 (elapsed: 0.0 min)
+[2025-12-18 18:29:55]   Qubits: (7, 14, 15, 16, 21, 22, 28)
+[2025-12-18 18:29:55]   lambda2=0.4226, C=2.9585
+[2025-12-18 18:29:55]   Depth 5 (1/2): running 2 instances
+[2025-12-18 18:29:55]     Instance 1/2
+[2025-12-18 18:29:57]         P_return=0.8880, GHZ witness=0.8880
+[2025-12-18 18:29:57]       Running mean P_return=0.8880
+[2025-12-18 18:29:57]     Instance 2/2
+[2025-12-18 18:30:01]         P_return=0.8860, GHZ witness=0.8860
+[2025-12-18 18:30:01]       Running mean P_return=0.8870
+[2025-12-18 18:30:01]   Saved depth 5 result (mean_P_return=0.8870)
+[2025-12-18 18:30:01]   Depth 10 (2/2): running 2 instances
+[2025-12-18 18:30:01]     Instance 1/2
+[2025-12-18 18:30:03]         P_return=0.8480, GHZ witness=0.8480
+[2025-12-18 18:30:03]       Running mean P_return=0.8480
+[2025-12-18 18:30:03]     Instance 2/2
+[2025-12-18 18:30:06]         P_return=0.8540, GHZ witness=0.8540
+[2025-12-18 18:30:06]       Running mean P_return=0.8510
+[2025-12-18 18:30:06]   Saved depth 10 result (mean_P_return=0.8510)
+[2025-12-18 18:30:06]   Alpha fit saved (alpha=0.0083, points=2)
+[2025-12-18 18:30:06] 
+============================================================
+[2025-12-18 18:30:06] LOSCHMIDT ECHO SWEEP COMPLETE in 0.2 minutes
+[2025-12-18 18:30:06] Results saved to results/loschmidt_echo_test.csv
