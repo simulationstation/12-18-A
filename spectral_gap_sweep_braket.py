@@ -230,19 +230,24 @@ def apply_entangler(circ: Circuit, q1: int, q2: int, params: Dict[str, float], m
 
     if mode == "zz":
         theta = params.get("theta", math.pi / 2)
-        if hasattr(circ, "zz"):
-            circ.zz(q1, q2, theta)
+        # Wrap ZZ gate in verbatim box for IonQ native execution
+        sub = Circuit()
+        if hasattr(sub, "zz"):
+            sub.zz(q1, q2, theta)
         else:
             try:
-                circ.add(gates.ZZ(theta), [q1, q2])
+                sub.add(gates.ZZ(theta), [q1, q2])
             except Exception as exc:  # pragma: no cover - SDK dependent
                 raise RuntimeError("ZZ gate not supported by installed Braket SDK") from exc
+        circ.add_verbatim_box(sub)
         return ("zz", (q1, q2), (theta,))
 
     if mode == "ms":
         theta = params.get("theta", math.pi / 2)
         phi = params.get("phi", 0.0)
-        ms_method = getattr(circ, "ms", None)
+        # Wrap MS gate in verbatim box for IonQ native execution
+        sub = Circuit()
+        ms_method = getattr(sub, "ms", None)
         if callable(ms_method):
             try:
                 ms_method(q1, q2, theta, phi)
@@ -250,11 +255,12 @@ def apply_entangler(circ: Circuit, q1: int, q2: int, params: Dict[str, float], m
                 ms_method(q1, q2, theta)
         else:
             try:
-                circ.add(gates.MS(theta, phi), [q1, q2])
+                sub.add(gates.MS(theta, phi), [q1, q2])
             except TypeError:
-                circ.add(gates.MS(theta), [q1, q2])
+                sub.add(gates.MS(theta), [q1, q2])
             except Exception as exc:  # pragma: no cover - SDK dependent
                 raise RuntimeError("MS gate not supported by installed Braket SDK") from exc
+        circ.add_verbatim_box(sub)
         return ("ms", (q1, q2), (theta, phi))
 
     raise ValueError(f"Unsupported entangler mode: {mode}")
