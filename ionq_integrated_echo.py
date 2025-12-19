@@ -898,21 +898,31 @@ def run_phase(
     gate_label: str,
     start_block: int,
     entangler_params: Optional[Dict[str, float]] = None,
+    skip_calibration: bool = False,
 ) -> Tuple[List[Dict[str, Any]], int]:
     records: List[Dict[str, Any]] = []
     block_groups = _block_seeds(n_seeds, recalibrate_every)
     block_index = start_block
     entangler_params = entangler_params or _default_entangler_params(gate_label)
     for seeds in block_groups:
-        calib = run_calibration_block(
-            device=device,
-            n_qubits=n_qubits,
-            shots=calibration_shots,
-            block_index=block_index,
-            output_dir=os.path.dirname(output_jsonl) or ".",
-            prefer_verbatim=prefer_verbatim,
-            device_info=device_info,
-        )
+        if skip_calibration:
+            # Create null calibration (no SPAM mitigation)
+            calib = CalibrationData(
+                mitigator=lambda p, _n: p,  # identity function
+                calib_hash="no_calibration",
+                block_index=block_index,
+                calib_path="none",
+            )
+        else:
+            calib = run_calibration_block(
+                device=device,
+                n_qubits=n_qubits,
+                shots=calibration_shots,
+                block_index=block_index,
+                output_dir=os.path.dirname(output_jsonl) or ".",
+                prefer_verbatim=prefer_verbatim,
+                device_info=device_info,
+            )
         jobs = _jobs_for_block(phase, families, depths, seeds)
         for job in jobs:
             seed_seq = np.random.SeedSequence([base_seed, job.seed, job.depth, hash(job.family) & 0xFFFFFFFF])
@@ -1017,6 +1027,7 @@ def run_integrated(args) -> None:
         gate_label=gate_label,
         start_block=0,
         entangler_params=entangler_params,
+        skip_calibration=args.skip_calibration,
     )
 
     decision = _decision_from_core(core_records, depths_core)
@@ -1045,6 +1056,7 @@ def run_integrated(args) -> None:
             gate_label=gate_label,
             start_block=next_block,
             entangler_params=entangler_params,
+            skip_calibration=args.skip_calibration,
         )
     else:
         print("Skipping Phase B sweep because decay criterion was not met.")
@@ -1077,6 +1089,12 @@ def parse_args():
     run_p.add_argument("--shots_sweep", type=int, default=5000, help="Shots per circuit in Phase B.")
     run_p.add_argument("--calibration_shots", type=int, default=20000, help="Shots per calibration circuit.")
     run_p.add_argument("--recalibrate_every", type=int, default=1, help="Seeds per calibration block.")
+    run_p.add_argument(
+        "--skip_calibration",
+        action="store_true",
+        default=False,
+        help="Skip calibration and run echo circuits directly (no SPAM mitigation).",
+    )
     run_p.add_argument(
         "--use_verbatim",
         dest="use_verbatim",
