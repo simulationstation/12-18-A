@@ -26,7 +26,7 @@ import os
 import sys
 import subprocess
 from datetime import datetime
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Optional
 import numpy as np
 import networkx as nx
 from scipy.optimize import curve_fit
@@ -217,8 +217,29 @@ def append_inverse_from_instructions(circuit: Circuit, instructions: List) -> No
         invert_instruction(circuit, instr)
 
 
+def _order_edges_for_u_style(edges: List[Tuple[int, int]], rng: random.Random, u_style: str) -> List[Tuple[int, int]]:
+    """
+    Order entangling edges based on the requested U style.
+
+    mixed: random order (status quo)
+    local: favor short-range pairs in the qubit index ordering
+    global: favor long-range pairs to maximize mixing
+    """
+    if u_style == 'mixed':
+        ordered = list(edges)
+        rng.shuffle(ordered)
+        return ordered
+
+    def _score(edge: Tuple[int, int]) -> float:
+        distance = abs(edge[0] - edge[1])
+        jitter = rng.random() * 1e-6  # deterministic tie-breaker given rng
+        return distance + jitter if u_style == 'local' else -(distance + jitter)
+
+    return sorted(edges, key=_score)
+
+
 def generate_brickwork_unitary(qubits: List[int], edges: List[Tuple[int, int]], depth: int,
-                               rng: random.Random, circuit: Circuit) -> List[List[Tuple]]:
+                               rng: random.Random, circuit: Circuit, u_style: str = 'mixed') -> List[List[Tuple]]:
     """
     Generate a brickwork pattern of 1Q rotations + 2Q entanglers.
 
@@ -240,8 +261,7 @@ def generate_brickwork_unitary(qubits: List[int], edges: List[Tuple[int, int]], 
             layer_ops.append(('rz', q, theta_z))
 
         # 2Q entanglers on disjoint edges to keep depth modest
-        available_edges = list(edges)
-        rng.shuffle(available_edges)
+        available_edges = _order_edges_for_u_style(list(edges), rng, u_style)
         used: set = set()
         for q1, q2 in available_edges:
             if q1 in used or q2 in used:
@@ -275,7 +295,8 @@ def append_inverse_brickwork(circuit: Circuit, op_log: List[List[Tuple]]) -> Non
 
 def build_loschmidt_echo_circuit(subgraph: nx.Graph,
                                  depth: int,
-                                 rng: random.Random) -> Circuit:
+                                 rng: random.Random,
+                                 u_style: str = 'mixed') -> Circuit:
     """
     Build a Loschmidt echo circuit:
         - Prepare GHZ on the connected subgraph
@@ -298,7 +319,7 @@ def build_loschmidt_echo_circuit(subgraph: nx.Graph,
     circuit.add_circuit(ghz_circuit)
 
     # Forward unitary
-    op_log = generate_brickwork_unitary(qubits, edges, depth, rng, circuit)
+    op_log = generate_brickwork_unitary(qubits, edges, depth, rng, circuit, u_style)
 
     # Exact inverse
     append_inverse_brickwork(circuit, op_log)
@@ -319,9 +340,10 @@ def run_loschmidt_echo_instance(device,
                                 depth: int,
                                 shots: int,
                                 rng: random.Random,
+                                u_style: str = 'mixed',
                                 logger=None) -> Tuple[float, float]:
     """Run a single Loschmidt echo instance and return (P_return, GHZ_witness)."""
-    circuit = build_loschmidt_echo_circuit(subgraph, depth, rng)
+    circuit = build_loschmidt_echo_circuit(subgraph, depth, rng, u_style)
     task = device.run(circuit, shots=shots)
     result = task.result()
     measurements = np.array(result.measurements)
@@ -396,6 +418,108 @@ def generate_diverse_subsets(G: nx.Graph, N: int, num_subsets: int, seed: int,
             subsets.append(subset)
 
     return subsets
+
+
+def _sample_connected_subset(G: nx.Graph, N: int, rng: random.Random, max_attempts: int = 1000) -> Optional[Tuple[int, ...]]:
+    """Sample a single connected subset of size N using randomized BFS."""
+    nodes = list(G.nodes())
+    for _ in range(max_attempts):
+        start = rng.choice(nodes)
+        visited = [start]
+        frontier = list(G.neighbors(start))
+        rng.shuffle(frontier)
+
+        while len(visited) < N and frontier:
+            nxt = frontier.pop(0)
+            if nxt not in visited:
+                visited.append(nxt)
+                new_neighbors = [n for n in G.neighbors(nxt) if n not in visited and n not in frontier]
+                rng.shuffle(new_neighbors)
+                frontier.extend(new_neighbors)
+
+        if len(visited) < N:
+            continue
+
+        subset = tuple(sorted(int(x) for x in visited[:N]))
+        subgraph = G.subgraph(subset)
+        if not nx.is_connected(subgraph):
+            continue
+        return subset
+    return None
+
+
+def select_subsets_max_spread_C(
+    G: nx.Graph,
+    N: int,
+    num_subsets: int,
+    seed: int,
+    candidate_pool: int = 200,
+) -> Tuple[List[Tuple[int, ...]], Dict[int, Dict]]:
+    """
+    Select subsets that maximize spread in the architecture metric C while limiting overlap.
+
+    - Build a candidate pool of connected subsets
+    - Compute C = N * lambda2 for each
+    - Choose half from lowest C and half from highest C
+    - Greedily minimize qubit overlap within each bucket
+    """
+    rng = random.Random(seed)
+    candidates: List[Tuple[int, ...]] = []
+    candidate_metrics: List[Dict] = []
+
+    attempts = 0
+    while len(candidates) < candidate_pool and attempts < candidate_pool * 50:
+        attempts += 1
+        subset = _sample_connected_subset(G, N, rng)
+        if subset is None or subset in candidates:
+            continue
+        metrics = compute_architecture_metrics(G.subgraph(subset).copy())
+        candidates.append(subset)
+        candidate_metrics.append(metrics)
+
+    if len(candidates) < num_subsets:
+        raise ValueError(f"Could not generate enough candidate subsets (got {len(candidates)})")
+
+    indexed = list(zip(candidates, candidate_metrics))
+    indexed.sort(key=lambda x: x[1]['C'])
+    low_target = num_subsets // 2
+    high_target = num_subsets - low_target
+    low_bucket = indexed[:max(low_target * 2, low_target + 1)]
+    high_bucket = indexed[-max(high_target * 2, high_target + 1):]
+
+    def pick_from_bucket(bucket, target, existing_sets):
+        selected_local: List[Tuple[Tuple[int, ...], Dict]] = []
+        remaining = list(bucket)
+        while len(selected_local) < target and remaining:
+            best = None
+            best_score = None
+            rng.shuffle(remaining)
+            for cand_subset, cand_metrics in remaining:
+                score = 0
+                c_set = set(cand_subset)
+                for chosen, _ in existing_sets + selected_local:
+                    score += len(c_set & set(chosen))
+                if best is None or score < best_score:
+                    best = (cand_subset, cand_metrics)
+                    best_score = score
+            if best is None:
+                break
+            selected_local.append(best)
+            remaining.remove(best)
+        return selected_local
+
+    chosen: List[Tuple[Tuple[int, ...], Dict]] = []
+    chosen += pick_from_bucket(low_bucket, low_target, chosen)
+    chosen += pick_from_bucket(high_bucket, high_target, chosen)
+
+    if len(chosen) < num_subsets:
+        extra_pool = [item for item in indexed if item not in chosen]
+        extra = pick_from_bucket(extra_pool, num_subsets - len(chosen), chosen)
+        chosen += extra
+
+    subsets = [s for s, _ in chosen[:num_subsets]]
+    metrics_map = {i: m for i, (_, m) in enumerate(chosen[:num_subsets])}
+    return subsets, metrics_map
 
 
 def summarize_subsets(
@@ -1107,6 +1231,175 @@ def run_compiler_fragility_sweep(device,
     log(f"Results saved to {output_csv}", logger)
 
 
+def run_loschmidt_echo_interleaved(
+    device,
+    G: nx.Graph,
+    subsets: List[Tuple[int, ...]],
+    depths: List[int],
+    shots: int,
+    K: int,
+    seed: int,
+    num_blocks: int,
+    block_shuffle_seed: int,
+    output_csv: str,
+    fit_eps: float,
+    logger=None,
+    run_id: str = "",
+    git_commit: str = "",
+    subset_metrics: Dict[int, Dict] = None,
+    u_style: str = "mixed",
+    N_requested: int = 0,
+    resume: bool = True,
+):
+    """Run time-interleaved Loschmidt echo experiment with block structure."""
+    subset_metrics = subset_metrics or {}
+    completed = set()
+    existing_fieldnames: List[str] = []
+    if resume and os.path.exists(output_csv):
+        with open(output_csv, "r") as f:
+            reader = csv.DictReader(f)
+            existing_fieldnames = reader.fieldnames or []
+            for row in reader:
+                completed.add(
+                    (
+                        int(row["block_index"]),
+                        int(row["subset_id"]),
+                        int(row["depth"]),
+                    )
+                )
+        log(f"Resuming: {len(completed)} block/subset/depth points already completed", logger)
+
+    fieldnames = [
+        "experiment_type",
+        "run_id",
+        "backend",
+        "block_index",
+        "subset_id",
+        "qubits",
+        "N_requested",
+        "N_used",
+        "lambda2",
+        "C",
+        "u_style",
+        "depth",
+        "K",
+        "shots",
+        "mean_P_return",
+        "sem_P_return",
+        "timestamp",
+        "git_commit",
+    ]
+
+    write_header = (
+        not os.path.exists(output_csv)
+        or os.path.getsize(output_csv) == 0
+        or set(existing_fieldnames) != set(fieldnames)
+    )
+    os.makedirs(os.path.dirname(output_csv) if os.path.dirname(output_csv) else ".", exist_ok=True)
+
+    start_time = time.time()
+    num_subsets = len(subsets)
+    backend = device.name if hasattr(device, "name") else str(device)
+
+    for block in range(num_blocks):
+        block_idx = block + 1
+        block_rng = random.Random((block_shuffle_seed if block_shuffle_seed is not None else seed) + block)
+        order = list(range(num_subsets))
+        block_rng.shuffle(order)
+        log(f"\nBlock {block_idx}/{num_blocks} order: {order}", logger)
+
+        for subset_pos, subset_id in enumerate(order):
+            subset = subsets[subset_id]
+            subgraph = G.subgraph(subset).copy()
+            metrics = subset_metrics.get(subset_id) or compute_architecture_metrics(subgraph)
+
+            if metrics.get("diameter", 0) == -1:
+                log(f"  Subset {subset_id} disconnected, skipping", logger)
+                continue
+
+            for depth_idx, depth in enumerate(depths):
+                if (block_idx, subset_id, depth) in completed:
+                    log(f"  Block {block_idx} subset {subset_id} depth {depth} already done, skipping", logger)
+                    continue
+
+                p_returns: List[float] = []
+                log(
+                    f"  block {block_idx}/{num_blocks}, subset {subset_pos + 1}/{num_subsets} (id={subset_id}), depth {depth_idx + 1}/{len(depths)}",
+                    logger,
+                )
+
+                for k in range(K):
+                    inst_seed = seed + block_idx * 1_000_000 + subset_id * 10_000 + depth * 100 + k
+                    rng = random.Random(inst_seed)
+                    try:
+                        p_return, _ = run_loschmidt_echo_instance(
+                            device,
+                            subset,
+                            subgraph,
+                            depth,
+                            shots,
+                            rng,
+                            u_style,
+                            logger,
+                        )
+                        p_returns.append(p_return)
+                    except Exception as e:
+                        log(f"    FAILED instance {k+1}/{K}: {e}", logger)
+                        p_returns.append(np.nan)
+
+                    finite = [p for p in p_returns if not np.isnan(p)]
+                    rolling_mean = float(np.mean(finite)) if finite else float("nan")
+                    log(
+                        f"    block {block_idx}/{num_blocks}, subset {subset_pos + 1}/{num_subsets}, depth {depth_idx + 1}/{len(depths)}, instance {k+1}/{K}, rolling mean P_return={rolling_mean:.4f}",
+                        logger,
+                    )
+
+                finite = [p for p in p_returns if not np.isnan(p)]
+                if not finite:
+                    log(f"  FAILED: all instances failed for subset {subset_id} depth {depth}", logger)
+                    continue
+
+                mean_p = float(np.mean(finite))
+                sem_p = float(np.std(finite, ddof=1) / np.sqrt(len(finite))) if len(finite) > 1 else 0.0
+                row = {
+                    "experiment_type": "loschmidt_echo_interleaved",
+                    "run_id": run_id,
+                    "backend": backend,
+                    "block_index": block_idx,
+                    "subset_id": subset_id,
+                    "qubits": str(subset),
+                    "N_requested": N_requested,
+                    "N_used": len(subset),
+                    "lambda2": metrics.get("lambda2", 0.0),
+                    "C": metrics.get("C", 0.0),
+                    "u_style": u_style,
+                    "depth": depth,
+                    "K": K,
+                    "shots": shots,
+                    "mean_P_return": mean_p,
+                    "sem_P_return": sem_p,
+                    "timestamp": datetime.now().isoformat(),
+                    "git_commit": git_commit,
+                }
+
+                with open(output_csv, "a", newline="") as f:
+                    writer = csv.DictWriter(f, fieldnames=fieldnames)
+                    if write_header:
+                        writer.writeheader()
+                        write_header = False
+                    writer.writerow(row)
+
+                log(
+                    f"  Saved block {block_idx} subset {subset_id} depth {depth} (mean_P_return={mean_p:.4f})",
+                    logger,
+                )
+
+    elapsed = (time.time() - start_time) / 60
+    log(f"\n{'='*60}", logger)
+    log(f"LOSCHMIDT ECHO INTERLEAVED COMPLETE in {elapsed:.1f} minutes", logger)
+    log(f"Results saved to {output_csv}", logger)
+
+
 def run_loschmidt_echo_sweep(device,
                              G: nx.Graph,
                              subsets: List[Tuple[int, ...]],
@@ -1121,7 +1414,8 @@ def run_loschmidt_echo_sweep(device,
                              resume: bool = True,
                              run_id: str = "",
                              git_commit: str = "",
-                             subset_metrics: Dict[int, Dict] = None):
+                             subset_metrics: Dict[int, Dict] = None,
+                             u_style: str = 'mixed'):
     """Run Loschmidt echo experiments across subsets with incremental CSV writes."""
     subset_metrics = subset_metrics or {}
     completed = set()
@@ -1201,6 +1495,7 @@ def run_loschmidt_echo_sweep(device,
                         depth,
                         shots,
                         rng,
+                        u_style,
                         logger
                     )
                     p_returns.append(p_return)
@@ -1293,20 +1588,20 @@ def main():
     parser = argparse.ArgumentParser(description='AWS Braket RB Sweep')
     parser.add_argument('--device', type=str, default='arn:aws:braket:us-west-1::device/qpu/rigetti/Ankaa-3',
                         help='Braket device ARN')
-    parser.add_argument('--N', type=int, default=7, help='Subset size')
-    parser.add_argument('--num-subsets', type=int, default=30, help='Number of subsets')
-    parser.add_argument('--depths', type=str, default=None, help='Comma-separated depths')
-    parser.add_argument('--shots', type=int, default=1000, help='Shots per circuit')
+    parser.add_argument('--N', type=int, default=None, help='Subset size')
+    parser.add_argument('--num-subsets', type=int, default=None, help='Number of subsets')
+    parser.add_argument('--depths', type=str, default=None, help='Comma/space-separated depths')
+    parser.add_argument('--shots', type=int, default=None, help='Shots per circuit')
     parser.add_argument('--seed', type=int, default=42, help='Random seed')
     parser.add_argument('--output', type=str, default=None, help='Output CSV (auto-set by experiment type)')
     parser.add_argument('--resume', action='store_true', default=True, help='Resume from existing results')
     parser.add_argument('--simulator', action='store_true', help='Use local simulator instead of QPU')
-    parser.add_argument('--experiment', type=str, choices=['rb', 'logical_code', 'compiler_fragility', 'loschmidt_echo'], default='rb',
-                        help='Experiment type: rb (mirror RB), logical_code (repetition code), compiler_fragility (GHZ variance), or loschmidt_echo (echo decay).')
+    parser.add_argument('--experiment', type=str, choices=['rb', 'logical_code', 'compiler_fragility', 'loschmidt_echo', 'loschmidt_echo_interleaved'], default='rb',
+                        help='Experiment type: rb (mirror RB), logical_code (repetition code), compiler_fragility (GHZ variance), loschmidt_echo (echo decay), or loschmidt_echo_interleaved (block-structured echo).')
     parser.add_argument('--logical-rounds', type=int, default=2, help='Parity-check rounds for logical experiment')
     parser.add_argument('--num-compilations', type=int, default=10,
                         help='Number of compilations/layouts for compiler fragility experiment')
-    parser.add_argument('--loschmidt-K', type=int, default=5, help='Number of random unitaries per depth for echo')
+    parser.add_argument('--loschmidt-K', type=int, default=None, help='Number of random unitaries per depth for echo')
     parser.add_argument('--fit-eps', type=float, default=1e-3, help='Minimum P_return to include in alpha fit')
     parser.add_argument('--alpha-output', type=str, default='results/loschmidt_echo_alpha.csv',
                         help='Output CSV for fitted alpha values (per subset)')
@@ -1319,15 +1614,39 @@ def main():
                         help='Max Jaccard similarity when generating diverse subsets')
     parser.add_argument('--subset-max-attempts', type=int, default=10000,
                         help='Max attempts for subset generation')
+    parser.add_argument('--num-blocks', type=int, default=None, help='Number of time blocks for interleaved echo')
+    parser.add_argument('--block-shuffle-seed', type=int, default=None,
+                        help='Seed to shuffle subsets within each block (defaults to --seed)')
+    parser.add_argument('--candidate-pool', type=int, default=200,
+                        help='Candidate pool size for max-spread-C subset selection')
+    parser.add_argument('--u-style', type=str, choices=['mixed', 'local', 'global'], default='mixed',
+                        help='Entangling preference: mixed (random), local (short-range), global (long-range)')
 
     args = parser.parse_args()
     git_commit = get_git_commit_short()
 
+    # Experiment-specific defaults
+    if args.N is None:
+        args.N = 11 if args.experiment == 'loschmidt_echo_interleaved' else 7
+    if args.num_subsets is None:
+        args.num_subsets = 6 if args.experiment == 'loschmidt_echo_interleaved' else 30
+    if args.shots is None:
+        args.shots = 2000 if args.experiment == 'loschmidt_echo_interleaved' else 1000
+    if args.loschmidt_K is None:
+        args.loschmidt_K = 3 if args.experiment == 'loschmidt_echo_interleaved' else 5
+    if args.num_blocks is None:
+        args.num_blocks = 4
+    if args.block_shuffle_seed is None:
+        args.block_shuffle_seed = args.seed
+
     if args.depths:
-        depths = [int(d) for d in args.depths.split(',')]
+        tokens = args.depths.replace(',', ' ').split()
+        depths = [int(d) for d in tokens]
     else:
         if args.experiment == 'loschmidt_echo':
             depths = [5, 10, 20, 30]
+        elif args.experiment == 'loschmidt_echo_interleaved':
+            depths = [3, 5, 7, 9]
         else:
             depths = [1, 2, 4, 8, 16, 32]
     output_path = args.output
@@ -1341,6 +1660,11 @@ def main():
                 output_path = f"results/loschmidt_echo_sweep_{args.run_id}.csv"
             else:
                 output_path = 'results/loschmidt_echo_sweep.csv'
+        elif args.experiment == 'loschmidt_echo_interleaved':
+            if args.run_id:
+                output_path = f"results/loschmidt_echo_interleaved_{args.run_id}.csv"
+            else:
+                output_path = 'results/loschmidt_echo_interleaved.csv'
         else:
             output_path = 'results/rb_sweep_braket.csv'
     if args.experiment == 'loschmidt_echo' and args.run_id and args.alpha_output == 'results/loschmidt_echo_alpha.csv':
@@ -1370,6 +1694,13 @@ def main():
         log(f"Depths: {depths}", logger)
         log(f"K (instances per depth): {args.loschmidt_K}", logger)
         log(f"Fit eps: {args.fit_eps}", logger)
+    elif args.experiment == 'loschmidt_echo_interleaved':
+        log(f"Depths: {depths}", logger)
+        log(f"K (instances per depth): {args.loschmidt_K}", logger)
+        log(f"Blocks: {args.num_blocks}", logger)
+        log(f"Block shuffle seed: {args.block_shuffle_seed}", logger)
+        log(f"Fit eps: {args.fit_eps}", logger)
+        log(f"U style: {args.u_style}", logger)
     else:
         log(f"Num compilations: {args.num_compilations}", logger)
     log(f"Shots: {args.shots}", logger)
@@ -1404,21 +1735,33 @@ def main():
         if subset_meta.get("N_used") and subset_meta["N_used"] != args.N:
             log(f"WARNING: Loaded subsets size {subset_meta['N_used']} != requested N {args.N}", logger)
     else:
-        print(f"\nGenerating {args.num_subsets} diverse subsets of size {args.N}...")
-        subsets = generate_diverse_subsets(
-            G, args.N, args.num_subsets, args.seed, args.subset_max_jaccard, args.subset_max_attempts
-        )
-        log(f"Generated {len(subsets)} subsets", logger)
+        if args.experiment == 'loschmidt_echo_interleaved':
+            print(f"\nSelecting {args.num_subsets} subsets (max-spread C) of size {args.N}...")
+            subsets, subset_metrics = select_subsets_max_spread_C(
+                G, args.N, args.num_subsets, args.seed, args.candidate_pool
+            )
+            log(f"Selected {len(subsets)} subsets with max-spread-C strategy", logger)
+            selection_params = {
+                "strategy": "max_spread_C",
+                "candidate_pool": args.candidate_pool,
+            }
+        else:
+            print(f"\nGenerating {args.num_subsets} diverse subsets of size {args.N}...")
+            subsets = generate_diverse_subsets(
+                G, args.N, args.num_subsets, args.seed, args.subset_max_jaccard, args.subset_max_attempts
+            )
+            log(f"Generated {len(subsets)} subsets", logger)
+            selection_params = {
+                "max_jaccard": args.subset_max_jaccard,
+                "max_attempts": args.subset_max_attempts,
+            }
         subset_metrics = summarize_subsets(
             subsets,
             G,
             device.name if hasattr(device, 'name') else str(device),
             args.N,
             args.seed,
-            {
-                "max_jaccard": args.subset_max_jaccard,
-                "max_attempts": args.subset_max_attempts,
-            },
+            selection_params,
             save_path=args.save_subsets,
         )
         if args.save_subsets:
@@ -1454,7 +1797,34 @@ def main():
             args.resume,
             run_id=args.run_id,
             git_commit=git_commit,
-            subset_metrics=subset_metrics if not args.load_subsets else subset_metrics
+            subset_metrics=subset_metrics if not args.load_subsets else subset_metrics,
+            u_style=args.u_style,
+        )
+    elif args.experiment == 'loschmidt_echo_interleaved':
+        if not args.run_id:
+            log("ERROR: --run-id is required for loschmidt_echo_interleaved", logger)
+            sys.exit(1)
+        log("STARTING LOSCHMIDT ECHO INTERLEAVED", logger)
+        log("=" * 60, logger)
+        run_loschmidt_echo_interleaved(
+            device,
+            G,
+            subsets,
+            depths,
+            args.shots,
+            args.loschmidt_K,
+            args.seed,
+            args.num_blocks,
+            args.block_shuffle_seed,
+            output_path,
+            args.fit_eps,
+            logger,
+            run_id=args.run_id,
+            git_commit=git_commit,
+            subset_metrics=subset_metrics if not args.load_subsets else subset_metrics,
+            u_style=args.u_style,
+            N_requested=args.N,
+            resume=args.resume,
         )
     else:
         log("STARTING COMPILER FRAGILITY SWEEP", logger)
