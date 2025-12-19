@@ -906,12 +906,18 @@ def run_phase(
     entangler_params = entangler_params or _default_entangler_params(gate_label)
     for seeds in block_groups:
         if skip_calibration:
-            # Create null calibration (no SPAM mitigation)
+            # Create null calibration (identity matrices = no SPAM correction)
+            identity_matrix = [[1.0, 0.0], [0.0, 1.0]]
             calib = CalibrationData(
-                mitigator=lambda p, _n: p,  # identity function
-                calib_hash="no_calibration",
                 block_index=block_index,
-                calib_path="none",
+                counts_cal0={"0" * n_qubits: 1000},
+                counts_cal1={"1" * n_qubits: 1000},
+                matrices=[identity_matrix] * n_qubits,
+                shots=1000,
+                hash="no_calibration",
+                file_path="none",
+                timestamp="skipped",
+                compilation_mode="skipped",
             )
         else:
             calib = run_calibration_block(
