@@ -57,6 +57,24 @@ Live progress goes to stdout and a sidecar log (e.g., `bench.csv.log`):
 tail -f bench.csv.log
 ```
 
+### D) Compiler fragility experiment (AWS Braket)
+Run a GHZ-based layout fragility sweep on Rigetti hardware (or simulator) and
+correlate variance with the architecture metric \(C = N \lambda_2\):
+
+```bash
+python run_rb_sweep_braket.py --experiment compiler_fragility --N 5 --num-subsets 10 \
+    --num-compilations 10 --shots 500 --simulator
+
+# Analyze variance vs connectivity
+python analyze_compiler_fragility.py --input results/compiler_fragility_sweep.csv \
+    --plot results/compiler_fragility_std_vs_C.png \
+    --summary results/compiler_fragility_correlation.csv
+```
+
+Results are appended to `results/compiler_fragility_sweep.csv` with one row per
+subset containing \(\lambda_2\), \(C\), and summary statistics (mean/std/min/max)
+across compilation variants.
+
 Results are appended after each (family, N, depth) point, so you can interrupt
 a long run with Ctrl-C and later resume with `--resume 1` using the same
 arguments. Existing rows are skipped automatically.

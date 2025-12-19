@@ -12,7 +12,9 @@ measuring decay/logical performance and correlating with architecture metrics
 (lambda2, C).
 
 Since Braket doesn't have built-in StandardRB, this implements
-mirror circuit benchmarking for equivalent decay analysis.
+mirror circuit benchmarking for equivalent decay analysis. Also supports a
+compiler fragility experiment that repeatedly compiles/embeds the same GHZ
+state to probe variance across layout choices.
 """
 
 import argparse
@@ -95,6 +97,65 @@ def compute_architecture_metrics(G: nx.Graph) -> Dict:
         'avg_degree': avg_degree,
         'diameter': diameter
     }
+
+
+def build_random_spanning_tree(subgraph: nx.Graph, rng: random.Random) -> List[Tuple[int, int]]:
+    """Build a randomized spanning tree to serve as a GHZ entangling path."""
+    if not nx.is_connected(subgraph):
+        raise ValueError("Subgraph must be connected to build GHZ circuit")
+
+    nodes = list(subgraph.nodes())
+    root = rng.choice(nodes)
+    visited = {root}
+    queue = [root]
+    entangling_edges: List[Tuple[int, int]] = []
+
+    while queue:
+        current = queue.pop(0)
+        neighbors = [n for n in subgraph.neighbors(current) if n not in visited]
+        rng.shuffle(neighbors)
+        for n in neighbors:
+            visited.add(n)
+            entangling_edges.append((current, n))
+            queue.append(n)
+
+    if len(visited) != len(nodes):
+        raise ValueError("Failed to span all qubits when building GHZ layout")
+
+    return entangling_edges
+
+
+def build_randomized_ghz_circuit(subgraph: nx.Graph, rng: random.Random) -> Circuit:
+    """
+    Construct a shallow GHZ preparation circuit on the given connected subgraph.
+
+    - Choose a random root and randomized spanning tree to define entangling order
+    - Apply H on root, then CNOT(parent -> child) along the tree
+    """
+    entangling_edges = build_random_spanning_tree(subgraph, rng)
+    root = entangling_edges[0][0] if entangling_edges else next(iter(subgraph.nodes()))
+
+    circuit = Circuit()
+    circuit.h(root)
+    for control, target in entangling_edges:
+        circuit.cnot(control, target)
+
+    return circuit
+
+
+def compute_ghz_success_prob(measurements: np.ndarray) -> float:
+    """Return GHZ success probability using P(0...0) + P(1...1)."""
+    if measurements.ndim != 2:
+        raise ValueError("Measurements array must be 2D (shots, qubits)")
+
+    shots = measurements.shape[0]
+    if shots == 0:
+        raise ValueError("No measurement shots returned")
+
+    qubits = measurements.shape[1]
+    ones_counts = np.sum(measurements, axis=1)
+    successes = np.sum((ones_counts == 0) | (ones_counts == qubits))
+    return successes / shots
 
 
 def generate_diverse_subsets(G: nx.Graph, N: int, num_subsets: int, seed: int,
@@ -305,6 +366,62 @@ def fit_rb_decay(depths: List[int], success_probs: List[float]) -> Tuple[float, 
         return alpha, alpha_err, epc, epc_err
     except Exception as e:
         return np.nan, np.nan, np.nan, np.nan
+
+
+def run_compiler_fragility_experiment(device,
+                                      subset: Tuple[int, ...],
+                                      subgraph: nx.Graph,
+                                      shots: int,
+                                      num_compilations: int,
+                                      seed: int,
+                                      logger=None) -> Dict:
+    """
+    Compile and run the same GHZ circuit multiple times with randomized layouts.
+
+    Returns summary statistics of success probability across compilations.
+    """
+    if not nx.is_connected(subgraph):
+        raise ValueError("Subset must be connected for GHZ preparation")
+
+    rng = random.Random(seed)
+    success_probs: List[float] = []
+
+    for k in range(num_compilations):
+        try:
+            ghz_circuit = build_randomized_ghz_circuit(subgraph, rng)
+            for q in subset:
+                ghz_circuit.measure(q)
+
+            if logger:
+                log(f"    Compilation {k+1}/{num_compilations}", logger)
+
+            task = device.run(ghz_circuit, shots=shots)
+            task_result = task.result()
+
+            measurements = np.array(task_result.measurements)
+            success_prob = compute_ghz_success_prob(measurements)
+            success_probs.append(success_prob)
+
+            if logger:
+                log(f"      GHZ success: {success_prob:.4f}", logger)
+
+        except Exception as e:
+            if logger:
+                log(f"      FAILED compilation {k+1}: {e}", logger)
+            success_probs.append(np.nan)
+
+    finite = [p for p in success_probs if not np.isnan(p)]
+    if not finite:
+        raise ValueError("All GHZ compilation runs failed")
+
+    stats_arr = np.array(finite, dtype=float)
+    return {
+        'success_probs': success_probs,
+        'mean_success': float(np.mean(stats_arr)),
+        'std_success': float(np.std(stats_arr, ddof=0)),
+        'min_success': float(np.min(stats_arr)),
+        'max_success': float(np.max(stats_arr))
+    }
 
 
 def run_sweep(device, G: nx.Graph, subsets: List[Tuple[int, ...]],
@@ -635,6 +752,97 @@ def run_logical_code_sweep(device,
     log(f"Results saved to {output_csv}", logger)
 
 
+def run_compiler_fragility_sweep(device,
+                                 G: nx.Graph,
+                                 subsets: List[Tuple[int, ...]],
+                                 shots: int,
+                                 num_compilations: int,
+                                 seed: int,
+                                 output_csv: str,
+                                 logger=None,
+                                 resume: bool = True):
+    """Run compiler fragility experiments across subsets."""
+
+    completed_subsets = set()
+    if resume and os.path.exists(output_csv):
+        with open(output_csv, 'r') as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                completed_subsets.add(int(row['subset_id']))
+        log(f"Resuming: {len(completed_subsets)} subsets already completed", logger)
+
+    fieldnames = [
+        'experiment_type', 'device', 'subset_id', 'qubits', 'N', 'lambda2', 'C',
+        'num_compilations', 'mean_success', 'std_success', 'min_success', 'max_success', 'timestamp'
+    ]
+    write_header = not os.path.exists(output_csv) or os.path.getsize(output_csv) == 0
+
+    os.makedirs(os.path.dirname(output_csv) if os.path.dirname(output_csv) else '.', exist_ok=True)
+    start_time = time.time()
+
+    for i, subset in enumerate(subsets):
+        if i in completed_subsets:
+            log(f"[{i+1}/{len(subsets)}] Subset {i} already completed, skipping", logger)
+            continue
+
+        elapsed = (time.time() - start_time) / 60
+        log(f"\n[{i+1}/{len(subsets)}] Subset {i} (elapsed: {elapsed:.1f} min)", logger)
+        log(f"  Qubits: {subset}", logger)
+
+        subgraph = G.subgraph(subset).copy()
+        metrics = compute_architecture_metrics(subgraph)
+        log(f"  lambda2={metrics['lambda2']:.4f}, C={metrics['C']:.4f}", logger)
+
+        if not nx.is_connected(subgraph):
+            log("  SKIPPING: subset is disconnected", logger)
+            continue
+
+        try:
+            results = run_compiler_fragility_experiment(
+                device,
+                subset,
+                subgraph,
+                shots,
+                num_compilations,
+                seed + i,
+                logger
+            )
+
+            row = {
+                'experiment_type': 'compiler_fragility',
+                'device': device.name if hasattr(device, 'name') else str(device),
+                'subset_id': i,
+                'qubits': str(subset),
+                'N': len(subset),
+                'lambda2': metrics['lambda2'],
+                'C': metrics['C'],
+                'num_compilations': num_compilations,
+                'mean_success': results['mean_success'],
+                'std_success': results['std_success'],
+                'min_success': results['min_success'],
+                'max_success': results['max_success'],
+                'timestamp': datetime.now().isoformat()
+            }
+
+            with open(output_csv, 'a', newline='') as f:
+                writer = csv.DictWriter(f, fieldnames=fieldnames)
+                if write_header:
+                    writer.writeheader()
+                    write_header = False
+                writer.writerow(row)
+
+            log("  Compiler fragility result saved to CSV", logger)
+
+        except Exception as e:
+            log(f"  FAILED compiler fragility run: {e}", logger)
+            continue
+
+    elapsed = (time.time() - start_time) / 60
+    log(f"\n{'='*60}", logger)
+    log(f"COMPILER FRAGILITY SWEEP COMPLETE in {elapsed:.1f} minutes", logger)
+    log(f"Results saved to {output_csv}", logger)
+
+
 def main():
     parser = argparse.ArgumentParser(description='AWS Braket RB Sweep')
     parser.add_argument('--device', type=str, default='arn:aws:braket:us-west-1::device/qpu/rigetti/Ankaa-3',
@@ -647,16 +855,23 @@ def main():
     parser.add_argument('--output', type=str, default=None, help='Output CSV (auto-set by experiment type)')
     parser.add_argument('--resume', action='store_true', default=True, help='Resume from existing results')
     parser.add_argument('--simulator', action='store_true', help='Use local simulator instead of QPU')
-    parser.add_argument('--experiment', type=str, choices=['rb', 'logical_code'], default='rb',
-                        help='Experiment type: rb (mirror RB) or logical_code (repetition code)')
+    parser.add_argument('--experiment', type=str, choices=['rb', 'logical_code', 'compiler_fragility'], default='rb',
+                        help='Experiment type: rb (mirror RB), logical_code (repetition code), or compiler_fragility (GHZ variance)')
     parser.add_argument('--logical-rounds', type=int, default=2, help='Parity-check rounds for logical experiment')
+    parser.add_argument('--num-compilations', type=int, default=10,
+                        help='Number of compilations/layouts for compiler fragility experiment')
 
     args = parser.parse_args()
 
     depths = [int(d) for d in args.depths.split(',')]
     output_path = args.output
     if output_path is None:
-        output_path = 'results/logical_code_sweep.csv' if args.experiment == 'logical_code' else 'results/rb_sweep_braket.csv'
+        if args.experiment == 'logical_code':
+            output_path = 'results/logical_code_sweep.csv'
+        elif args.experiment == 'compiler_fragility':
+            output_path = 'results/compiler_fragility_sweep.csv'
+        else:
+            output_path = 'results/rb_sweep_braket.csv'
 
     # Setup logging
     os.makedirs('results', exist_ok=True)
@@ -672,8 +887,10 @@ def main():
     log(f"Experiment: {args.experiment}", logger)
     if args.experiment == 'rb':
         log(f"Depths: {depths}", logger)
-    else:
+    elif args.experiment == 'logical_code':
         log(f"Rounds: {args.logical_rounds}", logger)
+    else:
+        log(f"Num compilations: {args.num_compilations}", logger)
     log(f"Shots: {args.shots}", logger)
     log(f"Seed: {args.seed}", logger)
     log(f"Output CSV: {output_path}", logger)
@@ -708,11 +925,17 @@ def main():
         log("=" * 60, logger)
         run_sweep(device, G, subsets, depths, args.shots, args.seed,
                   output_path, logger, args.resume)
-    else:
+    elif args.experiment == 'logical_code':
         log("STARTING LOGICAL CODE SWEEP", logger)
         log("=" * 60, logger)
         run_logical_code_sweep(device, G, subsets, args.logical_rounds,
                                args.shots, args.seed, output_path, logger, args.resume)
+    else:
+        log("STARTING COMPILER FRAGILITY SWEEP", logger)
+        log("=" * 60, logger)
+        run_compiler_fragility_sweep(device, G, subsets, args.shots,
+                                     args.num_compilations, args.seed, output_path,
+                                     logger, args.resume)
 
     logger.close()
 
