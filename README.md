@@ -157,6 +157,40 @@ python spectral_gap_sweep_braket.py sweep --device local --n_qubits 8 \
     --depths 2,4 --shots 200 --self_test --output_dir results
 ```
 
+### H) Plateau diagnostic controls (Braket)
+Add a shallow control suite to isolate SPAM vs 1Q vs first entangling-layer
+effects and to verify that compiled circuits for ring/grid/expander remain
+distinct after transpilation. Default depths are `0,1,2` (optionally include 4).
+
+Run the plateau control sweep (local simulator or ARN):
+```bash
+python spectral_gap_sweep_braket.py plateau_diagnostic --device local --n_qubits 8 \
+    --depths 0,1,2 --seeds 3 --shots 500 --output_dir results --families ring,grid,expander \
+    --interleave --analyze_after
+```
+Analyze existing plateau JSONL output:
+```bash
+python spectral_gap_sweep_braket.py plateau_analyze --input results/plateau_diagnostic.jsonl \
+    --csv_out results/plateau_summary.csv --delta_csv results/plateau_delta_summary.csv \
+    --distinct_csv results/plateau_distinctness_summary.csv --depths 0,1,2
+```
+Self-test (local simulator) that writes JSONL plus CSV summaries and prints the
+plateau table:
+```bash
+python spectral_gap_sweep_braket.py plateau_diagnostic --device local --n_qubits 8 \
+    --shots 200 --self_test --output_dir results
+```
+Interpretation guide:
+- **depth 0**: no gates, so \(P_\text{return}\) is a SPAM ceiling.
+- **depth 1**: single-qubit scramble + inverse only; any drop reflects SPAM,
+  compilation, or measurement artifacts.
+- **depth 2**: first entangling layer (plus scrambles) and its inverse; the drop
+  highlights two-qubit-induced plateau onset. (Depth 4 adds a second entangling
+  layer.)
+- **Distinctness table**: confirms whether compiled programs remain unique per
+  family after transpilation (via compiled IR hash counts and compiled gate
+  depth/2Q medians).
+
 ## What this tests
 - **Connectivity metric:** \(C = N \lambda_2\) measures how well-connected the
   architecture is (\(\lambda_2\) is the spectral gap of the normalized
