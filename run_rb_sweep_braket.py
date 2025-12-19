@@ -20,6 +20,7 @@ state to probe variance across layout choices.
 import argparse
 import csv
 import json
+import math
 import time
 import random
 import os
@@ -110,6 +111,81 @@ def compute_architecture_metrics(G: nx.Graph) -> Dict:
         'avg_degree': avg_degree,
         'diameter': diameter
     }
+
+
+def _device_name(device) -> str:
+    """Best-effort device name extraction."""
+    return getattr(
+        device,
+        "name",
+        getattr(getattr(device, "properties", None), "deviceParameters", {}).get("name", "unknown"),
+    )
+
+
+def resolve_entangler_mode(device, requested: str) -> str:
+    """
+    Resolve entangler choice with IonQ-aware defaults.
+
+    - auto -> ZZ on Forte-class, MS on Aria-class, CZ otherwise.
+    - explicit choices are returned directly.
+    """
+    if requested != "auto":
+        return requested
+
+    name = _device_name(device).lower()
+    if "forte" in name:
+        return "zz"
+    if "aria" in name:
+        return "ms"
+    return "cz"
+
+
+def _default_entangler_params(mode: str) -> Dict[str, float]:
+    """Return fixed parameters for parameterized entanglers."""
+    if mode in ("zz", "ms"):
+        return {"theta": math.pi / 2, "phi": 0.0}
+    return {}
+
+
+def apply_entangler(circuit: Circuit, q1: int, q2: int, params: Dict[str, float], mode: str) -> Tuple[str, Tuple[int, int], Tuple[float, ...]]:
+    """Apply a 2Q entangler and return a log tuple for inversion."""
+    if mode in ("cz", "cnot", "cx"):
+        if hasattr(circuit, "cz"):
+            circuit.cz(q1, q2)
+        else:
+            circuit.cnot(q1, q2)
+        return ("cz", (q1, q2), ())
+
+    if mode == "zz":
+        theta = params.get("theta", math.pi / 2)
+        if hasattr(circuit, "zz"):
+            circuit.zz(q1, q2, theta)
+        else:
+            try:
+                circuit.add(gates.ZZ(theta), [q1, q2])
+            except Exception as exc:  # pragma: no cover - depends on SDK version
+                raise RuntimeError("ZZ gate not supported by installed Braket SDK") from exc
+        return ("zz", (q1, q2), (theta,))
+
+    if mode == "ms":
+        theta = params.get("theta", math.pi / 2)
+        phi = params.get("phi", 0.0)
+        ms_method = getattr(circuit, "ms", None)
+        if callable(ms_method):
+            try:
+                ms_method(q1, q2, theta, phi)
+            except TypeError:
+                ms_method(q1, q2, theta)
+        else:
+            try:
+                circuit.add(gates.MS(theta, phi), [q1, q2])
+            except TypeError:
+                circuit.add(gates.MS(theta), [q1, q2])
+            except Exception as exc:  # pragma: no cover - depends on SDK version
+                raise RuntimeError("MS gate not supported by installed Braket SDK") from exc
+        return ("ms", (q1, q2), (theta, phi))
+
+    raise ValueError(f"Unsupported entangler mode: {mode}")
 
 
 def build_random_spanning_tree(subgraph: nx.Graph, rng: random.Random) -> List[Tuple[int, int]]:
@@ -238,8 +314,15 @@ def _order_edges_for_u_style(edges: List[Tuple[int, int]], rng: random.Random, u
     return sorted(edges, key=_score)
 
 
-def generate_brickwork_unitary(qubits: List[int], edges: List[Tuple[int, int]], depth: int,
-                               rng: random.Random, circuit: Circuit, u_style: str = 'mixed') -> List[List[Tuple]]:
+def generate_brickwork_unitary(
+    qubits: List[int],
+    edges: List[Tuple[int, int]],
+    depth: int,
+    rng: random.Random,
+    circuit: Circuit,
+    u_style: str = "mixed",
+    entangler_mode: str = "cz",
+) -> List[List[Tuple[str, Tuple[int, ...], Tuple[float, ...]]]]:
     """
     Generate a brickwork pattern of 1Q rotations + 2Q entanglers.
 
@@ -247,9 +330,10 @@ def generate_brickwork_unitary(qubits: List[int], edges: List[Tuple[int, int]], 
     is a list of tuples ('rx'/'ry'/'rz'/'cz', params...).
     """
     op_log: List[List[Tuple]] = []
+    entangler_params = _default_entangler_params(entangler_mode)
 
     for _ in range(depth):
-        layer_ops: List[Tuple] = []
+        layer_ops: List[Tuple[str, Tuple[int, ...], Tuple[float, ...]]] = []
 
         # 1Q rotations
         for q in qubits:
@@ -257,8 +341,8 @@ def generate_brickwork_unitary(qubits: List[int], edges: List[Tuple[int, int]], 
             theta_z = rng.uniform(0, 2 * np.pi)
             circuit.rx(q, theta_x)
             circuit.rz(q, theta_z)
-            layer_ops.append(('rx', q, theta_x))
-            layer_ops.append(('rz', q, theta_z))
+            layer_ops.append(("rx", (q,), (theta_x,)))
+            layer_ops.append(("rz", (q,), (theta_z,)))
 
         # 2Q entanglers on disjoint edges to keep depth modest
         available_edges = _order_edges_for_u_style(list(edges), rng, u_style)
@@ -267,8 +351,8 @@ def generate_brickwork_unitary(qubits: List[int], edges: List[Tuple[int, int]], 
             if q1 in used or q2 in used:
                 continue
             if rng.random() < 0.5:
-                circuit.cz(q1, q2)
-                layer_ops.append(('cz', q1, q2))
+                gate = apply_entangler(circuit, q1, q2, entangler_params, entangler_mode)
+                layer_ops.append(gate)
                 used.add(q1)
                 used.add(q2)
 
@@ -277,26 +361,31 @@ def generate_brickwork_unitary(qubits: List[int], edges: List[Tuple[int, int]], 
     return op_log
 
 
-def append_inverse_brickwork(circuit: Circuit, op_log: List[List[Tuple]]) -> None:
+def append_inverse_brickwork(circuit: Circuit, op_log: List[List[Tuple[str, Tuple[int, ...], Tuple[float, ...]]]]) -> None:
     """Append the exact inverse of the brickwork operations."""
     for layer_ops in reversed(op_log):
         for op in reversed(layer_ops):
-            if op[0] == 'rx':
-                circuit.rx(op[1], -op[2])
-            elif op[0] == 'ry':
-                circuit.ry(op[1], -op[2])
-            elif op[0] == 'rz':
-                circuit.rz(op[1], -op[2])
-            elif op[0] == 'cz':
-                circuit.cz(op[1], op[2])
+            name, qubits, params = op
+            if name == "rx":
+                circuit.rx(qubits[0], -params[0])
+            elif name == "ry":
+                circuit.ry(qubits[0], -params[0])
+            elif name == "rz":
+                circuit.rz(qubits[0], -params[0])
+            elif name in ("cz", "zz", "ms"):
+                inv_params = {"theta": -params[0]} if params else {}
+                if len(params) > 1:
+                    inv_params["phi"] = params[1]
+                apply_entangler(circuit, qubits[0], qubits[1], inv_params, name)
             else:
-                raise ValueError(f"Unknown op in brickwork log: {op[0]}")
+                raise ValueError(f"Unknown op in brickwork log: {name}")
 
 
 def build_loschmidt_echo_circuit(subgraph: nx.Graph,
                                  depth: int,
                                  rng: random.Random,
-                                 u_style: str = 'mixed') -> Circuit:
+                                 u_style: str = 'mixed',
+                                 entangler_mode: str = "cz") -> Circuit:
     """
     Build a Loschmidt echo circuit:
         - Prepare GHZ on the connected subgraph
@@ -319,7 +408,7 @@ def build_loschmidt_echo_circuit(subgraph: nx.Graph,
     circuit.add_circuit(ghz_circuit)
 
     # Forward unitary
-    op_log = generate_brickwork_unitary(qubits, edges, depth, rng, circuit, u_style)
+    op_log = generate_brickwork_unitary(qubits, edges, depth, rng, circuit, u_style, entangler_mode)
 
     # Exact inverse
     append_inverse_brickwork(circuit, op_log)
@@ -341,9 +430,10 @@ def run_loschmidt_echo_instance(device,
                                 shots: int,
                                 rng: random.Random,
                                 u_style: str = 'mixed',
+                                entangler_mode: str = "cz",
                                 logger=None) -> Tuple[float, float]:
     """Run a single Loschmidt echo instance and return (P_return, GHZ_witness)."""
-    circuit = build_loschmidt_echo_circuit(subgraph, depth, rng, u_style)
+    circuit = build_loschmidt_echo_circuit(subgraph, depth, rng, u_style, entangler_mode)
     task = device.run(circuit, shots=shots)
     result = task.result()
     measurements = np.array(result.measurements)
@@ -371,6 +461,18 @@ def fit_loschmidt_alpha(depths: List[int], p_returns: List[float], fit_eps: floa
     neg_logs = [-np.log(p) for p in ys]
     res = linregress(xs, neg_logs)
     return res.slope, res.stderr, len(valid)
+
+
+def entangler_smoke_test(entangler_mode: str, u_style: str = "mixed") -> None:
+    """Build a tiny circuit with the entangler and run it on the local simulator."""
+    subgraph = nx.path_graph(4)
+    rng = random.Random(123)
+    circ = build_loschmidt_echo_circuit(subgraph, depth=2, rng=rng, u_style=u_style, entangler_mode=entangler_mode)
+    ir_text = circ.to_ir().json().lower()
+    if entangler_mode in ("zz", "ms") and "cz" in ir_text:
+        raise RuntimeError("Entangler smoke test detected CZ in IR when non-CZ entangler was requested.")
+    sim = LocalSimulator()
+    sim.run(circ, shots=4).result()
 
 
 def generate_diverse_subsets(G: nx.Graph, N: int, num_subsets: int, seed: int,
@@ -1250,6 +1352,7 @@ def run_loschmidt_echo_interleaved(
     u_style: str = "mixed",
     N_requested: int = 0,
     resume: bool = True,
+    entangler_mode: str = "cz",
 ):
     """Run time-interleaved Loschmidt echo experiment with block structure."""
     subset_metrics = subset_metrics or {}
@@ -1288,6 +1391,8 @@ def run_loschmidt_echo_interleaved(
         "sem_P_return",
         "timestamp",
         "git_commit",
+        "entangler_mode",
+        "verbatim_requested",
     ]
 
     write_header = (
@@ -1340,6 +1445,7 @@ def run_loschmidt_echo_interleaved(
                             shots,
                             rng,
                             u_style,
+                            entangler_mode,
                             logger,
                         )
                         p_returns.append(p_return)
@@ -1380,6 +1486,8 @@ def run_loschmidt_echo_interleaved(
                     "sem_P_return": sem_p,
                     "timestamp": datetime.now().isoformat(),
                     "git_commit": git_commit,
+                    "entangler_mode": entangler_mode,
+                    "verbatim_requested": False,
                 }
 
                 with open(output_csv, "a", newline="") as f:
@@ -1415,7 +1523,8 @@ def run_loschmidt_echo_sweep(device,
                              run_id: str = "",
                              git_commit: str = "",
                              subset_metrics: Dict[int, Dict] = None,
-                             u_style: str = 'mixed'):
+                             u_style: str = 'mixed',
+                             entangler_mode: str = "cz"):
     """Run Loschmidt echo experiments across subsets with incremental CSV writes."""
     subset_metrics = subset_metrics or {}
     completed = set()
@@ -1443,11 +1552,11 @@ def run_loschmidt_echo_sweep(device,
 
     fieldnames = [
         'experiment_type', 'device', 'run_id', 'git_commit', 'subset_id', 'qubits', 'N', 'lambda2', 'C',
-        'depth', 'K', 'shots', 'mean_P_return', 'sem_P_return', 'timestamp'
+        'depth', 'K', 'shots', 'mean_P_return', 'sem_P_return', 'timestamp', 'entangler_mode', 'verbatim_requested'
     ]
     alpha_fields = [
         'experiment_type', 'device', 'run_id', 'git_commit', 'subset_id', 'qubits', 'N', 'lambda2', 'C',
-        'fit_eps', 'alpha', 'alpha_stderr', 'points', 'timestamp'
+        'fit_eps', 'alpha', 'alpha_stderr', 'points', 'timestamp', 'entangler_mode', 'verbatim_requested'
     ]
 
     write_header = (not os.path.exists(output_csv) or os.path.getsize(output_csv) == 0
@@ -1496,6 +1605,7 @@ def run_loschmidt_echo_sweep(device,
                         shots,
                         rng,
                         u_style,
+                        entangler_mode,
                         logger
                     )
                     p_returns.append(p_return)
@@ -1529,7 +1639,9 @@ def run_loschmidt_echo_sweep(device,
                 'shots': shots,
                 'mean_P_return': mean_p,
                 'sem_P_return': sem_p,
-                'timestamp': datetime.now().isoformat()
+                'timestamp': datetime.now().isoformat(),
+                'entangler_mode': entangler_mode,
+                'verbatim_requested': False
             }
 
             with open(output_csv, 'a', newline='') as f:
@@ -1566,7 +1678,9 @@ def run_loschmidt_echo_sweep(device,
                 'alpha': alpha,
                 'alpha_stderr': stderr,
                 'points': points,
-                'timestamp': datetime.now().isoformat()
+                'timestamp': datetime.now().isoformat(),
+                'entangler_mode': entangler_mode,
+                'verbatim_requested': False
             }
 
             with open(alpha_output, 'a', newline='') as f:
@@ -1621,6 +1735,18 @@ def main():
                         help='Candidate pool size for max-spread-C subset selection')
     parser.add_argument('--u-style', type=str, choices=['mixed', 'local', 'global'], default='mixed',
                         help='Entangling preference: mixed (random), local (short-range), global (long-range)')
+    parser.add_argument(
+        '--two_qubit_entangler',
+        type=str,
+        choices=['auto', 'cz', 'zz', 'ms'],
+        default='auto',
+        help='Two-qubit entangler to use inside Loschmidt/Lorentz echo circuits.',
+    )
+    parser.add_argument(
+        '--entangler-self-test',
+        action='store_true',
+        help='Run a local simulator smoke test for the chosen entangler before executing experiments.',
+    )
 
     args = parser.parse_args()
     git_commit = get_git_commit_short()
@@ -1725,7 +1851,21 @@ def main():
         log(f"Device: {device.name}, Status: {device.status}", logger)
         G = build_coupling_graph(device)
 
+    entangler_mode = resolve_entangler_mode(device, args.two_qubit_entangler)
+    log(f"Entangler mode: {entangler_mode} (flag={args.two_qubit_entangler})", logger)
+
     log(f"Graph: {G.number_of_nodes()} nodes, {G.number_of_edges()} edges", logger)
+
+    if args.experiment in ("loschmidt_echo", "loschmidt_echo_interleaved") and (
+        args.entangler_self_test or entangler_mode in ("zz", "ms")
+    ):
+        log("Running entangler smoke test on local simulator...", logger)
+        try:
+            entangler_smoke_test(entangler_mode, args.u_style)
+            log("Entangler smoke test passed.", logger)
+        except Exception as exc:  # pragma: no cover - defensive guard
+            log(f"Entangler smoke test failed: {exc}", logger)
+            raise
 
     # Generate or load subsets
     subset_metrics: Dict[int, Dict] = {}
@@ -1799,6 +1939,7 @@ def main():
             git_commit=git_commit,
             subset_metrics=subset_metrics if not args.load_subsets else subset_metrics,
             u_style=args.u_style,
+            entangler_mode=entangler_mode,
         )
     elif args.experiment == 'loschmidt_echo_interleaved':
         if not args.run_id:
@@ -1825,6 +1966,7 @@ def main():
             u_style=args.u_style,
             N_requested=args.N,
             resume=args.resume,
+            entangler_mode=entangler_mode,
         )
     else:
         log("STARTING COMPILER FRAGILITY SWEEP", logger)

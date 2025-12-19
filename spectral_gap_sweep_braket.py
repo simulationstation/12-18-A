@@ -187,25 +187,81 @@ def matching_schedule(
 SCRAMBLE_GATES = ("rx", "ry", "rz")
 
 
-def _two_qubit_gate_fn(device) -> str:
-    """Pick a native 2Q gate label, preferring CZ then CNOT."""
+def _device_name(device) -> str:
+    """Best-effort device name extraction."""
+    return getattr(
+        device,
+        "name",
+        getattr(getattr(device, "properties", None), "deviceParameters", {}).get("name", "unknown"),
+    )
+
+
+def resolve_entangler_mode(device, requested: str) -> str:
+    """IonQ-aware entangler resolution with safe defaults for non-IonQ hardware."""
+    if requested != "auto":
+        return requested
+
+    name = _device_name(device).lower()
+    if "forte" in name:
+        return "zz"
+    if "aria" in name:
+        return "ms"
     native = getattr(getattr(device, "properties", None), "paradigm", None)
-    if native and getattr(native, "nativeGateSet", None):
-        gateset = {g.lower() for g in native.nativeGateSet}
-    else:
-        gateset = set()
+    gateset = {g.lower() for g in getattr(native, "nativeGateSet", [])} if native else set()
     if "cz" in gateset:
         return "cz"
-    if "cnot" in gateset or "cx" in gateset:
-        return "cnot"
     return "cz"
 
 
-def _apply_two_qubit(circ: Circuit, gate_label: str, control: int, target: int) -> None:
-    if gate_label == "cnot":
-        circ.cnot(control, target)
-    else:
-        circ.cz(control, target)
+def _default_entangler_params(mode: str) -> Dict[str, float]:
+    if mode in ("zz", "ms"):
+        return {"theta": math.pi / 2, "phi": 0.0}
+    return {}
+
+
+def apply_entangler(circ: Circuit, q1: int, q2: int, params: Dict[str, float], mode: str) -> Gate:
+    """Apply the selected entangler and return a log tuple."""
+    if mode in ("cz", "cnot", "cx"):
+        if hasattr(circ, "cz"):
+            circ.cz(q1, q2)
+        else:
+            circ.cnot(q1, q2)
+        return ("cz", (q1, q2), ())
+
+    if mode == "zz":
+        theta = params.get("theta", math.pi / 2)
+        if hasattr(circ, "zz"):
+            circ.zz(q1, q2, theta)
+        else:
+            try:
+                circ.add(gates.ZZ(theta), [q1, q2])
+            except Exception as exc:  # pragma: no cover - SDK dependent
+                raise RuntimeError("ZZ gate not supported by installed Braket SDK") from exc
+        return ("zz", (q1, q2), (theta,))
+
+    if mode == "ms":
+        theta = params.get("theta", math.pi / 2)
+        phi = params.get("phi", 0.0)
+        ms_method = getattr(circ, "ms", None)
+        if callable(ms_method):
+            try:
+                ms_method(q1, q2, theta, phi)
+            except TypeError:
+                ms_method(q1, q2, theta)
+        else:
+            try:
+                circ.add(gates.MS(theta, phi), [q1, q2])
+            except TypeError:
+                circ.add(gates.MS(theta), [q1, q2])
+            except Exception as exc:  # pragma: no cover - SDK dependent
+                raise RuntimeError("MS gate not supported by installed Braket SDK") from exc
+        return ("ms", (q1, q2), (theta, phi))
+
+    raise ValueError(f"Unsupported entangler mode: {mode}")
+
+
+def _apply_two_qubit(circ: Circuit, gate_label: str, control: int, target: int, entangler_params: Dict[str, float]) -> Gate:
+    return apply_entangler(circ, control, target, entangler_params, gate_label)
 
 
 def build_scramble_layer(circ: Circuit, n_qubits: int, rng: np.random.Generator) -> List[Gate]:
@@ -232,12 +288,13 @@ def apply_matching_layer(
     circ: Circuit,
     matches: Matching,
     gate_label: str,
+    entangler_params: Optional[Dict[str, float]] = None,
 ) -> List[Gate]:
     """Apply a layer of two-qubit gates and return a log of applied gates."""
     applied: List[Gate] = []
+    entangler_params = entangler_params or _default_entangler_params(gate_label)
     for control, target in matches:
-        _apply_two_qubit(circ, gate_label, control, target)
-        applied.append((gate_label, (control, target), ()))
+        applied.append(_apply_two_qubit(circ, gate_label, control, target, entangler_params))
     return applied
 
 
@@ -250,8 +307,11 @@ def invert_gate(circ: Circuit, gate: Gate) -> None:
         circ.ry(qubits[0], -params[0])
     elif name == "rz":
         circ.rz(qubits[0], -params[0])
-    elif name in ("cz", "cnot"):
-        _apply_two_qubit(circ, name, qubits[0], qubits[1])
+    elif name in ("cz", "cnot", "zz", "ms"):
+        inv_params: Dict[str, float] = {"theta": -params[0]} if params else {}
+        if len(params) > 1:
+            inv_params["phi"] = params[1]
+        _apply_two_qubit(circ, "cz" if name == "cnot" else name, qubits[0], qubits[1], inv_params)
     else:
         raise ValueError(f"Unsupported gate for inversion: {name}")
 
@@ -261,13 +321,15 @@ def build_loschmidt_circuit(
     matches: List[Matching],
     rng: np.random.Generator,
     gate_label: str,
+    entangler_params: Optional[Dict[str, float]] = None,
 ) -> Circuit:
     """Construct U(d) followed by its exact inverse."""
     circ = Circuit()
     log: List[Gate] = []
+    entangler_params = entangler_params or _default_entangler_params(gate_label)
     for layer in matches:
         log.extend(build_scramble_layer(circ, n_qubits, rng))
-        log.extend(apply_matching_layer(circ, layer, gate_label))
+        log.extend(apply_matching_layer(circ, layer, gate_label, entangler_params))
 
     # Append inverse
     for gate in reversed(log):
@@ -275,6 +337,23 @@ def build_loschmidt_circuit(
 
     circ.measure_all()
     return circ
+
+
+def entangler_smoke_test(entangler_mode: str) -> None:
+    """Small local simulation to ensure entangler wiring works and avoids CZ when requested."""
+    rng = np.random.default_rng(123)
+    schedule = matching_schedule("ring", 4, 2, rng)
+    circ = build_loschmidt_circuit(
+        n_qubits=4,
+        matches=schedule,
+        rng=rng,
+        gate_label=entangler_mode,
+        entangler_params=_default_entangler_params(entangler_mode),
+    )
+    ir_text = circ.to_ir().json().lower()
+    if entangler_mode in ("zz", "ms") and "cz" in ir_text:
+        raise RuntimeError("Entangler smoke test detected CZ in IR while a native IonQ entangler was requested.")
+    LocalSimulator().run(circ, shots=4).result()
 
 
 # ---------------------------------------------------------------------------
@@ -450,6 +529,7 @@ def build_plateau_circuit(
     n_qubits: int,
     rng: np.random.Generator,
     gate_label: str,
+    entangler_params: Optional[Dict[str, float]] = None,
 ) -> Tuple[Circuit, List[Matching], int]:
     """
     Build plateau-style circuits:
@@ -464,6 +544,7 @@ def build_plateau_circuit(
     circ = Circuit()
     schedule: List[Matching] = []
     log: List[Gate] = []
+    entangler_params = entangler_params or _default_entangler_params(gate_label)
 
     if depth == 0:
         matching_layers = 0
@@ -475,7 +556,7 @@ def build_plateau_circuit(
         schedule = matching_schedule(family, n_qubits, matching_layers, rng)
         for layer in schedule:
             log.extend(build_scramble_layer(circ, n_qubits, rng))
-            log.extend(apply_matching_layer(circ, layer, gate_label))
+            log.extend(apply_matching_layer(circ, layer, gate_label, entangler_params))
 
     for gate in reversed(log):
         invert_gate(circ, gate)
@@ -491,11 +572,12 @@ def run_job(
     shots: int,
     gate_label: str,
     embed_strategy: str,
+    entangler_params: Optional[Dict[str, float]] = None,
 ) -> Dict:
     seed_seq = np.random.SeedSequence([base_seed, job.seed, job.depth, hash(job.family) & 0xFFFFFFFF])
     rng = np.random.default_rng(seed_seq)
     schedule = matching_schedule(job.family, n_qubits, job.depth, rng)
-    circ = build_loschmidt_circuit(n_qubits, schedule, rng, gate_label)
+    circ = build_loschmidt_circuit(n_qubits, schedule, rng, gate_label, entangler_params)
 
     started = time.time()
     result = device.run(circ, shots=shots).result()
@@ -518,6 +600,8 @@ def run_job(
         "hamming_weight_histogram": hamming_weight_hist(counts),
         "runtime_seconds": runtime_s,
         "embed_strategy": embed_strategy,
+        "entangler_mode": gate_label,
+        "verbatim_requested": False,
     }
     return record
 
@@ -530,6 +614,7 @@ def run_plateau_job(
     shots: int,
     gate_label: str,
     embed_strategy: str,
+    entangler_params: Optional[Dict[str, float]] = None,
 ) -> Dict:
     seed_seq = np.random.SeedSequence([base_seed, job.seed, job.depth, hash(job.family) & 0xFFFFFFFF])
     rng = np.random.default_rng(seed_seq)
@@ -539,6 +624,7 @@ def run_plateau_job(
         n_qubits=n_qubits,
         rng=rng,
         gate_label=gate_label,
+        entangler_params=entangler_params,
     )
 
     started = time.time()
@@ -579,6 +665,8 @@ def run_plateau_job(
         "logical_gate_counts": logical_gate_counts,
         "compiled_gate_counts": compiled_gate_counts,
         "compiled_depth": compiled_depth,
+        "entangler_mode": gate_label,
+        "verbatim_requested": False,
     }
     return record
 
@@ -622,8 +710,10 @@ def sweep(
     interleave: bool,
     base_seed: int,
     embed_strategy: str,
+    entangler_mode: str,
 ) -> None:
-    gate_label = _two_qubit_gate_fn(device)
+    gate_label = entangler_mode
+    entangler_params = _default_entangler_params(gate_label)
     ensure_output_dir(os.path.dirname(output_jsonl) or ".")
     jobs = jobs_in_order(families, depths, n_seeds, interleave)
     with open(output_jsonl, "a", encoding="utf-8") as f:
@@ -637,6 +727,7 @@ def sweep(
                 shots=shots,
                 gate_label=gate_label,
                 embed_strategy=embed_strategy,
+                entangler_params=entangler_params,
             )
             f.write(json.dumps(rec) + "\n")
             f.flush()
@@ -656,8 +747,10 @@ def plateau_sweep(
     interleave: bool,
     base_seed: int,
     embed_strategy: str,
+    entangler_mode: str,
 ) -> None:
-    gate_label = _two_qubit_gate_fn(device)
+    gate_label = entangler_mode
+    entangler_params = _default_entangler_params(gate_label)
     ensure_output_dir(os.path.dirname(output_jsonl) or ".")
     jobs = jobs_in_order(families, depths, n_seeds, interleave)
     with open(output_jsonl, "a", encoding="utf-8") as f:
@@ -673,6 +766,7 @@ def plateau_sweep(
                 shots=shots,
                 gate_label=gate_label,
                 embed_strategy=embed_strategy,
+                entangler_params=entangler_params,
             )
             f.write(json.dumps(rec) + "\n")
             f.flush()
@@ -942,6 +1036,13 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Run a quick local self-test (overrides most flags: n_qubits=8, depths=2,4, shots=200).",
     )
+    sweep_p.add_argument(
+        "--two_qubit_entangler",
+        type=str,
+        choices=["auto", "cz", "zz", "ms"],
+        default="auto",
+        help="Two-qubit entangler to use inside matching layers (auto selects ZZ on Forte, MS on Aria, CZ otherwise).",
+    )
 
     analyze_p = subparsers.add_parser("analyze", help="Analyze JSONL output and export CSV summaries.")
     analyze_p.add_argument("--input", required=True, help="Path to JSONL produced by sweep.")
@@ -1025,6 +1126,13 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Run a local plateau self-test (n_qubits=8, depths=0,1,2, seeds=3, shots=200) and summarize.",
     )
+    plateau_p.add_argument(
+        "--two_qubit_entangler",
+        type=str,
+        choices=["auto", "cz", "zz", "ms"],
+        default="auto",
+        help="Two-qubit entangler to use inside matching layers (auto selects ZZ on Forte, MS on Aria, CZ otherwise).",
+    )
 
     plateau_analyze_p = subparsers.add_parser(
         "plateau_analyze", help="Analyze plateau diagnostic JSONL and export summary/distinctness CSVs."
@@ -1060,6 +1168,10 @@ def main() -> None:
 
     if args.command == "sweep":
         device = LocalSimulator() if args.device == "local" else AwsDevice(args.device)
+        entangler_mode = resolve_entangler_mode(device, args.two_qubit_entangler)
+        if args.self_test or entangler_mode in ("zz", "ms"):
+            print(f"Running entangler smoke test (mode={entangler_mode}) on local simulator...")
+            entangler_smoke_test(entangler_mode)
         if args.self_test:
             depths = [2, 4]
             n_qubits = 8
@@ -1084,6 +1196,7 @@ def main() -> None:
             interleave=args.interleave,
             base_seed=args.base_seed,
             embed_strategy=args.embed_strategy,
+            entangler_mode=entangler_mode,
         )
 
     elif args.command == "analyze":
@@ -1104,6 +1217,10 @@ def main() -> None:
 
     elif args.command == "plateau_diagnostic":
         device = LocalSimulator() if args.device == "local" else AwsDevice(args.device)
+        entangler_mode = resolve_entangler_mode(device, args.two_qubit_entangler)
+        if args.self_test or entangler_mode in ("zz", "ms"):
+            print(f"Running entangler smoke test (mode={entangler_mode}) on local simulator...")
+            entangler_smoke_test(entangler_mode)
         if args.self_test:
             depths = [0, 1, 2]
             n_qubits = 8
@@ -1137,6 +1254,7 @@ def main() -> None:
             interleave=args.interleave,
             base_seed=args.base_seed,
             embed_strategy=args.embed_strategy,
+            entangler_mode=entangler_mode,
         )
 
         if args.analyze_after or args.self_test:
