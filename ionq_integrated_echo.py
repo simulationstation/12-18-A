@@ -396,6 +396,16 @@ def _apply_native_ms(circ: Circuit, q1: int, q2: int, theta: float, phi: float) 
     return ("ms", (q1, q2), (theta, phi))
 
 
+def _apply_native_zz(circ: Circuit, q1: int, q2: int, theta: float) -> Gate:
+    """Apply native ZZ gate for IonQ Forte systems."""
+    zz_method = getattr(circ, "zz", None)
+    if callable(zz_method):
+        zz_method(q1, q2, theta)
+    else:
+        circ.add(gates.ZZ(theta), [q1, q2])
+    return ("zz", (q1, q2), (theta,))
+
+
 def _native_scramble_layer(circ: Circuit, n_qubits: int, rng: np.random.Generator) -> List[Gate]:
     log: List[Gate] = []
     for q in range(n_qubits):
@@ -409,14 +419,18 @@ def _native_scramble_layer(circ: Circuit, n_qubits: int, rng: np.random.Generato
 
 
 def _apply_native_matching_layer(
-    circ: Circuit, layer: Matching, entangler_params: Optional[Dict[str, float]] = None
+    circ: Circuit, layer: Matching, entangler_params: Optional[Dict[str, float]] = None,
+    native_2q_gate: str = "zz"
 ) -> List[Gate]:
-    entangler_params = entangler_params or _default_entangler_params("ms")
+    entangler_params = entangler_params or _default_entangler_params(native_2q_gate)
     theta = entangler_params.get("theta", math.pi / 2)
     phi = entangler_params.get("phi", 0.0)
     log: List[Gate] = []
     for q1, q2 in layer:
-        log.append(_apply_native_ms(circ, q1, q2, theta, phi))
+        if native_2q_gate == "zz":
+            log.append(_apply_native_zz(circ, q1, q2, theta))
+        else:
+            log.append(_apply_native_ms(circ, q1, q2, theta, phi))
     return log
 
 
@@ -431,6 +445,9 @@ def invert_native_gate(circ: Circuit, gate: Gate) -> None:
         theta = params[0]
         phi = params[1] if len(params) > 1 else 0.0
         _apply_native_ms(circ, qubits[0], qubits[1], -theta, phi)
+    elif name == "zz":
+        theta = params[0]
+        _apply_native_zz(circ, qubits[0], qubits[1], -theta)
     else:
         raise ValueError(f"Unsupported native gate for inversion: {name}")
 
@@ -760,7 +777,7 @@ def ionq_native_verbatim_smoke_test(n_qubits: int = 4, depth: int = 2) -> None:
         depth=depth,
         n_qubits=n_qubits,
         rng=rng,
-        entangler_params=_default_entangler_params("ms"),
+        entangler_params=_default_entangler_params("zz"),
     )
     outer = Circuit()
     outer.add_verbatim_box(native_prog)
@@ -779,7 +796,7 @@ def ionq_native_verbatim_smoke_test(n_qubits: int = 4, depth: int = 2) -> None:
         elif after_end and name not in ("measure", "measurement"):
             raise RuntimeError(f"Found non-measurement instruction '{name}' outside the verbatim box.")
 
-    allowed_inner = {"gpi", "gpi2", "ms", "measure", "measurement"}
+    allowed_inner = {"gpi", "gpi2", "zz", "measure", "measurement"}
     inner_names = {_instruction_name(instr) for instr in getattr(native_prog, "instructions", [])}
     if not inner_names.issubset(allowed_inner):
         raise RuntimeError(f"Unexpected gate(s) inside verbatim program: {inner_names - allowed_inner}")
@@ -791,7 +808,7 @@ def ionq_native_verbatim_smoke_test(n_qubits: int = 4, depth: int = 2) -> None:
         ir_text = outer.to_ir().json().lower()
     except Exception:
         ir_text = str(outer).lower()
-    for forbidden in ("cz", "zz", "cnot"):
+    for forbidden in ("cz", "cnot", "ms"):
         if forbidden in ir_text:
             raise RuntimeError(f"Forbidden gate {forbidden} detected in native verbatim circuit IR.")
 
@@ -1104,7 +1121,7 @@ def run_phase(
                 for q in range(n_qubits):
                     circ.measure(q)
                 logical_circ = native_prog
-                native_gate_set_used = ["gpi", "gpi2", "ms"]
+                native_gate_set_used = ["gpi", "gpi2", "zz"]
                 compilation_mode_label = "ionq_native_verbatim"
             else:
                 circ, schedule = build_echo_program_generic(
@@ -1179,10 +1196,10 @@ def run_phase(
 
 def run_integrated(args) -> None:
     device, device_info = resolve_device(args.device)
-    gate_label = "ms" if args.ionq_native_verbatim else _two_qubit_gate_fn(device, args.two_qubit_entangler)
+    gate_label = "zz" if args.ionq_native_verbatim else _two_qubit_gate_fn(device, args.two_qubit_entangler)
     entangler_params = _default_entangler_params(gate_label)
     if args.ionq_native_verbatim and args.two_qubit_entangler != "auto":
-        print("IonQ native verbatim mode overrides --two_qubit_entangler to 'ms'.")
+        print("IonQ native verbatim mode overrides --two_qubit_entangler to 'zz' (Forte native gate).")
     base_seed = args.base_seed
     n_qubits = args.n_qubits
     require_even_qubits(n_qubits)
