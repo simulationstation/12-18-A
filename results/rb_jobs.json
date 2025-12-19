@@ -1,0 +1,816 @@
+{
+  "jobs": {
+    "d529qlbht8fs739tqj3g": {
+      "subset_id": 3,
+      "status": "submitted"
+    },
+    "d529qo0nsj9s73avohbg": {
+      "subset_id": 4,
+      "status": "submitted"
+    },
+    "d529qqgnsj9s73avoheg": {
+      "subset_id": 5,
+      "status": "submitted"
+    },
+    "d529qt8nsj9s73avohi0": {
+      "subset_id": 6,
+      "status": "submitted"
+    },
+    "d529r0fp3tbc73ala4ag": {
+      "subset_id": 7,
+      "status": "submitted"
+    },
+    "d529r30nsj9s73avoho0": {
+      "subset_id": 8,
+      "status": "submitted"
+    },
+    "d529r63ht8fs739tqjl0": {
+      "subset_id": 9,
+      "status": "submitted"
+    },
+    "d529r8onsj9s73avohv0": {
+      "subset_id": 10,
+      "status": "submitted"
+    },
+    "d529rbpsmlfc739dmkm0": {
+      "subset_id": 11,
+      "status": "submitted"
+    },
+    "d529rejht8fs739tqjv0": {
+      "subset_id": 12,
+      "status": "submitted"
+    },
+    "d529rhjht8fs739tqk3g": {
+      "subset_id": 13,
+      "status": "submitted"
+    },
+    "d529rkgnsj9s73avoiag": {
+      "subset_id": 14,
+      "status": "submitted"
+    },
+    "d529ronp3tbc73ala540": {
+      "subset_id": 15,
+      "status": "submitted"
+    },
+    "d529rsjht8fs739tqke0": {
+      "subset_id": 16,
+      "status": "submitted"
+    },
+    "d529rvpsmlfc739dml9g": {
+      "subset_id": 17,
+      "status": "submitted"
+    },
+    "d529s3bht8fs739tqklg": {
+      "subset_id": 18,
+      "status": "submitted"
+    },
+    "d529s78nsj9s73avoitg": {
+      "subset_id": 19,
+      "status": "submitted"
+    },
+    "d529sbbht8fs739tqksg": {
+      "subset_id": 20,
+      "status": "submitted"
+    },
+    "d529sf3ht8fs739tql1g": {
+      "subset_id": 21,
+      "status": "submitted"
+    },
+    "d529sipsmlfc739dmls0": {
+      "subset_id": 22,
+      "status": "submitted"
+    },
+    "d529sngnsj9s73avojcg": {
+      "subset_id": 23,
+      "status": "submitted"
+    },
+    "d529srpsmlfc739dmm4g": {
+      "subset_id": 24,
+      "status": "submitted"
+    },
+    "d529t0np3tbc73ala6ag": {
+      "subset_id": 25,
+      "status": "submitted"
+    },
+    "d529t4psmlfc739dmmd0": {
+      "subset_id": 26,
+      "status": "submitted"
+    },
+    "d529t8rht8fs739tqlq0": {
+      "subset_id": 27,
+      "status": "submitted"
+    },
+    "d529tdfp3tbc73ala6n0": {
+      "subset_id": 28,
+      "status": "submitted"
+    },
+    "d529th0nsj9s73avok3g": {
+      "subset_id": 29,
+      "status": "submitted"
+    }
+  },
+  "subsets": {
+    "3": {
+      "subset_id": 3,
+      "qubits": [
+        92,
+        96,
+        97,
+        98,
+        99,
+        100,
+        110
+      ],
+      "metrics": {
+        "N": 7,
+        "edges_count": 6,
+        "avg_degree": 1.7142857142857142,
+        "diameter": 4,
+        "lambda2": 0.18350341907227413,
+        "C": 1.2845239335059189
+      },
+      "job_ids": [
+        "d529qlbht8fs739tqj3g"
+      ],
+      "experiment_id": "fb7ebf04-92f8-41eb-b12b-747670e8acad",
+      "status": "submitted",
+      "submit_time": "2025-12-18T14:33:27.026963"
+    },
+    "4": {
+      "subset_id": 4,
+      "qubits": [
+        11,
+        12,
+        13,
+        18,
+        30,
+        31,
+        32
+      ],
+      "metrics": {
+        "N": 7,
+        "edges_count": 6,
+        "avg_degree": 1.7142857142857142,
+        "diameter": 4,
+        "lambda2": 0.18350341907227422,
+        "C": 1.2845239335059195
+      },
+      "job_ids": [
+        "d529qo0nsj9s73avohbg"
+      ],
+      "experiment_id": "500c8e8f-ed14-4865-ac4a-8c20386cbe97",
+      "status": "submitted",
+      "submit_time": "2025-12-18T14:33:36.600078"
+    },
+    "5": {
+      "subset_id": 5,
+      "qubits": [
+        35,
+        43,
+        44,
+        45,
+        46,
+        47,
+        55
+      ],
+      "metrics": {
+        "N": 7,
+        "edges_count": 6,
+        "avg_degree": 1.7142857142857142,
+        "diameter": 4,
+        "lambda2": 0.18350341907227402,
+        "C": 1.2845239335059182
+      },
+      "job_ids": [
+        "d529qqgnsj9s73avoheg"
+      ],
+      "experiment_id": "3b132596-1ffb-4d0d-a577-ab034a5642fb",
+      "status": "submitted",
+      "submit_time": "2025-12-18T14:33:47.619583"
+    },
+    "6": {
+      "subset_id": 6,
+      "qubits": [
+        73,
+        79,
+        80,
+        81,
+        82,
+        83,
+        92
+      ],
+      "metrics": {
+        "N": 7,
+        "edges_count": 6,
+        "avg_degree": 1.7142857142857142,
+        "diameter": 4,
+        "lambda2": 0.18350341907227374,
+        "C": 1.2845239335059162
+      },
+      "job_ids": [
+        "d529qt8nsj9s73avohi0"
+      ],
+      "experiment_id": "0e360f62-c229-4115-9a72-7b6a9238fa0c",
+      "status": "submitted",
+      "submit_time": "2025-12-18T14:33:59.013325"
+    },
+    "7": {
+      "subset_id": 7,
+      "qubits": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        17
+      ],
+      "metrics": {
+        "N": 7,
+        "edges_count": 6,
+        "avg_degree": 1.7142857142857142,
+        "diameter": 5,
+        "lambda2": 0.15316514422507793,
+        "C": 1.0721560095755456
+      },
+      "job_ids": [
+        "d529r0fp3tbc73ala4ag"
+      ],
+      "experiment_id": "952b41bf-6859-40a4-b5d3-27e4e1fe4216",
+      "status": "submitted",
+      "submit_time": "2025-12-18T14:34:09.668862"
+    },
+    "8": {
+      "subset_id": 8,
+      "qubits": [
+        78,
+        79,
+        80,
+        81,
+        82,
+        92,
+        99
+      ],
+      "metrics": {
+        "N": 7,
+        "edges_count": 6,
+        "avg_degree": 1.7142857142857142,
+        "diameter": 4,
+        "lambda2": 0.2928932188134524,
+        "C": 2.050252531694167
+      },
+      "job_ids": [
+        "d529r30nsj9s73avoho0"
+      ],
+      "experiment_id": "e1f8fbfd-619a-45a0-98a2-551c87dd59b7",
+      "status": "submitted",
+      "submit_time": "2025-12-18T14:34:21.655633"
+    },
+    "9": {
+      "subset_id": 9,
+      "qubits": [
+        112,
+        123,
+        124,
+        125,
+        126,
+        127,
+        132
+      ],
+      "metrics": {
+        "N": 7,
+        "edges_count": 6,
+        "avg_degree": 1.7142857142857142,
+        "diameter": 4,
+        "lambda2": 0.1835034190722739,
+        "C": 1.2845239335059173
+      },
+      "job_ids": [
+        "d529r63ht8fs739tqjl0"
+      ],
+      "experiment_id": "ecb1850c-0f6f-4924-9b4b-533ef25c3600",
+      "status": "submitted",
+      "submit_time": "2025-12-18T14:34:33.671727"
+    },
+    "10": {
+      "subset_id": 10,
+      "qubits": [
+        92,
+        98,
+        99,
+        100,
+        101,
+        102,
+        111
+      ],
+      "metrics": {
+        "N": 7,
+        "edges_count": 6,
+        "avg_degree": 1.7142857142857142,
+        "diameter": 4,
+        "lambda2": 0.18350341907227366,
+        "C": 1.2845239335059155
+      },
+      "job_ids": [
+        "d529r8onsj9s73avohv0"
+      ],
+      "experiment_id": "10a1508f-e69b-499b-9264-3e1455d4fcc9",
+      "status": "submitted",
+      "submit_time": "2025-12-18T14:34:43.949209"
+    },
+    "11": {
+      "subset_id": 11,
+      "qubits": [
+        57,
+        58,
+        59,
+        60,
+        61,
+        72,
+        78
+      ],
+      "metrics": {
+        "N": 7,
+        "edges_count": 6,
+        "avg_degree": 1.7142857142857142,
+        "diameter": 4,
+        "lambda2": 0.2928932188134522,
+        "C": 2.0502525316941655
+      },
+      "job_ids": [
+        "d529rbpsmlfc739dmkm0"
+      ],
+      "experiment_id": "90d6dc47-fdda-4286-83a9-570ef6121452",
+      "status": "submitted",
+      "submit_time": "2025-12-18T14:34:56.204133"
+    },
+    "12": {
+      "subset_id": 12,
+      "qubits": [
+        88,
+        94,
+        105,
+        106,
+        107,
+        108,
+        109
+      ],
+      "metrics": {
+        "N": 7,
+        "edges_count": 6,
+        "avg_degree": 1.7142857142857142,
+        "diameter": 4,
+        "lambda2": 0.2928932188134524,
+        "C": 2.050252531694167
+      },
+      "job_ids": [
+        "d529rejht8fs739tqjv0"
+      ],
+      "experiment_id": "c77a44c8-e716-46bf-9449-a1bf5e7605eb",
+      "status": "submitted",
+      "submit_time": "2025-12-18T14:35:08.312778"
+    },
+    "13": {
+      "subset_id": 13,
+      "qubits": [
+        48,
+        49,
+        50,
+        51,
+        52,
+        56,
+        69
+      ],
+      "metrics": {
+        "N": 7,
+        "edges_count": 6,
+        "avg_degree": 1.7142857142857142,
+        "diameter": 4,
+        "lambda2": 0.2928932188134524,
+        "C": 2.050252531694167
+      },
+      "job_ids": [
+        "d529rhjht8fs739tqk3g"
+      ],
+      "experiment_id": "0d08a6d1-cb7c-4bb9-b68c-b0c2f295c095",
+      "status": "submitted",
+      "submit_time": "2025-12-18T14:35:18.854136"
+    },
+    "14": {
+      "subset_id": 14,
+      "qubits": [
+        74,
+        85,
+        86,
+        87,
+        88,
+        89,
+        94
+      ],
+      "metrics": {
+        "N": 7,
+        "edges_count": 6,
+        "avg_degree": 1.7142857142857142,
+        "diameter": 4,
+        "lambda2": 0.18350341907227402,
+        "C": 1.2845239335059182
+      },
+      "job_ids": [
+        "d529rkgnsj9s73avoiag"
+      ],
+      "experiment_id": "56b3a9a3-fe05-4856-a2f6-6bbe26a4ccbe",
+      "status": "submitted",
+      "submit_time": "2025-12-18T14:35:32.140587"
+    },
+    "15": {
+      "subset_id": 15,
+      "qubits": [
+        69,
+        70,
+        71,
+        75,
+        88,
+        89,
+        90
+      ],
+      "metrics": {
+        "N": 7,
+        "edges_count": 6,
+        "avg_degree": 1.7142857142857142,
+        "diameter": 6,
+        "lambda2": 0.13397459621556101,
+        "C": 0.9378221735089272
+      },
+      "job_ids": [
+        "d529ronp3tbc73ala540"
+      ],
+      "experiment_id": "212cad23-cb2b-4471-b4a3-5afaf61ce1de",
+      "status": "submitted",
+      "submit_time": "2025-12-18T14:35:47.212062"
+    },
+    "16": {
+      "subset_id": 16,
+      "qubits": [
+        8,
+        17,
+        25,
+        26,
+        27,
+        28,
+        29
+      ],
+      "metrics": {
+        "N": 7,
+        "edges_count": 6,
+        "avg_degree": 1.7142857142857142,
+        "diameter": 4,
+        "lambda2": 0.2928932188134526,
+        "C": 2.050252531694168
+      },
+      "job_ids": [
+        "d529rsjht8fs739tqke0"
+      ],
+      "experiment_id": "c438f8ca-f63b-4219-9abe-9d0f90d5d4ef",
+      "status": "submitted",
+      "submit_time": "2025-12-18T14:36:03.408858"
+    },
+    "17": {
+      "subset_id": 17,
+      "qubits": [
+        96,
+        97,
+        98,
+        110,
+        115,
+        116,
+        117
+      ],
+      "metrics": {
+        "N": 7,
+        "edges_count": 6,
+        "avg_degree": 1.7142857142857142,
+        "diameter": 4,
+        "lambda2": 0.18350341907227435,
+        "C": 1.2845239335059204
+      },
+      "job_ids": [
+        "d529rvpsmlfc739dml9g"
+      ],
+      "experiment_id": "05e41f12-0850-4db2-af21-f544d7135147",
+      "status": "submitted",
+      "submit_time": "2025-12-18T14:36:16.178141"
+    },
+    "18": {
+      "subset_id": 18,
+      "qubits": [
+        17,
+        26,
+        27,
+        28,
+        29,
+        30,
+        36
+      ],
+      "metrics": {
+        "N": 7,
+        "edges_count": 6,
+        "avg_degree": 1.7142857142857142,
+        "diameter": 4,
+        "lambda2": 0.1835034190722739,
+        "C": 1.2845239335059173
+      },
+      "job_ids": [
+        "d529s3bht8fs739tqklg"
+      ],
+      "experiment_id": "023f5cdb-7342-43ee-aabe-567e0d1da4e1",
+      "status": "submitted",
+      "submit_time": "2025-12-18T14:36:30.565176"
+    },
+    "19": {
+      "subset_id": 19,
+      "qubits": [
+        104,
+        105,
+        106,
+        112,
+        123,
+        124,
+        125
+      ],
+      "metrics": {
+        "N": 7,
+        "edges_count": 6,
+        "avg_degree": 1.7142857142857142,
+        "diameter": 4,
+        "lambda2": 0.18350341907227435,
+        "C": 1.2845239335059204
+      },
+      "job_ids": [
+        "d529s78nsj9s73avoitg"
+      ],
+      "experiment_id": "ee8ef7f4-8887-461e-bdb3-6e193b039db9",
+      "status": "submitted",
+      "submit_time": "2025-12-18T14:36:45.876938"
+    },
+    "20": {
+      "subset_id": 20,
+      "qubits": [
+        93,
+        100,
+        101,
+        102,
+        103,
+        104,
+        111
+      ],
+      "metrics": {
+        "N": 7,
+        "edges_count": 6,
+        "avg_degree": 1.7142857142857142,
+        "diameter": 4,
+        "lambda2": 0.18350341907227413,
+        "C": 1.2845239335059189
+      },
+      "job_ids": [
+        "d529sbbht8fs739tqksg"
+      ],
+      "experiment_id": "56c3ca07-ed42-4762-9850-71a1d77560f0",
+      "status": "submitted",
+      "submit_time": "2025-12-18T14:37:02.175891"
+    },
+    "21": {
+      "subset_id": 21,
+      "qubits": [
+        55,
+        62,
+        63,
+        64,
+        65,
+        66,
+        73
+      ],
+      "metrics": {
+        "N": 7,
+        "edges_count": 6,
+        "avg_degree": 1.7142857142857142,
+        "diameter": 4,
+        "lambda2": 0.1835034190722741,
+        "C": 1.2845239335059186
+      },
+      "job_ids": [
+        "d529sf3ht8fs739tql1g"
+      ],
+      "experiment_id": "201be2e4-cf80-4949-bc5e-beb15fce61ad",
+      "status": "submitted",
+      "submit_time": "2025-12-18T14:37:16.668771"
+    },
+    "22": {
+      "subset_id": 22,
+      "qubits": [
+        27,
+        28,
+        29,
+        30,
+        31,
+        36,
+        48
+      ],
+      "metrics": {
+        "N": 7,
+        "edges_count": 6,
+        "avg_degree": 1.7142857142857142,
+        "diameter": 4,
+        "lambda2": 0.2928932188134522,
+        "C": 2.0502525316941655
+      },
+      "job_ids": [
+        "d529sipsmlfc739dmls0"
+      ],
+      "experiment_id": "ca709728-53d5-45c6-9d3f-060ff55d2806",
+      "status": "submitted",
+      "submit_time": "2025-12-18T14:37:32.200056"
+    },
+    "23": {
+      "subset_id": 23,
+      "qubits": [
+        107,
+        108,
+        109,
+        113,
+        126,
+        127,
+        128
+      ],
+      "metrics": {
+        "N": 7,
+        "edges_count": 6,
+        "avg_degree": 1.7142857142857142,
+        "diameter": 6,
+        "lambda2": 0.13397459621556143,
+        "C": 0.93782217350893
+      },
+      "job_ids": [
+        "d529sngnsj9s73avojcg"
+      ],
+      "experiment_id": "9c1c267d-3a8a-4c26-bbe6-52a62f3b824a",
+      "status": "submitted",
+      "submit_time": "2025-12-18T14:37:50.955031"
+    },
+    "24": {
+      "subset_id": 24,
+      "qubits": [
+        59,
+        72,
+        76,
+        77,
+        78,
+        79,
+        80
+      ],
+      "metrics": {
+        "N": 7,
+        "edges_count": 6,
+        "avg_degree": 1.7142857142857142,
+        "diameter": 4,
+        "lambda2": 0.2928932188134525,
+        "C": 2.0502525316941673
+      },
+      "job_ids": [
+        "d529srpsmlfc739dmm4g"
+      ],
+      "experiment_id": "b159680a-8802-47bd-a170-240a47cc84a4",
+      "status": "submitted",
+      "submit_time": "2025-12-18T14:38:08.367806"
+    },
+    "25": {
+      "subset_id": 25,
+      "qubits": [
+        72,
+        76,
+        77,
+        78,
+        79,
+        91,
+        95
+      ],
+      "metrics": {
+        "N": 7,
+        "edges_count": 6,
+        "avg_degree": 1.7142857142857142,
+        "diameter": 5,
+        "lambda2": 0.1531651442250782,
+        "C": 1.0721560095755476
+      },
+      "job_ids": [
+        "d529t0np3tbc73ala6ag"
+      ],
+      "experiment_id": "c7cd3d71-14f4-4b00-8678-ed67c8b66390",
+      "status": "submitted",
+      "submit_time": "2025-12-18T14:38:27.252203"
+    },
+    "26": {
+      "subset_id": 26,
+      "qubits": [
+        3,
+        4,
+        5,
+        16,
+        22,
+        23,
+        24
+      ],
+      "metrics": {
+        "N": 7,
+        "edges_count": 6,
+        "avg_degree": 1.7142857142857142,
+        "diameter": 4,
+        "lambda2": 0.18350341907227435,
+        "C": 1.2845239335059204
+      },
+      "job_ids": [
+        "d529t4psmlfc739dmmd0"
+      ],
+      "experiment_id": "2b1d3272-2ed9-447a-81c8-ba97b88f6511",
+      "status": "submitted",
+      "submit_time": "2025-12-18T14:38:43.852675"
+    },
+    "27": {
+      "subset_id": 27,
+      "qubits": [
+        25,
+        35,
+        42,
+        43,
+        44,
+        45,
+        46
+      ],
+      "metrics": {
+        "N": 7,
+        "edges_count": 6,
+        "avg_degree": 1.7142857142857142,
+        "diameter": 4,
+        "lambda2": 0.2928932188134525,
+        "C": 2.0502525316941673
+      },
+      "job_ids": [
+        "d529t8rht8fs739tqlq0"
+      ],
+      "experiment_id": "9315db37-bd2f-469c-82e8-b248b5492f34",
+      "status": "submitted",
+      "submit_time": "2025-12-18T14:39:00.148439"
+    },
+    "28": {
+      "subset_id": 28,
+      "qubits": [
+        99,
+        100,
+        101,
+        102,
+        103,
+        111,
+        120
+      ],
+      "metrics": {
+        "N": 7,
+        "edges_count": 6,
+        "avg_degree": 1.7142857142857142,
+        "diameter": 4,
+        "lambda2": 0.29289321881345237,
+        "C": 2.0502525316941664
+      },
+      "job_ids": [
+        "d529tdfp3tbc73ala6n0"
+      ],
+      "experiment_id": "89135529-d34d-47d5-a7d1-6fa499295dd0",
+      "status": "submitted",
+      "submit_time": "2025-12-18T14:39:17.419977"
+    },
+    "29": {
+      "subset_id": 29,
+      "qubits": [
+        103,
+        104,
+        105,
+        106,
+        107,
+        112,
+        124
+      ],
+      "metrics": {
+        "N": 7,
+        "edges_count": 6,
+        "avg_degree": 1.7142857142857142,
+        "diameter": 4,
+        "lambda2": 0.29289321881345237,
+        "C": 2.0502525316941664
+      },
+      "job_ids": [
+        "d529th0nsj9s73avok3g"
+      ],
+      "experiment_id": "31d24ba8-1d48-498b-bc07-99a423a51e15",
+      "status": "submitted",
+      "submit_time": "2025-12-18T14:39:33.685474"
+    }
+  }
+}

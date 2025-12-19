@@ -1,0 +1,319 @@
+[2025-12-18 12:56:11] ============================================================
+[2025-12-18 12:56:11] IBM Quantum RB Sweep
+[2025-12-18 12:56:11] ============================================================
+[2025-12-18 12:56:11] Backend: ibm_torino
+[2025-12-18 12:56:11] Subset size N: 7
+[2025-12-18 12:56:11] Num subsets: 30
+[2025-12-18 12:56:11] RB lengths: [1, 2, 4, 8, 16, 32]
+[2025-12-18 12:56:11] Num samples: 20
+[2025-12-18 12:56:11] Seed: 42
+[2025-12-18 12:56:11] Output CSV: results/rb_sweep.csv
+[2025-12-18 12:56:11] Resume: True
+[2025-12-18 12:56:11] ============================================================
+[2025-12-18 12:56:11] 
+Connecting to IBM Quantum...
+[2025-12-18 12:56:17] Loading backend ibm_torino...
+[2025-12-18 12:56:18] Backend: ibm_torino, 133 qubits
+[2025-12-18 12:56:18] Building coupling graph...
+[2025-12-18 12:56:18] Graph: 133 nodes, 150 edges
+[2025-12-18 12:56:18] 
+Generating 30 diverse subsets of size 7...
+[2025-12-18 12:56:18] Generated 30 subsets
+[2025-12-18 12:56:18] 
+============================================================
+[2025-12-18 12:56:18] STARTING RB SWEEP
+[2025-12-18 12:56:18] ============================================================
+[2025-12-18 12:56:18] 
+[1/30] Subset 0 (elapsed: 0.0 min)
+[2025-12-18 12:56:18]   Qubits: (6, 7, 8, np.int64(9), 10, 11, 17)
+[2025-12-18 12:56:18]   lambda2=0.1835, C=1.2845
+[2025-12-18 12:56:18]   edges=6, avg_degree=1.71, diameter=5
+[2025-12-18 12:56:18]   Queue: 0 pending jobs
+[2025-12-18 12:56:18]   Running StandardRB...
+[2025-12-18 12:56:18]   Attempt 1/2
+[2025-12-18 12:56:22]   Attempt 1 failed: 'int64' object cannot be converted to 'Qubit'
+[2025-12-18 12:56:32]   Attempt 2/2
+[2025-12-18 13:04:34] ============================================================
+[2025-12-18 13:04:34] IBM Quantum RB Sweep
+[2025-12-18 13:04:34] ============================================================
+[2025-12-18 13:04:34] Backend: ibm_torino
+[2025-12-18 13:04:34] Subset size N: 7
+[2025-12-18 13:04:34] Num subsets: 30
+[2025-12-18 13:04:34] RB lengths: [1, 2, 4, 8, 16, 32]
+[2025-12-18 13:04:34] Num samples: 20
+[2025-12-18 13:04:34] Seed: 42
+[2025-12-18 13:04:34] Output CSV: results/rb_sweep.csv
+[2025-12-18 13:04:34] Resume: True
+[2025-12-18 13:04:34] ============================================================
+[2025-12-18 13:04:34] 
+Connecting to IBM Quantum...
+[2025-12-18 13:04:39] Loading backend ibm_torino...
+[2025-12-18 13:04:40] Backend: ibm_torino, 133 qubits
+[2025-12-18 13:04:40] Building coupling graph...
+[2025-12-18 13:04:40] Graph: 133 nodes, 150 edges
+[2025-12-18 13:04:40] 
+Generating 30 diverse subsets of size 7...
+[2025-12-18 13:04:40] Generated 30 subsets
+[2025-12-18 13:04:40] 
+============================================================
+[2025-12-18 13:04:40] STARTING RB SWEEP
+[2025-12-18 13:04:40] ============================================================
+[2025-12-18 13:04:40] 
+[1/30] Subset 0 (elapsed: 0.0 min)
+[2025-12-18 13:04:40]   Qubits: (6, 7, 8, 9, 10, 11, 17)
+[2025-12-18 13:04:40]   lambda2=0.1835, C=1.2845
+[2025-12-18 13:04:40]   edges=6, avg_degree=1.71, diameter=5
+[2025-12-18 13:04:41]   Queue: 0 pending jobs
+[2025-12-18 13:04:41]   Running StandardRB...
+[2025-12-18 13:04:41]   Attempt 1/2
+[2025-12-18 13:04:51]   Job submitted, waiting for results...
+[2025-12-18 13:08:20]   Results received!
+[2025-12-18 13:08:20]   SUCCESS: alpha=0.4867, EPC=0.5093
+[2025-12-18 13:08:20]   Result saved to CSV
+[2025-12-18 13:08:20] 
+[2/30] Subset 1 (elapsed: 3.7 min)
+[2025-12-18 13:08:20]   Qubits: (42, 54, 59, 60, 61, 62, 63)
+[2025-12-18 13:08:20]   lambda2=0.2929, C=2.0503
+[2025-12-18 13:08:20]   edges=6, avg_degree=1.71, diameter=4
+[2025-12-18 13:08:20]   Queue: 0 pending jobs
+[2025-12-18 13:08:20]   Running StandardRB...
+[2025-12-18 13:08:20]   Attempt 1/2
+[2025-12-18 13:08:30]   Job submitted, waiting for results...
+[2025-12-18 13:12:09]   Results received!
+[2025-12-18 13:12:09]   SUCCESS: alpha=0.5042, EPC=0.4919
+[2025-12-18 13:12:09]   Result saved to CSV
+[2025-12-18 13:12:09] 
+[3/30] Subset 2 (elapsed: 7.5 min)
+[2025-12-18 13:12:09]   Qubits: (7, 8, 9, 17, 26, 27, 28)
+[2025-12-18 13:12:09]   lambda2=0.1835, C=1.2845
+[2025-12-18 13:12:09]   edges=6, avg_degree=1.71, diameter=4
+[2025-12-18 13:12:09]   Queue: 0 pending jobs
+[2025-12-18 13:12:09]   Running StandardRB...
+[2025-12-18 13:12:09]   Attempt 1/2
+[2025-12-18 13:12:17]   Job submitted, waiting for results...
+[2025-12-18 13:16:03]   Results received!
+[2025-12-18 13:16:03]   SUCCESS: alpha=0.3791, EPC=0.6161
+[2025-12-18 13:16:03]   Result saved to CSV
+[2025-12-18 13:16:03] 
+[4/30] Subset 3 (elapsed: 11.4 min)
+[2025-12-18 13:16:03]   Qubits: (92, 96, 97, 98, 99, 100, 110)
+[2025-12-18 13:16:03]   lambda2=0.1835, C=1.2845
+[2025-12-18 13:16:03]   edges=6, avg_degree=1.71, diameter=4
+[2025-12-18 13:16:03]   Queue: 0 pending jobs
+[2025-12-18 13:16:03]   Running StandardRB...
+[2025-12-18 13:16:03]   Attempt 1/2
+[2025-12-18 13:16:13]   Job submitted, waiting for results...
+[2025-12-18 14:33:08] ============================================================
+[2025-12-18 14:33:08] IBM Quantum RB Sweep - Mode: submit
+[2025-12-18 14:33:08] ============================================================
+[2025-12-18 14:33:08] Backend: ibm_torino
+[2025-12-18 14:33:08] Subset size N: 7
+[2025-12-18 14:33:08] Num subsets: 30
+[2025-12-18 14:33:08] Jobs file: results/rb_jobs.json
+[2025-12-18 14:33:08] ============================================================
+[2025-12-18 14:33:08] 
+Connecting to IBM Quantum...
+[2025-12-18 14:33:15] Loading backend ibm_torino...
+[2025-12-18 14:33:16] Backend: ibm_torino, 133 qubits
+[2025-12-18 14:33:16] Building coupling graph...
+[2025-12-18 14:33:16] Graph: 133 nodes, 150 edges
+[2025-12-18 14:33:16] 
+Generating 30 diverse subsets of size 7...
+[2025-12-18 14:33:16] Generated 30 subsets
+[2025-12-18 14:33:16] 
+============================================================
+[2025-12-18 14:33:16] SUBMIT MODE - Queuing all jobs
+[2025-12-18 14:33:16] ============================================================
+[2025-12-18 14:33:16] [1/30] Subset 0: already in CSV, skipping
+[2025-12-18 14:33:16] [2/30] Subset 1: already in CSV, skipping
+[2025-12-18 14:33:16] [3/30] Subset 2: already in CSV, skipping
+[2025-12-18 14:33:16] 
+[4/30] Subset 3
+[2025-12-18 14:33:16]   Qubits: (92, 96, 97, 98, 99, 100, 110)
+[2025-12-18 14:33:16]   C=1.2845
+[2025-12-18 14:33:27]   Submitted: job_ids=['d529qlbht8fs739tqj3g'], exp_id=fb7ebf04-92f8-41eb-b12b-747670e8acad
+[2025-12-18 14:33:28] 
+[5/30] Subset 4
+[2025-12-18 14:33:28]   Qubits: (11, 12, 13, 18, 30, 31, 32)
+[2025-12-18 14:33:28]   C=1.2845
+[2025-12-18 14:33:36]   Submitted: job_ids=['d529qo0nsj9s73avohbg'], exp_id=500c8e8f-ed14-4865-ac4a-8c20386cbe97
+[2025-12-18 14:33:37] 
+[6/30] Subset 5
+[2025-12-18 14:33:37]   Qubits: (35, 43, 44, 45, 46, 47, 55)
+[2025-12-18 14:33:37]   C=1.2845
+[2025-12-18 14:33:47]   Submitted: job_ids=['d529qqgnsj9s73avoheg'], exp_id=3b132596-1ffb-4d0d-a577-ab034a5642fb
+[2025-12-18 14:33:48] 
+[7/30] Subset 6
+[2025-12-18 14:33:48]   Qubits: (73, 79, 80, 81, 82, 83, 92)
+[2025-12-18 14:33:48]   C=1.2845
+[2025-12-18 14:33:59]   Submitted: job_ids=['d529qt8nsj9s73avohi0'], exp_id=0e360f62-c229-4115-9a72-7b6a9238fa0c
+[2025-12-18 14:34:00] 
+[8/30] Subset 7
+[2025-12-18 14:34:00]   Qubits: (4, 5, 6, 7, 8, 9, 17)
+[2025-12-18 14:34:00]   C=1.0722
+[2025-12-18 14:34:09]   Submitted: job_ids=['d529r0fp3tbc73ala4ag'], exp_id=952b41bf-6859-40a4-b5d3-27e4e1fe4216
+[2025-12-18 14:34:10] 
+[9/30] Subset 8
+[2025-12-18 14:34:10]   Qubits: (78, 79, 80, 81, 82, 92, 99)
+[2025-12-18 14:34:10]   C=2.0503
+[2025-12-18 14:34:21]   Submitted: job_ids=['d529r30nsj9s73avoho0'], exp_id=e1f8fbfd-619a-45a0-98a2-551c87dd59b7
+[2025-12-18 14:34:22] 
+[10/30] Subset 9
+[2025-12-18 14:34:22]   Qubits: (112, 123, 124, 125, 126, 127, 132)
+[2025-12-18 14:34:22]   C=1.2845
+[2025-12-18 14:34:33]   Submitted: job_ids=['d529r63ht8fs739tqjl0'], exp_id=ecb1850c-0f6f-4924-9b4b-533ef25c3600
+[2025-12-18 14:34:34] 
+[11/30] Subset 10
+[2025-12-18 14:34:34]   Qubits: (92, 98, 99, 100, 101, 102, 111)
+[2025-12-18 14:34:34]   C=1.2845
+[2025-12-18 14:34:43]   Submitted: job_ids=['d529r8onsj9s73avohv0'], exp_id=10a1508f-e69b-499b-9264-3e1455d4fcc9
+[2025-12-18 14:34:44] 
+[12/30] Subset 11
+[2025-12-18 14:34:44]   Qubits: (57, 58, 59, 60, 61, 72, 78)
+[2025-12-18 14:34:44]   C=2.0503
+[2025-12-18 14:34:56]   Submitted: job_ids=['d529rbpsmlfc739dmkm0'], exp_id=90d6dc47-fdda-4286-83a9-570ef6121452
+[2025-12-18 14:34:57] 
+[13/30] Subset 12
+[2025-12-18 14:34:57]   Qubits: (88, 94, 105, 106, 107, 108, 109)
+[2025-12-18 14:34:57]   C=2.0503
+[2025-12-18 14:35:08]   Submitted: job_ids=['d529rejht8fs739tqjv0'], exp_id=c77a44c8-e716-46bf-9449-a1bf5e7605eb
+[2025-12-18 14:35:07] 
+[14/30] Subset 13
+[2025-12-18 14:35:07]   Qubits: (48, 49, 50, 51, 52, 56, 69)
+[2025-12-18 14:35:07]   C=2.0503
+[2025-12-18 14:35:18]   Submitted: job_ids=['d529rhjht8fs739tqk3g'], exp_id=0d08a6d1-cb7c-4bb9-b68c-b0c2f295c095
+[2025-12-18 14:35:19] 
+[15/30] Subset 14
+[2025-12-18 14:35:19]   Qubits: (74, 85, 86, 87, 88, 89, 94)
+[2025-12-18 14:35:19]   C=1.2845
+[2025-12-18 14:35:32]   Submitted: job_ids=['d529rkgnsj9s73avoiag'], exp_id=56b3a9a3-fe05-4856-a2f6-6bbe26a4ccbe
+[2025-12-18 14:35:33] 
+[16/30] Subset 15
+[2025-12-18 14:35:33]   Qubits: (69, 70, 71, 75, 88, 89, 90)
+[2025-12-18 14:35:33]   C=0.9378
+[2025-12-18 14:35:47]   Submitted: job_ids=['d529ronp3tbc73ala540'], exp_id=212cad23-cb2b-4471-b4a3-5afaf61ce1de
+[2025-12-18 14:35:48] 
+[17/30] Subset 16
+[2025-12-18 14:35:48]   Qubits: (8, 17, 25, 26, 27, 28, 29)
+[2025-12-18 14:35:48]   C=2.0503
+[2025-12-18 14:36:03]   Submitted: job_ids=['d529rsjht8fs739tqke0'], exp_id=c438f8ca-f63b-4219-9abe-9d0f90d5d4ef
+[2025-12-18 14:36:04] 
+[18/30] Subset 17
+[2025-12-18 14:36:04]   Qubits: (96, 97, 98, 110, 115, 116, 117)
+[2025-12-18 14:36:04]   C=1.2845
+[2025-12-18 14:36:16]   Submitted: job_ids=['d529rvpsmlfc739dml9g'], exp_id=05e41f12-0850-4db2-af21-f544d7135147
+[2025-12-18 14:36:17] 
+[19/30] Subset 18
+[2025-12-18 14:36:17]   Qubits: (17, 26, 27, 28, 29, 30, 36)
+[2025-12-18 14:36:17]   C=1.2845
+[2025-12-18 14:36:30]   Submitted: job_ids=['d529s3bht8fs739tqklg'], exp_id=023f5cdb-7342-43ee-aabe-567e0d1da4e1
+[2025-12-18 14:36:31] 
+[20/30] Subset 19
+[2025-12-18 14:36:31]   Qubits: (104, 105, 106, 112, 123, 124, 125)
+[2025-12-18 14:36:31]   C=1.2845
+[2025-12-18 14:36:45]   Submitted: job_ids=['d529s78nsj9s73avoitg'], exp_id=ee8ef7f4-8887-461e-bdb3-6e193b039db9
+[2025-12-18 14:36:46] 
+[21/30] Subset 20
+[2025-12-18 14:36:46]   Qubits: (93, 100, 101, 102, 103, 104, 111)
+[2025-12-18 14:36:46]   C=1.2845
+[2025-12-18 14:37:02]   Submitted: job_ids=['d529sbbht8fs739tqksg'], exp_id=56c3ca07-ed42-4762-9850-71a1d77560f0
+[2025-12-18 14:37:03] 
+[22/30] Subset 21
+[2025-12-18 14:37:03]   Qubits: (55, 62, 63, 64, 65, 66, 73)
+[2025-12-18 14:37:03]   C=1.2845
+[2025-12-18 14:37:16]   Submitted: job_ids=['d529sf3ht8fs739tql1g'], exp_id=201be2e4-cf80-4949-bc5e-beb15fce61ad
+[2025-12-18 14:37:17] 
+[23/30] Subset 22
+[2025-12-18 14:37:17]   Qubits: (27, 28, 29, 30, 31, 36, 48)
+[2025-12-18 14:37:17]   C=2.0503
+[2025-12-18 14:37:32]   Submitted: job_ids=['d529sipsmlfc739dmls0'], exp_id=ca709728-53d5-45c6-9d3f-060ff55d2806
+[2025-12-18 14:37:33] 
+[24/30] Subset 23
+[2025-12-18 14:37:33]   Qubits: (107, 108, 109, 113, 126, 127, 128)
+[2025-12-18 14:37:33]   C=0.9378
+[2025-12-18 14:37:50]   Submitted: job_ids=['d529sngnsj9s73avojcg'], exp_id=9c1c267d-3a8a-4c26-bbe6-52a62f3b824a
+[2025-12-18 14:37:51] 
+[25/30] Subset 24
+[2025-12-18 14:37:51]   Qubits: (59, 72, 76, 77, 78, 79, 80)
+[2025-12-18 14:37:52]   C=2.0503
+[2025-12-18 14:38:08]   Submitted: job_ids=['d529srpsmlfc739dmm4g'], exp_id=b159680a-8802-47bd-a170-240a47cc84a4
+[2025-12-18 14:38:09] 
+[26/30] Subset 25
+[2025-12-18 14:38:09]   Qubits: (72, 76, 77, 78, 79, 91, 95)
+[2025-12-18 14:38:09]   C=1.0722
+[2025-12-18 14:38:27]   Submitted: job_ids=['d529t0np3tbc73ala6ag'], exp_id=c7cd3d71-14f4-4b00-8678-ed67c8b66390
+[2025-12-18 14:38:28] 
+[27/30] Subset 26
+[2025-12-18 14:38:28]   Qubits: (3, 4, 5, 16, 22, 23, 24)
+[2025-12-18 14:38:28]   C=1.2845
+[2025-12-18 14:38:43]   Submitted: job_ids=['d529t4psmlfc739dmmd0'], exp_id=2b1d3272-2ed9-447a-81c8-ba97b88f6511
+[2025-12-18 14:38:44] 
+[28/30] Subset 27
+[2025-12-18 14:38:44]   Qubits: (25, 35, 42, 43, 44, 45, 46)
+[2025-12-18 14:38:44]   C=2.0503
+[2025-12-18 14:39:00]   Submitted: job_ids=['d529t8rht8fs739tqlq0'], exp_id=9315db37-bd2f-469c-82e8-b248b5492f34
+[2025-12-18 14:39:01] 
+[29/30] Subset 28
+[2025-12-18 14:39:01]   Qubits: (99, 100, 101, 102, 103, 111, 120)
+[2025-12-18 14:39:01]   C=2.0503
+[2025-12-18 14:39:17]   Submitted: job_ids=['d529tdfp3tbc73ala6n0'], exp_id=89135529-d34d-47d5-a7d1-6fa499295dd0
+[2025-12-18 14:39:18] 
+[30/30] Subset 29
+[2025-12-18 14:39:18]   Qubits: (103, 104, 105, 106, 107, 112, 124)
+[2025-12-18 14:39:18]   C=2.0503
+[2025-12-18 14:39:33]   Submitted: job_ids=['d529th0nsj9s73avok3g'], exp_id=31d24ba8-1d48-498b-bc07-99a423a51e15
+[2025-12-18 14:39:34] 
+============================================================
+[2025-12-18 14:39:34] SUBMIT COMPLETE: 27 submitted, 3 skipped
+[2025-12-18 14:39:34] Jobs tracking saved to: results/rb_jobs.json
+[2025-12-18 14:39:34] ============================================================
+[2025-12-18 15:36:58] ============================================================
+[2025-12-18 15:36:58] IBM Quantum RB Sweep - Mode: status
+[2025-12-18 15:36:58] ============================================================
+[2025-12-18 15:36:58] Backend: ibm_torino
+[2025-12-18 15:36:58] Subset size N: 7
+[2025-12-18 15:36:58] Num subsets: 30
+[2025-12-18 15:36:58] Jobs file: results/rb_jobs.json
+[2025-12-18 15:36:58] ============================================================
+[2025-12-18 15:36:58] 
+Connecting to IBM Quantum...
+[2025-12-18 15:37:05] Loading backend ibm_torino...
+[2025-12-18 15:37:06] Backend: ibm_torino, 133 qubits
+[2025-12-18 15:37:06] Building coupling graph...
+[2025-12-18 15:37:06] Graph: 133 nodes, 150 edges
+[2025-12-18 15:37:06] 
+Generating 30 diverse subsets of size 7...
+[2025-12-18 15:37:06] Generated 30 subsets
+[2025-12-18 15:37:06] 
+============================================================
+[2025-12-18 15:37:06] STATUS MODE - Checking job statuses
+[2025-12-18 15:37:06] ============================================================
+[2025-12-18 15:37:07]   Job d529qlbht8fs739tqj3g: ERROR - 'str' object has no attribute 'name'
+[2025-12-18 15:37:08]   Job d529qo0nsj9s73avohbg: ERROR - 'str' object has no attribute 'name'
+[2025-12-18 15:37:08]   Job d529qqgnsj9s73avoheg: ERROR - 'str' object has no attribute 'name'
+[2025-12-18 15:37:09]   Job d529qt8nsj9s73avohi0: ERROR - 'str' object has no attribute 'name'
+[2025-12-18 15:37:09]   Job d529r0fp3tbc73ala4ag: ERROR - 'str' object has no attribute 'name'
+[2025-12-18 15:37:10]   Job d529r30nsj9s73avoho0: ERROR - 'str' object has no attribute 'name'
+[2025-12-18 15:37:10]   Job d529r63ht8fs739tqjl0: ERROR - 'str' object has no attribute 'name'
+[2025-12-18 15:37:10]   Job d529r8onsj9s73avohv0: ERROR - 'str' object has no attribute 'name'
+[2025-12-18 15:37:11]   Job d529rbpsmlfc739dmkm0: ERROR - 'str' object has no attribute 'name'
+[2025-12-18 15:37:11]   Job d529rejht8fs739tqjv0: ERROR - 'str' object has no attribute 'name'
+[2025-12-18 15:37:12]   Job d529rhjht8fs739tqk3g: ERROR - 'str' object has no attribute 'name'
+[2025-12-18 15:37:12]   Job d529rkgnsj9s73avoiag: ERROR - 'str' object has no attribute 'name'
+[2025-12-18 15:37:12]   Job d529ronp3tbc73ala540: ERROR - 'str' object has no attribute 'name'
+[2025-12-18 15:37:13]   Job d529rsjht8fs739tqke0: ERROR - 'str' object has no attribute 'name'
+[2025-12-18 15:37:13]   Job d529rvpsmlfc739dml9g: ERROR - 'str' object has no attribute 'name'
+[2025-12-18 15:37:14]   Job d529s3bht8fs739tqklg: ERROR - 'str' object has no attribute 'name'
+[2025-12-18 15:37:14]   Job d529s78nsj9s73avoitg: ERROR - 'str' object has no attribute 'name'
+[2025-12-18 15:37:15]   Job d529sbbht8fs739tqksg: ERROR - 'str' object has no attribute 'name'
+[2025-12-18 15:37:15]   Job d529sf3ht8fs739tql1g: ERROR - 'str' object has no attribute 'name'
+[2025-12-18 15:37:14]   Job d529sipsmlfc739dmls0: ERROR - 'str' object has no attribute 'name'
+[2025-12-18 15:37:14]   Job d529sngnsj9s73avojcg: ERROR - 'str' object has no attribute 'name'
+[2025-12-18 15:37:15]   Job d529srpsmlfc739dmm4g: ERROR - 'str' object has no attribute 'name'
+[2025-12-18 15:37:15]   Job d529t0np3tbc73ala6ag: ERROR - 'str' object has no attribute 'name'
+[2025-12-18 15:37:16]   Job d529t4psmlfc739dmmd0: ERROR - 'str' object has no attribute 'name'
+[2025-12-18 15:37:16]   Job d529t8rht8fs739tqlq0: ERROR - 'str' object has no attribute 'name'
+[2025-12-18 15:37:16]   Job d529tdfp3tbc73ala6n0: ERROR - 'str' object has no attribute 'name'
+[2025-12-18 15:37:17]   Job d529th0nsj9s73avok3g: ERROR - 'str' object has no attribute 'name'
+[2025-12-18 15:37:17] 
+Summary: {'ERROR': 27}
