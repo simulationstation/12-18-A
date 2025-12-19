@@ -1,0 +1,2 @@
+experiment_type,device,subset_id,qubits,N,lambda2,C,rounds,shots,logical_success_prob,logical_error_rate,data_qubits,ancilla_qubits,timestamp,status
+logical_code,Ankaa-3,0,"(7, 14, 15, 16, 21, 22, 28)",7,0.4226497308103742,2.9585481156726194,2,500,0.998,0.0020000000000000018,"[7, 14, 15]","[16, 21, 22, 28]",2025-12-18T16:18:51.000688,ok
